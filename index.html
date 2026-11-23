@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>이지다이나톤 (Easy Dynatone) — 음계 인식 · 현악기 조율기 · 메트로놈</title>
+  <title>허밍스코어 &amp; 튜너 (Hum Score &amp; Tuner) — 음성 오선지 채보 · 조율기 · 메트로놈</title>
   <style>
     /* ==========================================================================
        1. 기본 리셋 및 다국어 가독성 최적화 폰트 스택
@@ -444,8 +444,8 @@
         <div class="flex items-center gap-2">
           <div class="w-2.5 h-6 rounded-full bg-emerald-500"></div>
           <div>
-            <h1 id="appTitle" class="text-base sm:text-xl font-extrabold text-white tracking-tight">이지다이나톤</h1>
-            <p id="appSubtitle" class="text-[11px] font-medium text-slate-400">음계 인식 · 현악기 조율기 · 메트로놈</p>
+            <h1 id="appTitle" class="text-base sm:text-xl font-extrabold text-white tracking-tight">허밍스코어 &amp; 튜너</h1>
+            <p id="appSubtitle" class="text-[11px] font-medium text-slate-400">Hum Score &amp; Tuner · 음성 오선지 채보 · 조율기</p>
           </div>
         </div>
 
@@ -584,36 +584,6 @@
         </div>
       </div>
 
-      <!-- 소음 제어 및 안정화 슬라이더 -->
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
-        <h2 id="noiseFilterTitle" class="text-xs font-extrabold text-slate-200">주변 소음 차단 & 주음 추출 필터</h2>
-
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 space-y-1.5">
-            <div class="flex justify-between text-xs font-bold">
-              <span id="gateSliderLabel" class="text-slate-300">노이즈 게이트</span>
-              <span id="gateValueText" class="text-amber-300 tabular-nums">-42 dB</span>
-            </div>
-            <input id="gateSlider" type="range" min="-65" max="-15" step="1" value="-42" />
-          </div>
-
-          <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 space-y-1.5">
-            <div class="flex justify-between text-xs font-bold">
-              <span id="claritySliderLabel" class="text-slate-300">명료도 기준</span>
-              <span id="clarityThresholdText" class="text-emerald-300 tabular-nums">86%</span>
-            </div>
-            <input id="claritySlider" type="range" min="70" max="96" step="1" value="86" />
-          </div>
-
-          <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 space-y-1.5">
-            <div class="flex justify-between text-xs font-bold">
-              <span id="smoothingSliderLabel" class="text-slate-300">음정 안정화</span>
-              <span id="smoothingValueText" class="text-sky-300 tabular-nums">3 프레임</span>
-            </div>
-            <input id="smoothingSlider" type="range" min="1" max="8" step="1" value="3" />
-          </div>
-        </div>
-      </div>
 
       <!-- 최근 인식된 음계 히스토리 -->
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-2.5">
@@ -822,8 +792,8 @@
          ====================================================================== */
       const I18N = {
         ko: {
-          appTitle: '이지다이나톤',
-          appSubtitle: '음계 인식 · 현악기 조율기 · 메트로놈',
+          appTitle: '허밍스코어 & 튜너',
+          appSubtitle: 'Hum Score & Tuner · 음성 오선지 채보 · 조율기',
           statusIdle: '대기 중 (오프라인 작동 지원)',
           statusMic: '마이크 실시간 수음 중',
           statusSim: '가상 테스트 신호 입력 중',
@@ -836,7 +806,7 @@
           tabMetronome: '⏱️ 메트로놈',
           scaleModeLabel: '음계 표기 모드',
           scaleModeHint: '7음계(CDEFGAB) 또는 반음(#) 포함 12음계를 선택합니다',
-          modeDiatonic: '다이나톤 7음계 (CDEFGAB)',
+          modeDiatonic: '7음계 (CDEFGAB)',
           modeChromatic: '12음계 (반음 # 포함)',
           targetAnalysisLabel: '타깃 주음 분석 결과',
           clarityHeaderLabel: '음정 명료도:',
@@ -952,8 +922,8 @@
         },
 
         en: {
-          appTitle: 'Easy Dynatone',
-          appSubtitle: 'Pitch Detector · String Tuner · Metronome',
+          appTitle: 'Hum Score & Tuner',
+          appSubtitle: 'Voice-to-Staff Transcription · String Tuner · Metronome',
           statusIdle: 'Standby (Offline Ready)',
           statusMic: 'Listening via Microphone',
           statusSim: 'Test Signal Input Active',
@@ -966,7 +936,7 @@
           tabMetronome: '⏱️ Metronome',
           scaleModeLabel: 'Scale Display Mode',
           scaleModeHint: 'Choose 7-note diatonic (CDEFGAB) or 12-note chromatic (#)',
-          modeDiatonic: 'Dynatone 7-Note (CDEFGAB)',
+          modeDiatonic: '7-Note (CDEFGAB)'
           modeChromatic: '12-Tone Chromatic (with #)',
           targetAnalysisLabel: 'Primary Pitch Analysis',
           clarityHeaderLabel: 'Pitch Clarity:',
@@ -1082,8 +1052,8 @@
         },
 
         es: {
-          appTitle: 'Easy Dynatone',
-          appSubtitle: 'Detector de Notas · Afinador · Metrónomo',
+          appTitle: 'Hum Score & Tuner',
+          appSubtitle: 'Transcripción Vocal · Afinador · Metrónomo',
           statusIdle: 'En espera (Modo sin conexión)',
           statusMic: 'Escuchando por micrófono',
           statusSim: 'Señal de prueba activa',
@@ -1212,8 +1182,8 @@
         },
 
         ja: {
-          appTitle: 'イージーダイナトーン',
-          appSubtitle: '音階認識 · 弦楽器チューナー · メトロノーム',
+          appTitle: 'ハミングスコア & チューナー',
+          appSubtitle: 'Hum Score & Tuner · 音声五線譜採譜 · 調律器',
           statusIdle: '待機中 (オフライン動作対応)',
           statusMic: 'マイクでリアルタイム収音中',
           statusSim: 'テスト信号を入力中',
@@ -1226,7 +1196,7 @@
           tabMetronome: '⏱️ メトロノーム',
           scaleModeLabel: '音階表記モード',
           scaleModeHint: '7音階(CDEFGAB)または半音(#)を含む12音階を選択します',
-          modeDiatonic: 'ダイナトーン7音階 (CDEFGAB)',
+          modeDiatonic: '7音階 (CDEFGAB)',
           modeChromatic: '12音階 (半音 # を含む)',
           targetAnalysisLabel: '主音ピッチ解析結果',
           clarityHeaderLabel: '音程明瞭度:',
@@ -1342,8 +1312,8 @@
         },
 
         'zh-CN': {
-          appTitle: '易达音调',
-          appSubtitle: '音阶识别 · 弦乐调音器 · 节拍器',
+          appTitle: '哼唱乐谱 & 调音器',
+          appSubtitle: 'Hum Score & Tuner · 人声五线谱记谱 · 调音器',
           statusIdle: '待机中 (支持离线运行)',
           statusMic: '麦克风实时收音中',
           statusSim: '模拟测试信号输入中',
@@ -1356,7 +1326,7 @@
           tabMetronome: '⏱️ 节拍器',
           scaleModeLabel: '音阶显示模式',
           scaleModeHint: '选择7音阶(CDEFGAB)或含半音(#)的12音阶',
-          modeDiatonic: '自然7音阶 (CDEFGAB)',
+          modeDiatonic: '7音阶 (CDEFGAB)',
           modeChromatic: '12音阶 (半音阶 #)',
           targetAnalysisLabel: '主音音高分析结果',
           clarityHeaderLabel: '音高清晰度:',
@@ -1472,8 +1442,8 @@
         },
 
         'zh-TW': {
-          appTitle: '易達音調',
-          appSubtitle: '音階辨識 · 弦樂調音器 · 節拍器',
+          appTitle: '哼唱樂譜 & 調音器',
+          appSubtitle: 'Hum Score & Tuner · 人聲五線譜記譜 · 調音器',
           statusIdle: '待機中 (支援離線運作)',
           statusMic: '麥克風即時收音中',
           statusSim: '模擬測試訊號輸入中',
@@ -1486,7 +1456,7 @@
           tabMetronome: '⏱️ 節拍器',
           scaleModeLabel: '音階顯示模式',
           scaleModeHint: '選擇7音階(CDEFGAB)或含半音(#)的12音階',
-          modeDiatonic: '自然7音階 (CDEFGAB)',
+          modeDiatonic: '7音階 (CDEFGAB)',
           modeChromatic: '12音階 (半音階 #)',
           targetAnalysisLabel: '主音音高分析結果',
           clarityHeaderLabel: '音高清晰度:',
@@ -1645,14 +1615,14 @@
       /* ======================================================================
          3. 전역 상태(State) 및 DOM 요소 참조
          ====================================================================== */
-      const state = {
+     const state = {
         lang: 'ko',
         activeTab: 'detector',
         a4Freq: 440,
         scaleMode: 'diatonic',
-        noiseGateDb: -42,
-        clarityThreshold: 0.86,
-        smoothingFrames: 3,
+        noiseGateDb: -40,
+        clarityThreshold: 0.90,
+        smoothingFrames: 4,
 
         // 오디오 수음 / 시뮬레이션 상태
         isMicRunning: false,
@@ -1745,8 +1715,6 @@
         inputLevelLabel: document.getElementById('inputLevelLabel'),
         rmsDbText: document.getElementById('rmsDbText'),
         calibrateNoiseBtn: document.getElementById('calibrateNoiseBtn'),
-        volumeBar: document.getElementById('volumeBar'),
-        gateMarker: document.getElementById('gateMarker'),
         noiseFilterTitle: document.getElementById('noiseFilterTitle'),
         gateSliderLabel: document.getElementById('gateSliderLabel'),
         gateValueText: document.getElementById('gateValueText'),
@@ -1757,7 +1725,6 @@
         smoothingSliderLabel: document.getElementById('smoothingSliderLabel'),
         smoothingValueText: document.getElementById('smoothingValueText'),
         smoothingSlider: document.getElementById('smoothingSlider'),
-        historyTitle: document.getElementById('historyTitle'),
         clearHistoryBtn: document.getElementById('clearHistoryBtn'),
         historyContainer: document.getElementById('historyContainer'),
         historyEmptyText: document.getElementById('historyEmptyText'),
@@ -1872,14 +1839,11 @@
         el.scaleModeSelect.options[1].textContent = d.modeChromatic;
         el.targetAnalysisLabel.textContent = d.targetAnalysisLabel;
         el.clarityHeaderLabel.textContent = d.clarityHeaderLabel;
-        el.inputLevelLabel.textContent = d.inputLevelLabel;
-        el.calibrateNoiseBtn.textContent = state.isCalibrating ? d.calibratingNoiseBtn : d.calibrateNoiseBtn;
         el.noiseFilterTitle.textContent = d.noiseFilterTitle;
         el.gateSliderLabel.textContent = d.gateSliderLabel;
         el.claritySliderLabel.textContent = d.claritySliderLabel;
         el.smoothingSliderLabel.textContent = d.smoothingSliderLabel;
         el.smoothingValueText.textContent = d.framesUnit(state.smoothingFrames);
-        el.historyTitle.textContent = d.historyTitle;
         el.clearHistoryBtn.textContent = d.clearHistoryBtn;
         if (el.historyEmptyText) {
           el.historyEmptyText.textContent = d.historyEmptyText;
@@ -2152,14 +2116,14 @@
         targetFft = Math.pow(2, Math.round(Math.log2(targetFft)));
         targetFft = Math.max(2048, Math.min(16384, targetFft));
 
-        const highPass = ctx.createBiquadFilter();
+              const highPass = ctx.createBiquadFilter();
         highPass.type = 'highpass';
-        highPass.frequency.value = state.activeTab === 'tuner' ? 26 : 60;
+        highPass.frequency.value = state.activeTab === 'tuner' ? 26 : 80;
         highPass.Q.value = 0.707;
 
         const lowPass = ctx.createBiquadFilter();
         lowPass.type = 'lowpass';
-        lowPass.frequency.value = 3400;
+        lowPass.frequency.value = state.activeTab === 'tuner' ? 3400 : 1200;
         lowPass.Q.value = 0.707;
 
         const analyser = ctx.createAnalyser();
@@ -3001,7 +2965,10 @@
         state.inTuneStartTime = 0;
 
         if (state.highPassNode) {
-          state.highPassNode.frequency.value = tabName === 'tuner' ? 26 : 60;
+          state.highPassNode.frequency.value = tabName === 'tuner' ? 26 : 80;
+        }
+        if (state.lowPassNode) {
+          state.lowPassNode.frequency.value = tabName === 'tuner' ? 3400 : 1200;
         }
 
         if (tabName === 'detector' && el.detectedNoteLetter.textContent === '--') {
@@ -3031,9 +2998,8 @@
       function updateGateMarkerUI() {
         const pct = Math.max(0, Math.min(100, Math.round(((state.noiseGateDb + 65) / 65) * 100)));
         el.gateMarker.style.left = `${pct}%`;
-        el.gateValueText.textContent = `${state.noiseGateDb} dB`;
       }
-
+    
       function bindEvents() {
         // 언어 전환
         el.langSelect.addEventListener('change', (e) => {
@@ -3078,24 +3044,6 @@
           state.candidateCount = 0;
         });
 
-        // 노이즈 게이트 / 명료도 / 안정화 슬라이더
-        el.gateSlider.addEventListener('input', (e) => {
-          state.noiseGateDb = parseInt(e.target.value, 10);
-          updateGateMarkerUI();
-        });
-
-        el.claritySlider.addEventListener('input', (e) => {
-          const pct = parseInt(e.target.value, 10);
-          state.clarityThreshold = pct / 100;
-          el.clarityThresholdText.textContent = `${pct}%`;
-        });
-
-        el.smoothingSlider.addEventListener('input', (e) => {
-          const val = parseInt(e.target.value, 10);
-          state.smoothingFrames = val;
-          el.smoothingValueText.textContent = getDict().framesUnit(val);
-        });
-
         // 주변 소음 자동 보정
         el.calibrateNoiseBtn.addEventListener('click', async () => {
           if (state.isCalibrating) return;
@@ -3119,13 +3067,12 @@
               const avg = state.calibrationSamples.reduce((a, b) => a + b, 0) / state.calibrationSamples.length;
               const newGate = Math.max(-62, Math.min(-18, Math.round(avg + 6)));
               state.noiseGateDb = newGate;
-              el.gateSlider.value = String(newGate);
               updateGateMarkerUI();
               showToast(getDict().toastCalibrated(newGate));
             }
           }, 1100);
         });
-
+        
         // 히스토리 지우기
         el.clearHistoryBtn.addEventListener('click', () => {
           state.noteHistory = [];
