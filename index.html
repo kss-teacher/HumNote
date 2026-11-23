@@ -1,0 +1,3367 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>이지다이나톤 (Easy Dynatone) — 음계 인식 · 현악기 조율기 · 메트로놈</title>
+  <style>
+    /* ==========================================================================
+       1. 기본 리셋 및 다국어 가독성 최적화 폰트 스택
+       ========================================================================== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo',
+        'Noto Sans KR', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN',
+        'PingFang SC', 'PingFang TC', 'Microsoft YaHei', 'Microsoft JhengHei',
+        'Segoe UI', Roboto, sans-serif;
+      line-height: 1.5;
+      background-color: #020617;
+      color: #f8fafc;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #0f172a 0%, #020617 70%);
+      color: #f8fafc;
+      overflow-x: hidden;
+      padding-bottom: 4.5rem;
+    }
+
+    button, input, select {
+      font-family: inherit;
+      color: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    /* 데스크톱 브라우저 숫자 입력칸 기본 스핀 화살표 제거 (중앙 정렬 보장) */
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type="number"] {
+      -moz-appearance: textfield;
+    }
+
+    /* 커스텀 드롭다운 가독성 (안드로이드 WebView 다크 배경 대응) */
+    select {
+      background-color: #1e293b;
+      color: #f8fafc;
+      border: 1px solid #334155;
+      border-radius: 0.75rem;
+      padding: 0.55rem 0.75rem;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.15s ease, background-color 0.15s ease;
+    }
+    select:focus {
+      border-color: #10b981;
+    }
+    select option {
+      background-color: #0f172a;
+      color: #f8fafc;
+    }
+
+    /* 커스텀 레인지 슬라이더 */
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 0.45rem;
+      background: #1e293b;
+      border-radius: 9999px;
+      outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 1.2rem;
+      height: 1.2rem;
+      border-radius: 9999px;
+      background: #10b981;
+      border: 2px solid #ecfdf5;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+      cursor: pointer;
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 1.2rem;
+      height: 1.2rem;
+      border-radius: 9999px;
+      background: #10b981;
+      border: 2px solid #ecfdf5;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+      cursor: pointer;
+    }
+
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ==========================================================================
+       2. 유틸리티 클래스 (외부 CDN 없이 100% 오프라인 동작)
+       ========================================================================== */
+    .hidden { display: none !important; }
+    .block { display: block; }
+    .inline-block { display: inline-block; }
+    .inline-flex { display: inline-flex; }
+    .flex { display: flex; }
+    .grid { display: grid; }
+
+    .flex-col { flex-direction: column; }
+    .flex-wrap { flex-wrap: wrap; }
+    .flex-1 { flex: 1 1 0%; }
+    .shrink-0 { flex-shrink: 0; }
+    .items-center { align-items: center; }
+    .items-baseline { align-items: baseline; }
+    .items-end { align-items: flex-end; }
+    .justify-between { justify-content: space-between; }
+    .justify-center { justify-content: center; }
+    .justify-end { justify-content: flex-end; }
+
+    .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+    .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+    .gap-1 { gap: 0.25rem; }
+    .gap-1\.5 { gap: 0.375rem; }
+    .gap-2 { gap: 0.5rem; }
+    .gap-2\.5 { gap: 0.625rem; }
+    .gap-3 { gap: 0.75rem; }
+    .gap-4 { gap: 1rem; }
+
+    .space-y-1 > * + * { margin-top: 0.25rem; }
+    .space-y-1\.5 > * + * { margin-top: 0.375rem; }
+    .space-y-2 > * + * { margin-top: 0.5rem; }
+    .space-y-2\.5 > * + * { margin-top: 0.625rem; }
+    .space-y-3 > * + * { margin-top: 0.75rem; }
+    .space-y-4 > * + * { margin-top: 1rem; }
+
+    .w-full { width: 100%; }
+    .w-max { width: max-content; }
+    .w-2 { width: 0.5rem; }
+    .w-2\.5 { width: 0.625rem; }
+    .w-3 { width: 0.75rem; }
+    .w-16 { width: 4rem; }
+    .w-24 { width: 6rem; }
+    .w-28 { width: 7rem; }
+    .max-w-3xl { max-width: 48rem; }
+    .max-w-\[90vw\] { max-width: 90vw; }
+
+    .h-1\.5 { height: 0.375rem; }
+    .h-2 { height: 0.5rem; }
+    .h-2\.5 { height: 0.625rem; }
+    .h-3 { height: 0.75rem; }
+    .h-4 { height: 1rem; }
+    .h-5 { height: 1.25rem; }
+    .h-6 { height: 1.5rem; }
+    .h-28 { height: 7rem; }
+    .min-h-\[40px\] { min-height: 40px; }
+    .min-h-\[44px\] { min-height: 44px; }
+    .min-h-\[54px\] { min-height: 54px; }
+
+    .mx-auto { margin-left: auto; margin-right: auto; }
+    .mt-1 { margin-top: 0.25rem; }
+    .mt-2 { margin-top: 0.5rem; }
+    .mt-3 { margin-top: 0.75rem; }
+    .mb-1 { margin-bottom: 0.25rem; }
+    .mr-1 { margin-right: 0.25rem; }
+
+    .p-0 { padding: 0; }
+    .p-1 { padding: 0.25rem; }
+    .p-1\.5 { padding: 0.375rem; }
+    .p-2 { padding: 0.5rem; }
+    .p-2\.5 { padding: 0.625rem; }
+    .p-3 { padding: 0.75rem; }
+    .p-3\.5 { padding: 0.875rem; }
+    .p-4 { padding: 1rem; }
+    .p-5 { padding: 1.25rem; }
+
+    .px-0\.5 { padding-left: 0.125rem; padding-right: 0.125rem; }
+    .px-1 { padding-left: 0.25rem; padding-right: 0.25rem; }
+    .px-1\.5 { padding-left: 0.375rem; padding-right: 0.375rem; }
+    .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+    .px-2\.5 { padding-left: 0.625rem; padding-right: 0.625rem; }
+    .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+    .px-3\.5 { padding-left: 0.875rem; padding-right: 0.875rem; }
+    .px-4 { padding-left: 1rem; padding-right: 1rem; }
+
+    .py-0\.5 { padding-top: 0.125rem; padding-bottom: 0.125rem; }
+    .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+    .py-1\.5 { padding-top: 0.375rem; padding-bottom: 0.375rem; }
+    .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+    .py-2\.5 { padding-top: 0.625rem; padding-bottom: 0.625rem; }
+    .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+    .pt-1 { padding-top: 0.25rem; }
+    .pt-2 { padding-top: 0.5rem; }
+
+    .relative { position: relative; }
+    .absolute { position: absolute; }
+    .fixed { position: fixed; }
+    .sticky { position: sticky; }
+    .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
+    .top-0 { top: 0; }
+    .bottom-4 { bottom: 1rem; }
+    .left-1\/2 { left: 50%; }
+    .-translate-x-1\/2 { transform: translateX(-50%); }
+    .-translate-y-1\/2 { transform: translateY(-50%); }
+    .top-1\/2 { top: 50%; }
+    .z-30 { z-index: 30; }
+    .z-50 { z-index: 50; }
+    .overflow-hidden { overflow: hidden; }
+    .overflow-x-auto { overflow-x: auto; }
+
+    .rounded-lg { border-radius: 0.5rem; }
+    .rounded-xl { border-radius: 0.75rem; }
+    .rounded-2xl { border-radius: 1rem; }
+    .rounded-full { border-radius: 9999px; }
+
+    .border-0 { border-width: 0; }
+    .border { border-width: 1px; border-style: solid; }
+    .border-2 { border-width: 2px; border-style: solid; }
+    .border-b { border-bottom-width: 1px; border-bottom-style: solid; }
+    .border-t { border-top-width: 1px; border-top-style: solid; }
+
+    .border-slate-800 { border-color: #1e293b; }
+    .border-slate-700 { border-color: #334155; }
+    .border-slate-600 { border-color: #475569; }
+    .border-emerald-500 { border-color: #10b981; }
+    .border-emerald-500\/60 { border-color: rgba(16, 185, 129, 0.6); }
+    .border-emerald-500\/40 { border-color: rgba(16, 185, 129, 0.4); }
+    .border-emerald-400 { border-color: #34d399; }
+    .border-amber-500\/50 { border-color: rgba(245, 158, 11, 0.5); }
+    .border-amber-500\/40 { border-color: rgba(245, 158, 11, 0.4); }
+    .border-amber-400 { border-color: #fbbf24; }
+    .border-rose-500\/50 { border-color: rgba(244, 63, 94, 0.5); }
+    .border-sky-500\/40 { border-color: rgba(14, 165, 233, 0.4); }
+
+    .bg-transparent { background-color: transparent; }
+    .bg-slate-950 { background-color: #020617; }
+    .bg-slate-950\/90 { background-color: rgba(2, 6, 23, 0.9); }
+    .bg-slate-950\/80 { background-color: rgba(2, 6, 23, 0.8); }
+    .bg-slate-900 { background-color: #0f172a; }
+    .bg-slate-900\/95 { background-color: rgba(15, 23, 42, 0.95); }
+    .bg-slate-800 { background-color: #1e293b; }
+    .bg-slate-700 { background-color: #334155; }
+    .bg-slate-600 { background-color: #475569; }
+    .bg-emerald-600 { background-color: #059669; }
+    .bg-emerald-500 { background-color: #10b981; }
+    .bg-emerald-500\/20 { background-color: rgba(16, 185, 129, 0.2); }
+    .bg-emerald-500\/15 { background-color: rgba(16, 185, 129, 0.15); }
+    .bg-emerald-500\/10 { background-color: rgba(16, 185, 129, 0.1); }
+    .bg-emerald-400 { background-color: #34d399; }
+    .bg-amber-500 { background-color: #f59e0b; }
+    .bg-amber-500\/20 { background-color: rgba(245, 158, 11, 0.2); }
+    .bg-amber-500\/15 { background-color: rgba(245, 158, 11, 0.15); }
+    .bg-amber-400 { background-color: #fbbf24; }
+    .bg-sky-500 { background-color: #0ea5e9; }
+    .bg-sky-500\/15 { background-color: rgba(14, 165, 233, 0.15); }
+    .bg-rose-600 { background-color: #e11d48; }
+    .bg-rose-500\/20 { background-color: rgba(244, 63, 94, 0.2); }
+    .bg-rose-500\/15 { background-color: rgba(244, 63, 94, 0.15); }
+
+    .text-white { color: #ffffff; }
+    .text-slate-950 { color: #020617; }
+    .text-slate-100 { color: #f1f5f9; }
+    .text-slate-200 { color: #e2e8f0; }
+    .text-slate-300 { color: #cbd5e1; }
+    .text-slate-400 { color: #a3b3c7; }
+    .text-slate-500 { color: #64748b; }
+    .text-emerald-200 { color: #a7f3d0; }
+    .text-emerald-300 { color: #6ee7b7; }
+    .text-emerald-400 { color: #34d399; }
+    .text-amber-200 { color: #fde68a; }
+    .text-amber-300 { color: #fcd34d; }
+    .text-amber-400 { color: #fbbf24; }
+    .text-sky-300 { color: #7dd3fc; }
+    .text-sky-400 { color: #38bdf8; }
+    .text-rose-300 { color: #fda4af; }
+    .text-rose-400 { color: #fb7185; }
+
+    .text-center { text-align: center; }
+    .text-left { text-align: left; }
+    .text-right { text-align: right; }
+
+    .text-\[11px\] { font-size: 0.72rem; line-height: 1.35; }
+    .text-xs { font-size: 0.8rem; line-height: 1.4; }
+    .text-sm { font-size: 0.9rem; line-height: 1.45; }
+    .text-base { font-size: 1rem; line-height: 1.5; }
+    .text-lg { font-size: 1.125rem; line-height: 1.4; }
+    .text-xl { font-size: 1.25rem; line-height: 1.35; }
+    .text-2xl { font-size: 1.5rem; line-height: 1.25; }
+    .text-3xl { font-size: 1.875rem; line-height: 1.2; }
+    .text-4xl { font-size: 2.25rem; line-height: 1.15; }
+    .text-5xl { font-size: 3rem; line-height: 1.1; }
+    .text-6xl { font-size: 3.75rem; line-height: 1.05; }
+    .text-7xl { font-size: 4.5rem; line-height: 1; }
+
+    .font-medium { font-weight: 500; }
+    .font-semibold { font-weight: 600; }
+    .font-bold { font-weight: 700; }
+    .font-extrabold { font-weight: 800; }
+    .tracking-tight { letter-spacing: -0.02em; }
+    .tracking-wide { letter-spacing: 0.025em; }
+    .whitespace-nowrap { white-space: nowrap; }
+
+    .shadow-lg { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.45); }
+    .shadow-xl { box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.6); }
+    .transition-all { transition: all 0.16s ease; }
+
+    /* ==========================================================================
+       3. 컴포넌트 전용 스타일 (게이지 바늘, 현 카드, 메트로놈 LED, 점등 효과)
+       ========================================================================== */
+    .gauge-track {
+      position: relative;
+      height: 1.25rem;
+      background: linear-gradient(90deg,
+        rgba(56, 189, 248, 0.22) 0%,
+        rgba(16, 185, 129, 0.35) 45%,
+        rgba(16, 185, 129, 0.5) 50%,
+        rgba(16, 185, 129, 0.35) 55%,
+        rgba(251, 191, 36, 0.22) 100%
+      );
+      border: 1px solid #334155;
+      border-radius: 9999px;
+      overflow: hidden;
+    }
+
+    .gauge-center-line {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background-color: #10b981;
+      transform: translateX(-50%);
+      z-index: 2;
+    }
+
+    .gauge-needle {
+      position: absolute;
+      top: 2px;
+      bottom: 2px;
+      width: 8px;
+      border-radius: 9999px;
+      background-color: #475569;
+      left: 50%;
+      transform: translateX(-50%);
+      transition: left 0.08s ease-out, background-color 0.12s ease;
+      z-index: 3;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.6);
+    }
+
+    /* 조율 정음 완료 카드 점등 효과 */
+    .in-tune-glow {
+      border-color: #34d399 !important;
+      box-shadow: 0 0 24px rgba(16, 185, 129, 0.28);
+    }
+
+    .tuner-string-card {
+      border-radius: 0.85rem;
+      padding: 0.7rem 0.75rem;
+      border: 1.5px solid #334155;
+      background-color: #0f172a;
+      transition: all 0.16s ease;
+      cursor: pointer;
+    }
+    .tuner-string-card:hover {
+      border-color: #64748b;
+    }
+    .tuner-string-card.target-active {
+      border-color: #10b981;
+      background: linear-gradient(145deg, rgba(16, 185, 129, 0.16), #0f172a);
+      box-shadow: 0 0 14px rgba(16, 185, 129, 0.2);
+    }
+    .tuner-string-card.tuned-done {
+      border-color: #34d399;
+      background: linear-gradient(145deg, rgba(16, 185, 129, 0.26), rgba(6, 78, 59, 0.45));
+      box-shadow: 0 0 16px rgba(52, 211, 153, 0.25);
+    }
+
+    /* 메트로놈 박자 패드 활성화 펄스 */
+    .metro-led-pad {
+      min-height: 54px;
+      transition: transform 0.08s ease, box-shadow 0.08s ease, background-color 0.08s ease;
+    }
+    .metro-led-pad.beat-flash {
+      transform: scale(1.06);
+      box-shadow: 0 0 18px rgba(52, 211, 153, 0.65);
+      border-color: #ffffff !important;
+    }
+
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.45; transform: scale(0.85); }
+    }
+    .animate-pulse-dot {
+      animation: pulseDot 1.3s infinite ease-in-out;
+    }
+
+    /* ==========================================================================
+       4. 반응형 브레이크포인트 (sm: 640px 이상)
+       ========================================================================== */
+    @media (min-width: 640px) {
+      .sm\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .sm\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .sm\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .sm\:grid-cols-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+      .sm\:flex-row { flex-direction: row; }
+      .sm\:flex-initial { flex: 0 1 auto; }
+      .sm\:items-center { align-items: center; }
+      .sm\:p-5 { padding: 1.25rem; }
+      .sm\:px-4 { padding-left: 1rem; padding-right: 1rem; }
+      .sm\:text-sm { font-size: 0.9rem; }
+      .sm\:text-base { font-size: 1rem; }
+      .sm\:text-xl { font-size: 1.25rem; }
+      .sm\:text-4xl { font-size: 2.25rem; }
+      .sm\:text-7xl { font-size: 4.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <!-- ========================================================================
+       상단 고정 헤더 (앱 타이틀 · 언어 선택 · 기준 주파수 A4 · 마이크 제어)
+       ======================================================================== -->
+  <header class="sticky top-0 z-30 bg-slate-950/90 border-b border-slate-800 px-3 sm:px-4 py-2.5">
+    <div class="max-w-3xl mx-auto space-y-2.5">
+      <div class="flex items-center justify-between gap-2">
+        <!-- 로고 및 앱 이름 -->
+        <div class="flex items-center gap-2">
+          <div class="w-2.5 h-6 rounded-full bg-emerald-500"></div>
+          <div>
+            <h1 id="appTitle" class="text-base sm:text-xl font-extrabold text-white tracking-tight">이지다이나톤</h1>
+            <p id="appSubtitle" class="text-[11px] font-medium text-slate-400">음계 인식 · 현악기 조율기 · 메트로놈</p>
+          </div>
+        </div>
+
+        <!-- 언어 선택 & 기준 주파수 A4 -->
+        <div class="flex items-center gap-1.5">
+          <div class="flex items-center bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5">
+            <span class="text-xs sm:text-sm mr-1" aria-hidden="true">🌐</span>
+            <select id="langSelect" aria-label="Language" class="bg-transparent border-0 p-0 px-0.5 text-xs sm:text-sm font-bold text-slate-100">
+              <option value="ko">한국어</option>
+              <option value="en">English</option>
+              <option value="es">Español</option>
+              <option value="ja">日本語</option>
+              <option value="zh-CN">简中</option>
+              <option value="zh-TW">繁中</option>
+            </select>
+          </div>
+
+          <div class="flex items-center bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5">
+            <label for="a4Select" class="text-xs font-bold text-slate-400 mr-1">A4</label>
+            <select id="a4Select" class="bg-transparent border-0 p-0 px-0.5 text-xs sm:text-sm font-extrabold text-emerald-300 tabular-nums"></select>
+          </div>
+        </div>
+      </div>
+
+      <!-- 상태 표시 및 마이크 / 가상 신호 제어 바 -->
+      <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-900 border border-slate-800 rounded-2xl p-2">
+        <div id="statusBadge" class="inline-flex items-center gap-2 px-2.5 py-1 rounded-xl bg-slate-950 border border-slate-800">
+          <span id="statusDot" class="w-2.5 h-2.5 rounded-full bg-slate-500"></span>
+          <span id="statusText" class="text-xs font-bold text-slate-300">대기 중 (오프라인 작동 지원)</span>
+        </div>
+
+        <div class="flex items-center gap-1.5 flex-1 sm:flex-initial justify-end">
+          <button id="micToggleBtn" type="button" class="min-h-[44px] px-3.5 py-2 rounded-xl bg-emerald-600 text-white text-xs sm:text-sm font-extrabold shadow-lg transition-all">
+            🎙️ 마이크 시작
+          </button>
+          <button id="simToggleBtn" type="button" class="min-h-[44px] px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-xs sm:text-sm font-bold transition-all">
+            🎹 테스트 신호
+          </button>
+        </div>
+      </div>
+
+      <!-- 3대 핵심 기능 탭 네비게이션 -->
+      <nav class="grid grid-cols-3 gap-1.5 bg-slate-900 p-1.5 rounded-2xl border border-slate-800" role="tablist">
+        <button id="tabDetector" type="button" role="tab" aria-selected="true" class="min-h-[44px] py-2 px-2 rounded-xl bg-emerald-600 text-white text-xs sm:text-sm font-extrabold transition-all">
+          🎵 음계 인식
+        </button>
+        <button id="tabTuner" type="button" role="tab" aria-selected="false" class="min-h-[44px] py-2 px-2 rounded-xl bg-transparent text-slate-300 text-xs sm:text-sm font-bold transition-all">
+          🎸 현악기 조율기
+        </button>
+        <button id="tabMetronome" type="button" role="tab" aria-selected="false" class="min-h-[44px] py-2 px-2 rounded-xl bg-transparent text-slate-300 text-xs sm:text-sm font-bold transition-all">
+          ⏱️ 메트로놈
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       메인 콘텐츠 영역
+       ======================================================================== -->
+  <main class="max-w-3xl mx-auto px-3 sm:px-4 pt-3 space-y-3">
+    <!-- ======================================================================
+         [TAB 1] 실시간 음계 인식 (CDEFGAB / 12음계)
+         ====================================================================== -->
+    <section id="panelDetector" class="space-y-3" role="tabpanel">
+      <!-- 음계 표기 모드 선택 카드 -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div>
+          <label id="scaleModeLabel" for="scaleModeSelect" class="block text-xs font-extrabold text-slate-200">음계 표기 모드</label>
+          <p id="scaleModeHint" class="text-[11px] text-slate-400">7음계(CDEFGAB) 또는 반음(#) 포함 12음계를 선택합니다</p>
+        </div>
+        <select id="scaleModeSelect" class="text-xs sm:text-sm font-bold">
+          <option value="diatonic">다이나톤 7음계 (CDEFGAB)</option>
+          <option value="chromatic">12음계 (반음 # 포함)</option>
+        </select>
+      </div>
+
+      <!-- 대형 음계 디스플레이 카드 -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 space-y-3.5">
+        <div class="flex items-center justify-between">
+          <span id="targetAnalysisLabel" class="text-xs font-extrabold text-slate-300">타깃 주음 분석 결과</span>
+          <div class="flex items-center gap-1.5 text-xs font-bold text-slate-300">
+            <span id="clarityHeaderLabel">음정 명료도:</span>
+            <span id="clarityPercentText" class="text-emerald-400 tabular-nums">0%</span>
+          </div>
+        </div>
+
+        <!-- 중앙 대형 음이름 & 옥타브 -->
+        <div class="text-center py-2 space-y-2">
+          <div class="inline-flex items-baseline justify-center gap-1">
+            <span id="detectedNoteLetter" class="text-6xl sm:text-7xl font-extrabold text-slate-500 tracking-tight transition-all" style="min-width: 1.25ch;">--</span>
+            <span id="detectedNoteOctave" class="text-2xl sm:text-3xl font-extrabold text-slate-500 tabular-nums"></span>
+          </div>
+
+          <div>
+            <span id="detectedSolfegeText" class="inline-block px-3.5 py-1 rounded-full bg-slate-950 border border-slate-700 text-sm sm:text-base font-extrabold text-slate-300">
+              소리를 입력해 주세요
+            </span>
+          </div>
+
+          <div class="flex items-center justify-center gap-3 text-xs sm:text-sm font-bold text-slate-400 tabular-nums">
+            <span id="detectedFreqText">0.00 Hz</span>
+            <span>•</span>
+            <span id="detectedCentsText">0 cents</span>
+          </div>
+        </div>
+
+        <!-- 음정 편차 게이지 (-50 ~ +50 cents) -->
+        <div class="space-y-1">
+          <div class="flex justify-between text-xs font-bold text-slate-400 tabular-nums px-1">
+            <span>-50 cents (♭)</span>
+            <span class="text-emerald-400">0</span>
+            <span>+50 cents (♯)</span>
+          </div>
+          <div class="gauge-track">
+            <div class="gauge-center-line"></div>
+            <div id="detectorNeedle" class="gauge-needle"></div>
+          </div>
+        </div>
+
+        <!-- 입력 음량 & 노이즈 게이트 게이지 -->
+        <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-3 space-y-2">
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <span id="inputLevelLabel" class="text-xs font-bold text-slate-300">입력 음량</span>
+              <span id="rmsDbText" class="text-xs font-extrabold text-emerald-400 tabular-nums">-60.0 dB</span>
+            </div>
+            <button id="calibrateNoiseBtn" type="button" class="px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-500/40 text-amber-300 text-xs font-extrabold">
+              🔇 주변 소음 자동 보정
+            </button>
+          </div>
+
+          <div class="relative h-3 bg-slate-800 rounded-full overflow-hidden">
+            <div id="volumeBar" class="h-full bg-emerald-500 rounded-full transition-all" style="width: 0%;"></div>
+            <div id="gateMarker" class="absolute top-0 bottom-0 w-1 bg-amber-400" style="left: 40%;" title="Noise Gate"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 소음 제어 및 안정화 슬라이더 -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+        <h2 id="noiseFilterTitle" class="text-xs font-extrabold text-slate-200">주변 소음 차단 & 주음 추출 필터</h2>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 space-y-1.5">
+            <div class="flex justify-between text-xs font-bold">
+              <span id="gateSliderLabel" class="text-slate-300">노이즈 게이트</span>
+              <span id="gateValueText" class="text-amber-300 tabular-nums">-42 dB</span>
+            </div>
+            <input id="gateSlider" type="range" min="-65" max="-15" step="1" value="-42" />
+          </div>
+
+          <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 space-y-1.5">
+            <div class="flex justify-between text-xs font-bold">
+              <span id="claritySliderLabel" class="text-slate-300">명료도 기준</span>
+              <span id="clarityThresholdText" class="text-emerald-300 tabular-nums">86%</span>
+            </div>
+            <input id="claritySlider" type="range" min="70" max="96" step="1" value="86" />
+          </div>
+
+          <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 space-y-1.5">
+            <div class="flex justify-between text-xs font-bold">
+              <span id="smoothingSliderLabel" class="text-slate-300">음정 안정화</span>
+              <span id="smoothingValueText" class="text-sky-300 tabular-nums">3 프레임</span>
+            </div>
+            <input id="smoothingSlider" type="range" min="1" max="8" step="1" value="3" />
+          </div>
+        </div>
+      </div>
+
+      <!-- 최근 인식된 음계 히스토리 -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-2.5">
+        <div class="flex items-center justify-between">
+          <h2 id="historyTitle" class="text-xs font-extrabold text-slate-200">최근 인식된 음계 흐름</h2>
+          <button id="clearHistoryBtn" type="button" class="px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 text-xs font-bold">
+            기록 지우기
+          </button>
+        </div>
+        <div id="historyContainer" class="flex flex-wrap gap-1.5 min-h-[44px] items-center">
+          <span id="historyEmptyText" class="text-xs text-slate-400">인식된 음계가 여기에 순서대로 기록됩니다.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         [TAB 2] 현악기 4종 정밀 조율기 (기타 · 우쿠렐레 · 바이올린 · 베이스)
+         ====================================================================== -->
+    <section id="panelTuner" class="hidden space-y-3" role="tabpanel">
+      <!-- 악기 선택 4버튼 -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 space-y-3">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="instrumentBtnGroup">
+          <button type="button" data-inst="guitar" class="inst-select-btn min-h-[44px] py-2 px-3 rounded-xl bg-emerald-600 text-white text-xs sm:text-sm font-extrabold border border-emerald-400">
+            🎸 기타
+          </button>
+          <button type="button" data-inst="ukulele" class="inst-select-btn min-h-[44px] py-2 px-3 rounded-xl bg-slate-800 text-slate-200 text-xs sm:text-sm font-bold border border-slate-700">
+            🏝️ 우쿠렐레
+          </button>
+          <button type="button" data-inst="violin" class="inst-select-btn min-h-[44px] py-2 px-3 rounded-xl bg-slate-800 text-slate-200 text-xs sm:text-sm font-bold border border-slate-700">
+            🎻 바이올린
+          </button>
+          <button type="button" data-inst="bass" class="inst-select-btn min-h-[44px] py-2 px-3 rounded-xl bg-slate-800 text-slate-200 text-xs sm:text-sm font-bold border border-slate-700">
+            🎸 베이스
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div class="space-y-1">
+            <label id="presetLabel" for="tunerPresetSelect" class="block text-xs font-bold text-slate-300">튜닝 프리셋 (표준 및 변칙 튜닝)</label>
+            <select id="tunerPresetSelect" class="w-full text-xs sm:text-sm font-bold"></select>
+          </div>
+
+          <div class="space-y-1">
+            <span id="stringManageLabel" class="block text-xs font-bold text-slate-300">현 감지 및 진행 관리</span>
+            <div class="flex items-center gap-1.5">
+              <button id="autoStringLockBtn" type="button" class="flex-1 min-h-[44px] px-2.5 py-2 rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-xs font-extrabold">
+                🔄 자동 현 감지
+              </button>
+              <button id="resetTunedStringsBtn" type="button" class="min-h-[44px] px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-xs font-bold">
+                초기화
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 조율기 정밀 게이지 카드 -->
+      <div id="tunerGaugeCard" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 space-y-3 transition-all">
+        <div class="flex items-center justify-between">
+          <div>
+            <span id="targetStringHeader" class="text-xs font-bold text-slate-300">현재 대상 현</span>
+            <div class="flex items-baseline gap-2">
+              <span id="tunerTargetStringLabel" class="text-sm font-extrabold text-emerald-400">6번줄</span>
+              <span id="tunerTargetNoteDisplay" class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">E2</span>
+              <span id="tunerTargetFreqText" class="text-xs font-bold text-slate-400 tabular-nums">(82.41 Hz)</span>
+            </div>
+          </div>
+          <div class="text-right">
+            <span id="realtimeMeasureHeader" class="text-xs font-bold text-slate-300">실시간 측정</span>
+            <div id="tunerMeasuredText" class="text-lg sm:text-xl font-extrabold text-slate-200 tabular-nums">-- Hz</div>
+            <div id="tunerCentsReadout" class="text-xs font-bold text-slate-400 tabular-nums">0 cents</div>
+          </div>
+        </div>
+
+        <!-- 조율 바늘 게이지 -->
+        <div class="space-y-1">
+          <div class="flex justify-between text-xs font-bold text-slate-400 tabular-nums px-1">
+            <span>-50 (♭ Low)</span>
+            <span class="text-emerald-400">IN TUNE</span>
+            <span>+50 (♯ High)</span>
+          </div>
+          <div class="gauge-track">
+            <div class="gauge-center-line"></div>
+            <div id="tunerNeedle" class="gauge-needle"></div>
+          </div>
+        </div>
+
+        <!-- 조율 상태 판정 배너 -->
+        <div id="tunerStatusVerdict" class="text-center text-sm sm:text-base font-extrabold text-slate-300 bg-slate-950/80 border border-slate-800 rounded-xl py-2 px-3 mt-2">
+          현을 튕겨주세요
+        </div>
+      </div>
+
+      <!-- 현별 목표 음정 & 조율 완료 점등 그리드 -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-2.5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+          <h2 id="stringGridTitle" class="text-xs font-extrabold text-slate-200">현별 목표 음정 설정 & 조율 상태</h2>
+          <span id="stringGridHint" class="text-[11px] text-slate-400">정음을 유지하면 차임벨과 함께 녹색 점등됩니다</span>
+        </div>
+        <div id="tunerStringsGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         [TAB 3] 정밀 메트로놈 (Precision Metronome)
+         ====================================================================== -->
+    <section id="panelMetronome" class="hidden space-y-3" role="tabpanel">
+      <!-- BPM & 시작/정지 컨트롤 카드 -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <span id="tempoHeaderLabel" class="text-xs font-extrabold text-slate-300">템포 (BPM)</span>
+            <div id="metroTempoName" class="text-xs sm:text-sm font-bold text-emerald-400">Moderato (보통 빠르게)</div>
+          </div>
+          <button id="metroTapBtn" type="button" class="min-h-[44px] px-3.5 py-2 rounded-xl bg-slate-800 border border-slate-700 text-amber-300 text-xs sm:text-sm font-extrabold">
+            👆 탭 템포 (TAP)
+          </button>
+        </div>
+
+        <!-- 대형 BPM 조절부 -->
+        <div class="flex items-center justify-center gap-2 sm:gap-3">
+          <button type="button" data-bpm-delta="-5" class="bpm-step-btn min-h-[44px] px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-sm font-extrabold">-5</button>
+          <button type="button" data-bpm-delta="-1" class="bpm-step-btn min-h-[44px] px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-sm font-extrabold">-1</button>
+
+          <div class="text-center px-2">
+            <input id="metroBpmInput" type="number" inputmode="numeric" min="30" max="260" value="120" aria-label="BPM"
+              class="w-28 text-center text-4xl sm:text-5xl font-extrabold text-white bg-slate-950 border border-slate-700 rounded-2xl py-1.5 tabular-nums" />
+          </div>
+
+          <button type="button" data-bpm-delta="1" class="bpm-step-btn min-h-[44px] px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-sm font-extrabold">+1</button>
+          <button type="button" data-bpm-delta="5" class="bpm-step-btn min-h-[44px] px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-sm font-extrabold">+5</button>
+        </div>
+
+        <input id="metroBpmSlider" type="range" min="30" max="260" step="1" value="120" />
+
+        <!-- 박자 강세 패드 (터치 시 강/중/약/묵음 순환) -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between">
+            <span id="beatAccentLabel" class="text-xs font-extrabold text-slate-300">박자 강세 (패드 터치로 강·중·약·묵음 변경)</span>
+          </div>
+          <div id="metroBeatLeds" class="grid grid-cols-4 gap-2"></div>
+        </div>
+
+        <!-- 박자표 · 리듬 세분화 · 음색 선택 -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
+          <div class="space-y-1">
+            <label id="timeSigLabel" for="metroTimeSigSelect" class="block text-xs font-bold text-slate-300">박자표</label>
+            <select id="metroTimeSigSelect" class="w-full text-xs sm:text-sm font-bold">
+              <option value="4/4">4/4 박자 (표준)</option>
+              <option value="3/4">3/4 박자 (왈츠)</option>
+              <option value="2/4">2/4 박자 (행진곡)</option>
+              <option value="6/8">6/8 박자 (겹박자)</option>
+              <option value="5/4">5/4 박자 (변박)</option>
+              <option value="7/8">7/8 박자 (변박)</option>
+              <option value="12/8">12/8 박자 (슬로우 록)</option>
+              <option value="1/4">1/4 박자 (무강세 클릭)</option>
+            </select>
+          </div>
+
+          <div class="space-y-1">
+            <label id="subdivLabel" for="metroSubdivSelect" class="block text-xs font-bold text-slate-300">리듬 세분화</label>
+            <select id="metroSubdivSelect" class="w-full text-xs sm:text-sm font-bold">
+              <option value="1">4분음표 (기본 1박)</option>
+              <option value="2">8분음표 (2분할)</option>
+              <option value="3">셋잇단음표 (3연음)</option>
+              <option value="4">16분음표 (4분할)</option>
+              <option value="swing">스윙 / 셔플 (Swing)</option>
+            </select>
+          </div>
+
+          <div class="space-y-1">
+            <label id="metroSoundLabel" for="metroSoundSelect" class="block text-xs font-bold text-slate-300">메트로놈 음색</label>
+            <select id="metroSoundSelect" class="w-full text-xs sm:text-sm font-bold">
+              <option value="woodblock">우드블록 (Woodblock)</option>
+              <option value="digital">디지털 비프 (Digital Beep)</option>
+              <option value="mechanical">메카니컬 진자 (Mechanical)</option>
+              <option value="drum">드럼 림샷 / 하이햇</option>
+              <option value="marimba">마림바 & 벨 (Marimba)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 메트로놈 시작/정지 대형 버튼 -->
+        <button id="metroToggleBtn" type="button" class="w-full min-h-[54px] py-3 px-4 rounded-2xl bg-emerald-600 text-white text-base font-extrabold shadow-lg transition-all">
+          ▶️ 메트로놈 시작
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <!-- 하단 플로팅 알림 토스트 -->
+  <div id="toastBanner" role="status" aria-live="polite"
+    class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-max max-w-[90vw] px-4 py-2.5 rounded-full bg-slate-900/95 border border-emerald-500/60 text-xs sm:text-sm font-extrabold text-emerald-200 shadow-xl text-center">
+  </div>
+
+  <!-- ========================================================================
+       핵심 DSP · 다국어 사전(DR 검증 완료) · 조율기 · 메트로놈 엔진
+       ======================================================================== -->
+  <script>
+    (() => {
+      'use strict';
+
+      /* ======================================================================
+         1. 6개 언어 다국어 사전 (한국어 · English · Español · 日本語 · 简中 · 繁中)
+            - 전문 음악 용어 교차 검증(DR) 반영 완료
+         ====================================================================== */
+      const I18N = {
+        ko: {
+          appTitle: '이지다이나톤',
+          appSubtitle: '음계 인식 · 현악기 조율기 · 메트로놈',
+          statusIdle: '대기 중 (오프라인 작동 지원)',
+          statusMic: '마이크 실시간 수음 중',
+          statusSim: '가상 테스트 신호 입력 중',
+          micStart: '🎙️ 마이크 시작',
+          micStop: '⏹️ 수음 중지',
+          simStart: '🎹 테스트 신호',
+          simStop: '⏹️ 신호 중지',
+          tabDetector: '🎵 음계 인식',
+          tabTuner: '🎸 현악기 조율기',
+          tabMetronome: '⏱️ 메트로놈',
+          scaleModeLabel: '음계 표기 모드',
+          scaleModeHint: '7음계(CDEFGAB) 또는 반음(#) 포함 12음계를 선택합니다',
+          modeDiatonic: '다이나톤 7음계 (CDEFGAB)',
+          modeChromatic: '12음계 (반음 # 포함)',
+          targetAnalysisLabel: '타깃 주음 분석 결과',
+          clarityHeaderLabel: '음정 명료도:',
+          promptInputSound: '소리를 입력해 주세요',
+          listeningWaiting: '소리 대기 중...',
+          inputLevelLabel: '입력 음량',
+          calibrateNoiseBtn: '🔇 주변 소음 자동 보정',
+          calibratingNoiseBtn: '⏳ 소음 측정 중...',
+          noiseFilterTitle: '주변 소음 차단 & 주음 추출 필터',
+          gateSliderLabel: '노이즈 게이트',
+          claritySliderLabel: '명료도 기준',
+          smoothingSliderLabel: '음정 안정화',
+          framesUnit: (n) => `${n} 프레임`,
+          historyTitle: '최근 인식된 음계 흐름',
+          clearHistoryBtn: '기록 지우기',
+          historyEmptyText: '인식된 음계가 여기에 순서대로 기록됩니다.',
+          solfege: ['도', '도#', '레', '레#', '미', '파', '파#', '솔', '솔#', '라', '라#', '시'],
+          instruments: {
+            guitar: '🎸 기타',
+            ukulele: '🏝️ 우쿠렐레',
+            violin: '🎻 바이올린',
+            bass: '🎸 베이스'
+          },
+          presets: {
+            '표준 (E A D G B E)': '표준 (E A D G B E)',
+            'Drop D (D A D G B E)': 'Drop D (D A D G B E)',
+            '반음 다운 (Eb Ab Db Gb Bb Eb)': '반음 다운 (Eb Ab Db Gb Bb Eb)',
+            '1온음 다운 (D G C F A D)': '1온음 다운 (D G C F A D)',
+            'DADGAD (모달 튜닝)': 'DADGAD (모달 튜닝)',
+            'Open G (D G D G B D)': 'Open G (D G D G B D)',
+            'Open D (D A D F# A D)': 'Open D (D A D F# A D)',
+            '표준 High-G (G4 C4 E4 A4)': '표준 High-G (G4 C4 E4 A4)',
+            'Low-G 튜닝 (G3 C4 E4 A4)': 'Low-G 튜닝 (G3 C4 E4 A4)',
+            '바리톤 (D3 G3 B3 E4)': '바리톤 (D3 G3 B3 E4)',
+            '표준 (G3 D4 A4 E5)': '표준 (G3 D4 A4 E5)',
+            'Open D (D3 A3 D4 F#4)': 'Open D (D3 A3 D4 F#4)',
+            '4현 표준 (E1 A1 D2 G2)': '4현 표준 (E1 A1 D2 G2)',
+            '4현 Drop D (D1 A1 D2 G2)': '4현 Drop D (D1 A1 D2 G2)',
+            '5현 표준 (B0 E1 A1 D2 G2)': '5현 표준 (B0 E1 A1 D2 G2)'
+          },
+          presetLabel: '튜닝 프리셋 (표준 및 변칙 튜닝)',
+          stringManageLabel: '현 감지 및 진행 관리',
+          autoLockOn: '🔄 자동 현 감지',
+          autoLockOff: '🔒 수동 현 고정',
+          resetStringsBtn: '초기화',
+          targetStringHeader: '현재 대상 현',
+          realtimeMeasureHeader: '실시간 측정',
+          stringGridTitle: '현별 목표 음정 설정 & 조율 상태',
+          stringGridHint: '정음을 유지하면 차임벨과 함께 녹색 점등됩니다',
+          stringNum: (n) => `${n}번줄`,
+          tunedBadge: '✓ 조율완료',
+          pluckPrompt: '현을 튕겨주세요',
+          inTuneMsg: '✓ 정음입니다! (IN TUNE)',
+          tooLowMsg: '▲ 음이 낮습니다 (페그를 조여주세요)',
+          tooHighMsg: '▼ 음이 높습니다 (페그를 풀어주세요)',
+          tempoHeaderLabel: '템포 (BPM)',
+          metroTapBtn: '👆 탭 템포 (TAP)',
+          beatAccentLabel: '박자 강세 (패드 터치로 강·중·약·묵음 변경)',
+          accentNames: ['묵음', '약', '중', '강'],
+          timeSigLabel: '박자표',
+          timeSigs: {
+            '4/4': '4/4 박자 (표준)',
+            '3/4': '3/4 박자 (왈츠)',
+            '2/4': '2/4 박자 (행진곡)',
+            '6/8': '6/8 박자 (겹박자)',
+            '5/4': '5/4 박자 (변박)',
+            '7/8': '7/8 박자 (변박)',
+            '12/8': '12/8 박자 (슬로우 록)',
+            '1/4': '1/4 박자 (무강세 클릭)'
+          },
+          subdivLabel: '리듬 세분화',
+          subdivs: {
+            '1': '4분음표 (기본 1박)',
+            '2': '8분음표 (2분할)',
+            '3': '셋잇단음표 (3연음)',
+            '4': '16분음표 (4분할)',
+            'swing': '스윙 / 셔플 (Swing)'
+          },
+          metroSoundLabel: '메트로놈 음색',
+          metroSounds: {
+            woodblock: '우드블록 (Woodblock)',
+            digital: '디지털 비프 (Digital Beep)',
+            mechanical: '메카니컬 진자 (Mechanical)',
+            drum: '드럼 림샷 / 하이햇',
+            marimba: '마림바 & 벨 (Marimba)'
+          },
+          metroStart: '▶️ 메트로놈 시작',
+          metroStop: '⏹️ 메트로놈 정지',
+          tempoMarkings: {
+            grave: 'Grave (매우 느리고 장중하게)',
+            largo: 'Largo (느리고 폭넓게)',
+            larghetto: 'Larghetto (Largo보다 조금 빠르게)',
+            adagio: 'Adagio (느리고 표정 있게)',
+            andante: 'Andante (걷는 빠르기로)',
+            moderato: 'Moderato (보통 빠르게)',
+            allegretto: 'Allegretto (조금 빠르게)',
+            allegro: 'Allegro (빠르고 경쾌하게)',
+            vivace: 'Vivace (빠르고 생기 있게)',
+            presto: 'Presto (매우 빠르게)',
+            prestissimo: 'Prestissimo (가장 빠르게)'
+          },
+          toastA4Changed: (hz) => `기준 주파수가 A4 = ${hz} Hz로 변경되었습니다`,
+          toastCalibrated: (db) => `주변 소음 보정 완료 (게이트: ${db} dB)`,
+          toastStringsReset: '모든 현의 조율 완료 표시가 초기화되었습니다',
+          toastStringLocked: (num, note) => `${num}번줄 (${note}) 조율 대상으로 선택됨`,
+          toastRefTone: (note, hz) => `기준음 ${note} (${hz} Hz) 재생 중`,
+          toastStringDone: (num, note) => `🔔 ${num}번줄 (${note}) 조율 완료!`,
+          toastMicDenied: '마이크 권한이 차단되었습니다. 브라우저/앱 설정에서 허용해 주세요.',
+          toastMicNotFound: '연결된 마이크 장치를 찾을 수 없습니다.',
+          toastMicBusy: '다른 앱에서 마이크를 사용 중입니다.',
+          toastMicUnsupported: '현재 환경에서 마이크 API를 지원하지 않습니다.',
+          toastMicError: '마이크 연결 중 오류가 발생했습니다.'
+        },
+
+        en: {
+          appTitle: 'Easy Dynatone',
+          appSubtitle: 'Pitch Detector · String Tuner · Metronome',
+          statusIdle: 'Standby (Offline Ready)',
+          statusMic: 'Listening via Microphone',
+          statusSim: 'Test Signal Input Active',
+          micStart: '🎙️ Start Mic',
+          micStop: '⏹️ Stop Mic',
+          simStart: '🎹 Test Signal',
+          simStop: '⏹️ Stop Signal',
+          tabDetector: '🎵 Pitch Detector',
+          tabTuner: '🎸 String Tuner',
+          tabMetronome: '⏱️ Metronome',
+          scaleModeLabel: 'Scale Display Mode',
+          scaleModeHint: 'Choose 7-note diatonic (CDEFGAB) or 12-note chromatic (#)',
+          modeDiatonic: 'Dynatone 7-Note (CDEFGAB)',
+          modeChromatic: '12-Tone Chromatic (with #)',
+          targetAnalysisLabel: 'Primary Pitch Analysis',
+          clarityHeaderLabel: 'Pitch Clarity:',
+          promptInputSound: 'Play or sing a note',
+          listeningWaiting: 'Listening for sound...',
+          inputLevelLabel: 'Input Level',
+          calibrateNoiseBtn: '🔇 Auto Calibrate Noise',
+          calibratingNoiseBtn: '⏳ Measuring Noise...',
+          noiseFilterTitle: 'Noise Suppression & Pitch Filter',
+          gateSliderLabel: 'Noise Gate',
+          claritySliderLabel: 'Clarity Threshold',
+          smoothingSliderLabel: 'Pitch Smoothing',
+          framesUnit: (n) => `${n} frames`,
+          historyTitle: 'Recent Detected Notes',
+          clearHistoryBtn: 'Clear',
+          historyEmptyText: 'Detected notes will appear here in sequence.',
+          solfege: ['Do', 'Do#', 'Re', 'Re#', 'Mi', 'Fa', 'Fa#', 'Sol', 'Sol#', 'La', 'La#', 'Si'],
+          instruments: {
+            guitar: '🎸 Guitar',
+            ukulele: '🏝️ Ukulele',
+            violin: '🎻 Violin',
+            bass: '🎸 Bass'
+          },
+          presets: {
+            '표준 (E A D G B E)': 'Standard (E A D G B E)',
+            'Drop D (D A D G B E)': 'Drop D (D A D G B E)',
+            '반음 다운 (Eb Ab Db Gb Bb Eb)': 'Half-Step Down (Eb Ab Db Gb Bb Eb)',
+            '1온음 다운 (D G C F A D)': 'Whole-Step Down (D G C F A D)',
+            'DADGAD (모달 튜닝)': 'DADGAD (Modal Tuning)',
+            'Open G (D G D G B D)': 'Open G (D G D G B D)',
+            'Open D (D A D F# A D)': 'Open D (D A D F# A D)',
+            '표준 High-G (G4 C4 E4 A4)': 'Standard High-G (G4 C4 E4 A4)',
+            'Low-G 튜닝 (G3 C4 E4 A4)': 'Low-G Tuning (G3 C4 E4 A4)',
+            '바리톤 (D3 G3 B3 E4)': 'Baritone (D3 G3 B3 E4)',
+            '표준 (G3 D4 A4 E5)': 'Standard (G3 D4 A4 E5)',
+            'Open D (D3 A3 D4 F#4)': 'Open D (D3 A3 D4 F#4)',
+            '4현 표준 (E1 A1 D2 G2)': '4-String Standard (E1 A1 D2 G2)',
+            '4현 Drop D (D1 A1 D2 G2)': '4-String Drop D (D1 A1 D2 G2)',
+            '5현 표준 (B0 E1 A1 D2 G2)': '5-String Standard (B0 E1 A1 D2 G2)'
+          },
+          presetLabel: 'Tuning Preset (Standard & Alternate)',
+          stringManageLabel: 'String Detection & Progress',
+          autoLockOn: '🔄 Auto String Detect',
+          autoLockOff: '🔒 Manual String Lock',
+          resetStringsBtn: 'Reset',
+          targetStringHeader: 'Target String',
+          realtimeMeasureHeader: 'Live Pitch',
+          stringGridTitle: 'String Targets & Tuning Status',
+          stringGridHint: 'Hold in tune to trigger chime and green light',
+          stringNum: (n) => `String ${n}`,
+          tunedBadge: '✓ Tuned',
+          pluckPrompt: 'Pluck a string',
+          inTuneMsg: '✓ In Tune!',
+          tooLowMsg: '▲ Too Flat (Tighten peg)',
+          tooHighMsg: '▼ Too Sharp (Loosen peg)',
+          tempoHeaderLabel: 'Tempo (BPM)',
+          metroTapBtn: '👆 Tap Tempo',
+          beatAccentLabel: 'Beat Accents (Tap pad: High · Med · Low · Mute)',
+          accentNames: ['Mute', 'Low', 'Med', 'High'],
+          timeSigLabel: 'Time Signature',
+          timeSigs: {
+            '4/4': '4/4 Time (Common)',
+            '3/4': '3/4 Time (Waltz)',
+            '2/4': '2/4 Time (March)',
+            '6/8': '6/8 Time (Compound)',
+            '5/4': '5/4 Time (Odd Meter)',
+            '7/8': '7/8 Time (Odd Meter)',
+            '12/8': '12/8 Time (Slow Rock)',
+            '1/4': '1/4 Time (No Accent)'
+          },
+          subdivLabel: 'Subdivision',
+          subdivs: {
+            '1': 'Quarter Note (1 Beat)',
+            '2': 'Eighth Notes (2x)',
+            '3': 'Triplets (3x)',
+            '4': 'Sixteenth Notes (4x)',
+            'swing': 'Swing / Shuffle'
+          },
+          metroSoundLabel: 'Click Sound',
+          metroSounds: {
+            woodblock: 'Woodblock',
+            digital: 'Digital Beep',
+            mechanical: 'Mechanical Pendulum',
+            drum: 'Drum Rimshot / Hi-Hat',
+            marimba: 'Marimba & Bell'
+          },
+          metroStart: '▶️ Start Metronome',
+          metroStop: '⏹️ Stop Metronome',
+          tempoMarkings: {
+            grave: 'Grave (Very slow & solemn)',
+            largo: 'Largo (Slow & broad)',
+            larghetto: 'Larghetto (Slightly faster than Largo)',
+            adagio: 'Adagio (Slow & expressive)',
+            andante: 'Andante (Walking pace)',
+            moderato: 'Moderato (Moderate speed)',
+            allegretto: 'Allegretto (Moderately fast)',
+            allegro: 'Allegro (Fast & bright)',
+            vivace: 'Vivace (Lively & fast)',
+            presto: 'Presto (Very fast)',
+            prestissimo: 'Prestissimo (As fast as possible)'
+          },
+          toastA4Changed: (hz) => `Reference pitch set to A4 = ${hz} Hz`,
+          toastCalibrated: (db) => `Noise calibrated (Gate: ${db} dB)`,
+          toastStringsReset: 'All string tuning indicators reset',
+          toastStringLocked: (num, note) => `Selected String ${num} (${note})`,
+          toastRefTone: (note, hz) => `Playing reference ${note} (${hz} Hz)`,
+          toastStringDone: (num, note) => `🔔 String ${num} (${note}) Tuned!`,
+          toastMicDenied: 'Microphone permission denied. Please enable it in settings.',
+          toastMicNotFound: 'No microphone device found.',
+          toastMicBusy: 'Microphone is currently in use by another app.',
+          toastMicUnsupported: 'Microphone API is not supported in this browser.',
+          toastMicError: 'Error accessing microphone.'
+        },
+
+        es: {
+          appTitle: 'Easy Dynatone',
+          appSubtitle: 'Detector de Notas · Afinador · Metrónomo',
+          statusIdle: 'En espera (Modo sin conexión)',
+          statusMic: 'Escuchando por micrófono',
+          statusSim: 'Señal de prueba activa',
+          micStart: '🎙️ Iniciar Mic',
+          micStop: '⏹️ Detener Mic',
+          simStart: '🎹 Señal Prueba',
+          simStop: '⏹️ Parar Señal',
+          tabDetector: '🎵 Notas',
+          tabTuner: '🎸 Afinador',
+          tabMetronome: '⏱️ Metrónomo',
+          scaleModeLabel: 'Modo de Escala',
+          scaleModeHint: 'Elige escala diatónica (7 notas) o cromática (12 notas con #)',
+          modeDiatonic: 'Escala Dynatone de 7 notas (CDEFGAB)',
+          modeChromatic: 'Escala cromática de 12 notas (con #)',
+          targetAnalysisLabel: 'Análisis de Tono Principal',
+          clarityHeaderLabel: 'Claridad:',
+          promptInputSound: 'Toca o canta una nota',
+          listeningWaiting: 'Esperando sonido...',
+          inputLevelLabel: 'Nivel de Entrada',
+          calibrateNoiseBtn: '🔇 Calibrar Ruido',
+          calibratingNoiseBtn: '⏳ Midiendo Ruido...',
+          noiseFilterTitle: 'Filtro de Ruido y Extracción de Tono',
+          gateSliderLabel: 'Puerta de Ruido (Gate)',
+          claritySliderLabel: 'Umbral Claridad',
+          smoothingSliderLabel: 'Estabilización',
+          framesUnit: (n) => `${n} cuadros`,
+          historyTitle: 'Historial Reciente de Notas',
+          clearHistoryBtn: 'Borrar',
+          historyEmptyText: 'Las notas detectadas aparecerán aquí en orden.',
+          solfege: ['Do', 'Do#', 'Re', 'Re#', 'Mi', 'Fa', 'Fa#', 'Sol', 'Sol#', 'La', 'La#', 'Si'],
+          instruments: {
+            guitar: '🎸 Guitarra',
+            ukulele: '🏝️ Ukelele',
+            violin: '🎻 Violín',
+            bass: '🎸 Bajo'
+          },
+          presets: {
+            '표준 (E A D G B E)': 'Estándar (E A D G B E)',
+            'Drop D (D A D G B E)': 'Drop D (D A D G B E)',
+            '반음 다운 (Eb Ab Db Gb Bb Eb)': 'Medio Tono Abajo (Eb Ab Db Gb Bb Eb)',
+            '1온음 다운 (D G C F A D)': 'Un Tono Abajo (D G C F A D)',
+            'DADGAD (모달 튜닝)': 'DADGAD (Afinación Modal)',
+            'Open G (D G D G B D)': 'Open G - Sol abierto (D G D G B D)',
+            'Open D (D A D F# A D)': 'Open D - Re abierto (D A D F# A D)',
+            '표준 High-G (G4 C4 E4 A4)': 'Estándar High-G (G4 C4 E4 A4)',
+            'Low-G 튜닝 (G3 C4 E4 A4)': 'Afinación Low-G (G3 C4 E4 A4)',
+            '바리톤 (D3 G3 B3 E4)': 'Barítono (D3 G3 B3 E4)',
+            '표준 (G3 D4 A4 E5)': 'Estándar (G3 D4 A4 E5)',
+            'Open D (D3 A3 D4 F#4)': 'Open D - Re abierto (D3 A3 D4 F#4)',
+            '4현 표준 (E1 A1 D2 G2)': 'Bajo de 4 cuerdas Estándar (E1 A1 D2 G2)',
+            '4현 Drop D (D1 A1 D2 G2)': 'Bajo de 4 cuerdas Drop D (D1 A1 D2 G2)',
+            '5현 표준 (B0 E1 A1 D2 G2)': 'Bajo de 5 cuerdas Estándar (B0 E1 A1 D2 G2)'
+          },
+          presetLabel: 'Preajuste de Afinación',
+          stringManageLabel: 'Detección y Progreso de Cuerdas',
+          autoLockOn: '🔄 Detección Auto',
+          autoLockOff: '🔒 Cuerda Fija',
+          resetStringsBtn: 'Reiniciar',
+          targetStringHeader: 'Cuerda Objetivo',
+          realtimeMeasureHeader: 'Medición en Vivo',
+          stringGridTitle: 'Objetivo por Cuerda y Estado',
+          stringGridHint: 'Mantén afinado para activar timbre y luz verde',
+          stringNum: (n) => `Cuerda ${n}`,
+          tunedBadge: '✓ Afinada',
+          pluckPrompt: 'Toca una cuerda',
+          inTuneMsg: '✓ ¡Afinada! (IN TUNE)',
+          tooLowMsg: '▲ Muy baja (Aprieta clavija)',
+          tooHighMsg: '▼ Muy alta (Afloja clavija)',
+          tempoHeaderLabel: 'Tempo (BPM)',
+          metroTapBtn: '👆 Tap Tempo',
+          beatAccentLabel: 'Acentos (Toca pad: Fuerte · Medio · Suave · Silencio)',
+          accentNames: ['Silencio', 'Suave', 'Medio', 'Fuerte'],
+          timeSigLabel: 'Compás',
+          timeSigs: {
+            '4/4': 'Compás 4/4 (Estándar)',
+            '3/4': 'Compás 3/4 (Vals)',
+            '2/4': 'Compás 2/4 (Marcha)',
+            '6/8': 'Compás 6/8 (Compuesto)',
+            '5/4': 'Compás 5/4 (Irregular)',
+            '7/8': 'Compás 7/8 (Irregular)',
+            '12/8': 'Compás 12/8 (Rock Lento)',
+            '1/4': 'Compás 1/4 (Sin Acento)'
+          },
+          subdivLabel: 'Subdivisión',
+          subdivs: {
+            '1': 'Negras (1 pulso)',
+            '2': 'Corcheas (2x)',
+            '3': 'Tresillos (3x)',
+            '4': 'Semicorcheas (4x)',
+            'swing': 'Swing / Shuffle'
+          },
+          metroSoundLabel: 'Sonido',
+          metroSounds: {
+            woodblock: 'Caja China (Woodblock)',
+            digital: 'Pitido Digital',
+            mechanical: 'Péndulo Mecánico',
+            drum: 'Golpe de Aro / Hi-Hat',
+            marimba: 'Marimba y Campana'
+          },
+          metroStart: '▶️ Iniciar Metrónomo',
+          metroStop: '⏹️ Detener Metrónomo',
+          tempoMarkings: {
+            grave: 'Grave (Muy lento y solemne)',
+            largo: 'Largo (Lento y amplio)',
+            larghetto: 'Larghetto (Un poco más rápido que Largo)',
+            adagio: 'Adagio (Lento y expresivo)',
+            andante: 'Andante (Paso tranquilo)',
+            moderato: 'Moderato (Velocidad moderada)',
+            allegretto: 'Allegretto (Algo rápido)',
+            allegro: 'Allegro (Rápido y brillante)',
+            vivace: 'Vivace (Vivo y rápido)',
+            presto: 'Presto (Muy rápido)',
+            prestissimo: 'Prestissimo (Lo más rápido posible)'
+          },
+          toastA4Changed: (hz) => `Frecuencia base ajustada a A4 = ${hz} Hz`,
+          toastCalibrated: (db) => `Ruido calibrado (Puerta: ${db} dB)`,
+          toastStringsReset: 'Indicadores de afinación reiniciados',
+          toastStringLocked: (num, note) => `Cuerda ${num} (${note}) seleccionada`,
+          toastRefTone: (note, hz) => `Reproduciendo tono guía ${note} (${hz} Hz)`,
+          toastStringDone: (num, note) => `🔔 ¡Cuerda ${num} (${note}) afinada!`,
+          toastMicDenied: 'Permiso de micrófono denegado. Actívalo en ajustes.',
+          toastMicNotFound: 'No se encontró ningún micrófono.',
+          toastMicBusy: 'El micrófono está siendo usado por otra app.',
+          toastMicUnsupported: 'API de micrófono no compatible.',
+          toastMicError: 'Error al conectar el micrófono.'
+        },
+
+        ja: {
+          appTitle: 'イージーダイナトーン',
+          appSubtitle: '音階認識 · 弦楽器チューナー · メトロノーム',
+          statusIdle: '待機中 (オフライン動作対応)',
+          statusMic: 'マイクでリアルタイム収音中',
+          statusSim: 'テスト信号を入力中',
+          micStart: '🎙️ マイク開始',
+          micStop: '⏹️ 収音停止',
+          simStart: '🎹 テスト信号',
+          simStop: '⏹️ 信号停止',
+          tabDetector: '🎵 音階認識',
+          tabTuner: '🎸 弦楽器チューナー',
+          tabMetronome: '⏱️ メトロノーム',
+          scaleModeLabel: '音階表記モード',
+          scaleModeHint: '7音階(CDEFGAB)または半音(#)を含む12音階を選択します',
+          modeDiatonic: 'ダイナトーン7音階 (CDEFGAB)',
+          modeChromatic: '12音階 (半音 # を含む)',
+          targetAnalysisLabel: '主音ピッチ解析結果',
+          clarityHeaderLabel: '音程明瞭度:',
+          promptInputSound: '音を入力してください',
+          listeningWaiting: '音声待機中...',
+          inputLevelLabel: '入力音量',
+          calibrateNoiseBtn: '🔇 周囲ノイズ自動補正',
+          calibratingNoiseBtn: '⏳ ノイズ測定中...',
+          noiseFilterTitle: '周囲ノイズ遮断 & 主音抽出フィルター',
+          gateSliderLabel: 'ノイズゲート',
+          claritySliderLabel: '明瞭度の基準',
+          smoothingSliderLabel: '音程安定化',
+          framesUnit: (n) => `${n} フレーム`,
+          historyTitle: '最近認識した音階の流れ',
+          clearHistoryBtn: '履歴消去',
+          historyEmptyText: '認識された音階がここに順番に記録されます。',
+          solfege: ['ド', 'ド#', 'レ', 'レ#', 'ミ', 'ファ', 'ファ#', 'ソ', 'ソ#', 'ラ', 'ラ#', 'シ'],
+          instruments: {
+            guitar: '🎸 ギター',
+            ukulele: '🏝️ ウクレレ',
+            violin: '🎻 バイオリン',
+            bass: '🎸 ベース'
+          },
+          presets: {
+            '표준 (E A D G B E)': 'スタンダード (E A D G B E)',
+            'Drop D (D A D G B E)': 'ドロップD (D A D G B E)',
+            '반음 다운 (Eb Ab Db Gb Bb Eb)': '半音下げ (Eb Ab Db Gb Bb Eb)',
+            '1온음 다운 (D G C F A D)': '全音下げ (D G C F A D)',
+            'DADGAD (모달 튜닝)': 'DADGAD (モーダル・チューニング)',
+            'Open G (D G D G B D)': 'オープンG (D G D G B D)',
+            'Open D (D A D F# A D)': 'オープンD (D A D F# A D)',
+            '표준 High-G (G4 C4 E4 A4)': '標準 High-G (G4 C4 E4 A4)',
+            'Low-G 튜닝 (G3 C4 E4 A4)': 'Low-G チューニング (G3 C4 E4 A4)',
+            '바리톤 (D3 G3 B3 E4)': 'バリトン (D3 G3 B3 E4)',
+            '표준 (G3 D4 A4 E5)': 'スタンダード (G3 D4 A4 E5)',
+            'Open D (D3 A3 D4 F#4)': 'オープンD (D3 A3 D4 F#4)',
+            '4현 표준 (E1 A1 D2 G2)': '4弦スタンダード (E1 A1 D2 G2)',
+            '4현 Drop D (D1 A1 D2 G2)': '4弦ドロップD (D1 A1 D2 G2)',
+            '5현 표준 (B0 E1 A1 D2 G2)': '5弦スタンダード (B0 E1 A1 D2 G2)'
+          },
+          presetLabel: 'チューニングプリセット (標準・変則)',
+          stringManageLabel: '弦検知および進行管理',
+          autoLockOn: '🔄 自動弦検知',
+          autoLockOff: '🔒 手動弦固定',
+          resetStringsBtn: 'リセット',
+          targetStringHeader: '現在の対象弦',
+          realtimeMeasureHeader: 'リアルタイム測定',
+          stringGridTitle: '弦ごとの目標音程 & チューニング状態',
+          stringGridHint: '正音を維持するとチャイム音と共に緑色に点灯します',
+          stringNum: (n) => `${n}弦`,
+          tunedBadge: '✓ 完了',
+          pluckPrompt: '弦を弾いてください',
+          inTuneMsg: '✓ 正音です！ (IN TUNE)',
+          tooLowMsg: '▲ 音が低いです (ペグを巻いてください)',
+          tooHighMsg: '▼ 音が高いです (ペグを緩めてください)',
+          tempoHeaderLabel: 'テンポ (BPM)',
+          metroTapBtn: '👆 タップテンポ (TAP)',
+          beatAccentLabel: '拍子アクセント (タップで強・中・弱・無音を切替)',
+          accentNames: ['無音', '弱', '中', '強'],
+          timeSigLabel: '拍子記号',
+          timeSigs: {
+            '4/4': '4/4 拍子 (標準)',
+            '3/4': '3/4 拍子 (ワルツ)',
+            '2/4': '2/4 拍子 (行進曲)',
+            '6/8': '6/8 拍子 (複合拍子)',
+            '5/4': '5/4 拍子 (変拍子)',
+            '7/8': '7/8 拍子 (変拍子)',
+            '12/8': '12/8 拍子 (スローロック)',
+            '1/4': '1/4 拍子 (アクセントなし)'
+          },
+          subdivLabel: 'リズム細分化',
+          subdivs: {
+            '1': '四分音符 (基本1拍)',
+            '2': '八分音符 (2等分)',
+            '3': '三連符 (3等分)',
+            '4': '十六分音符 (4等分)',
+            'swing': 'スウィング / シャッフル'
+          },
+          metroSoundLabel: 'メトロノーム音色',
+          metroSounds: {
+            woodblock: 'ウッドブロック (Woodblock)',
+            digital: 'デジタルビープ (Digital)',
+            mechanical: '機械式振り子 (Mechanical)',
+            drum: 'リムショット / ハイハット',
+            marimba: 'マリンバ＆ベル (Marimba)'
+          },
+          metroStart: '▶️ メトロノーム開始',
+          metroStop: '⏹️ メトロノーム停止',
+          tempoMarkings: {
+            grave: 'Grave (極めて遅く荘重に)',
+            largo: 'Largo (遅く幅広く)',
+            larghetto: 'Larghetto (Largoより少し速く)',
+            adagio: 'Adagio (遅く表情豊かに)',
+            andante: 'Andante (歩くような速さで)',
+            moderato: 'Moderato (中くらいの速さで)',
+            allegretto: 'Allegretto (やや速く)',
+            allegro: 'Allegro (速く快活に)',
+            vivace: 'Vivace (速く生き生きと)',
+            presto: 'Presto (極めて速く)',
+            prestissimo: 'Prestissimo (できる限り速く)'
+          },
+          toastA4Changed: (hz) => `基準周波数を A4 = ${hz} Hz に変更しました`,
+          toastCalibrated: (db) => `周囲ノイズ補正完了 (ゲート: ${db} dB)`,
+          toastStringsReset: 'すべての弦の完了表示をリセットしました',
+          toastStringLocked: (num, note) => `${num}弦 (${note}) を対象に選択しました`,
+          toastRefTone: (note, hz) => `基準音 ${note} (${hz} Hz) 再生中`,
+          toastStringDone: (num, note) => `🔔 ${num}弦 (${note}) チューニング完了！`,
+          toastMicDenied: 'マイク権限が拒否されました。設定で許可してください。',
+          toastMicNotFound: 'マイクデバイスが見つかりません。',
+          toastMicBusy: '他のアプリがマイクを使用中です。',
+          toastMicUnsupported: 'このブラウザはマイクAPIに対応していません。',
+          toastMicError: 'マイク接続中にエラーが発生しました。'
+        },
+
+        'zh-CN': {
+          appTitle: '易达音调',
+          appSubtitle: '音阶识别 · 弦乐调音器 · 节拍器',
+          statusIdle: '待机中 (支持离线运行)',
+          statusMic: '麦克风实时收音中',
+          statusSim: '模拟测试信号输入中',
+          micStart: '🎙️ 开启麦克风',
+          micStop: '⏹️ 停止收音',
+          simStart: '🎹 测试信号',
+          simStop: '⏹️ 停止信号',
+          tabDetector: '🎵 音阶识别',
+          tabTuner: '🎸 弦乐调音器',
+          tabMetronome: '⏱️ 节拍器',
+          scaleModeLabel: '音阶显示模式',
+          scaleModeHint: '选择7音阶(CDEFGAB)或含半音(#)的12音阶',
+          modeDiatonic: '自然7音阶 (CDEFGAB)',
+          modeChromatic: '12音阶 (半音阶 #)',
+          targetAnalysisLabel: '主音音高分析结果',
+          clarityHeaderLabel: '音高清晰度:',
+          promptInputSound: '请输入声音',
+          listeningWaiting: '等待声音输入...',
+          inputLevelLabel: '输入音量',
+          calibrateNoiseBtn: '🔇 自动校准环境噪音',
+          calibratingNoiseBtn: '⏳ 正在测量噪音...',
+          noiseFilterTitle: '环境降噪与主音提取滤波器',
+          gateSliderLabel: '噪声门限',
+          claritySliderLabel: '清晰度阈值',
+          smoothingSliderLabel: '音高平滑度',
+          framesUnit: (n) => `${n} 帧`,
+          historyTitle: '最近识别的音阶记录',
+          clearHistoryBtn: '清除记录',
+          historyEmptyText: '识别到的音阶将按顺序显示在此处。',
+          solfege: ['Do', 'Do#', 'Re', 'Re#', 'Mi', 'Fa', 'Fa#', 'Sol', 'Sol#', 'La', 'La#', 'Si'],
+          instruments: {
+            guitar: '🎸 吉他',
+            ukulele: '🏝️ 尤克里里',
+            violin: '🎻 小提琴',
+            bass: '🎸 贝斯'
+          },
+          presets: {
+            '표준 (E A D G B E)': '标准调弦 (E A D G B E)',
+            'Drop D (D A D G B E)': 'Drop D 降D调弦 (D A D G B E)',
+            '반음 다운 (Eb Ab Db Gb Bb Eb)': '降半音调弦 (Eb Ab Db Gb Bb Eb)',
+            '1온음 다운 (D G C F A D)': '降全音调弦 (D G C F A D)',
+            'DADGAD (모달 튜닝)': 'DADGAD (调式调弦)',
+            'Open G (D G D G B D)': '开放G调弦 (D G D G B D)',
+            'Open D (D A D F# A D)': '开放D调弦 (D A D F# A D)',
+            '표준 High-G (G4 C4 E4 A4)': '标准 High-G (G4 C4 E4 A4)',
+            'Low-G 튜닝 (G3 C4 E4 A4)': 'Low-G 低音G调弦 (G3 C4 E4 A4)',
+            '바리톤 (D3 G3 B3 E4)': '上低音尤克里里 (D3 G3 B3 E4)',
+            '표준 (G3 D4 A4 E5)': '标准定弦 (G3 D4 A4 E5)',
+            'Open D (D3 A3 D4 F#4)': '开放D调弦 (D3 A3 D4 F#4)',
+            '4현 표준 (E1 A1 D2 G2)': '4弦标准调弦 (E1 A1 D2 G2)',
+            '4현 Drop D (D1 A1 D2 G2)': '4弦 Drop D (D1 A1 D2 G2)',
+            '5현 표준 (B0 E1 A1 D2 G2)': '5弦标准调弦 (B0 E1 A1 D2 G2)'
+          },
+          presetLabel: '调弦预设 (标准及特殊调弦)',
+          stringManageLabel: '琴弦检测与进度管理',
+          autoLockOn: '🔄 自动识弦',
+          autoLockOff: '🔒 手动锁弦',
+          resetStringsBtn: '重置',
+          targetStringHeader: '当前目标弦',
+          realtimeMeasureHeader: '实时测量',
+          stringGridTitle: '各弦目标音高与调音状态',
+          stringGridHint: '保持音准即可触发提示音并亮起绿灯',
+          stringNum: (n) => `第${n}弦`,
+          tunedBadge: '✓ 已调准',
+          pluckPrompt: '请拨动琴弦',
+          inTuneMsg: '✓ 音准完美！ (IN TUNE)',
+          tooLowMsg: '▲ 音偏低 (请拧紧弦钮)',
+          tooHighMsg: '▼ 音偏高 (请放松弦钮)',
+          tempoHeaderLabel: '速度 (BPM)',
+          metroTapBtn: '👆 点击测速 (TAP)',
+          beatAccentLabel: '节拍重音 (点击切换 强·中·弱·静音)',
+          accentNames: ['静音', '弱', '中', '强'],
+          timeSigLabel: '拍号',
+          timeSigs: {
+            '4/4': '4/4 拍 (标准)',
+            '3/4': '3/4 拍 (华尔兹)',
+            '2/4': '2/4 拍 (进行曲)',
+            '6/8': '6/8 拍 (复拍子)',
+            '5/4': '5/4 拍 (混合拍)',
+            '7/8': '7/8 拍 (混合拍)',
+            '12/8': '12/8 拍 (慢摇滚)',
+            '1/4': '1/4 拍 (无重音)'
+          },
+          subdivLabel: '节奏细分',
+          subdivs: {
+            '1': '四分音符 (基本1拍)',
+            '2': '八分音符 (2等分)',
+            '3': '三连音 (3等分)',
+            '4': '十六分音符 (4等分)',
+            'swing': '摇摆 / 曳步 (Swing)'
+          },
+          metroSoundLabel: '节拍器音色',
+          metroSounds: {
+            woodblock: '木鱼 (Woodblock)',
+            digital: '电子蜂鸣 (Digital)',
+            mechanical: '机械摆锤 (Mechanical)',
+            drum: '鼓边敲击 / 踩镲',
+            marimba: '马林巴与铃声 (Marimba)'
+          },
+          metroStart: '▶️ 启动节拍器',
+          metroStop: '⏹️ 停止节拍器',
+          tempoMarkings: {
+            grave: 'Grave (极缓且庄重)',
+            largo: 'Largo (广板 · 宽广缓慢)',
+            larghetto: 'Larghetto (小广板 · 稍快于Largo)',
+            adagio: 'Adagio (柔板 · 缓慢深情)',
+            andante: 'Andante (行板 · 步行速度)',
+            moderato: 'Moderato (中板 · 速度适中)',
+            allegretto: 'Allegretto (小快板 · 稍快)',
+            allegro: 'Allegro (快板 · 快速轻快)',
+            vivace: 'Vivace (急快板 · 活泼快速)',
+            presto: 'Presto (急板 · 非常快速)',
+            prestissimo: 'Prestissimo (最急板 · 尽可能快)'
+          },
+          toastA4Changed: (hz) => `基准频率已更改为 A4 = ${hz} Hz`,
+          toastCalibrated: (db) => `环境噪音校准完成 (门限: ${db} dB)`,
+          toastStringsReset: '已重置所有琴弦的调音完成状态',
+          toastStringLocked: (num, note) => `已选定第${num}弦 (${note}) 为目标`,
+          toastRefTone: (note, hz) => `正在播放基准音 ${note} (${hz} Hz)`,
+          toastStringDone: (num, note) => `🔔 第${num}弦 (${note}) 调音完成！`,
+          toastMicDenied: '麦克风权限被拒绝，请在设置中允许访问。',
+          toastMicNotFound: '未找到可用的麦克风设备。',
+          toastMicBusy: '麦克风正被其他应用占用。',
+          toastMicUnsupported: '当前环境不支持麦克风 API。',
+          toastMicError: '连接麦克风时发生错误。'
+        },
+
+        'zh-TW': {
+          appTitle: '易達音調',
+          appSubtitle: '音階辨識 · 弦樂調音器 · 節拍器',
+          statusIdle: '待機中 (支援離線運作)',
+          statusMic: '麥克風即時收音中',
+          statusSim: '模擬測試訊號輸入中',
+          micStart: '🎙️ 開啟麥克風',
+          micStop: '⏹️ 停止收音',
+          simStart: '🎹 測試訊號',
+          simStop: '⏹️ 停止訊號',
+          tabDetector: '🎵 音階辨識',
+          tabTuner: '🎸 弦樂調音器',
+          tabMetronome: '⏱️ 節拍器',
+          scaleModeLabel: '音階顯示模式',
+          scaleModeHint: '選擇7音階(CDEFGAB)或含半音(#)的12音階',
+          modeDiatonic: '自然7音階 (CDEFGAB)',
+          modeChromatic: '12音階 (半音階 #)',
+          targetAnalysisLabel: '主音音高分析結果',
+          clarityHeaderLabel: '音高清晰度:',
+          promptInputSound: '請輸入聲音',
+          listeningWaiting: '等待聲音輸入...',
+          inputLevelLabel: '輸入音量',
+          calibrateNoiseBtn: '🔇 自動校正環境噪音',
+          calibratingNoiseBtn: '⏳ 正在測量噪音...',
+          noiseFilterTitle: '環境降噪與主音提取濾波器',
+          gateSliderLabel: '噪音門檻',
+          claritySliderLabel: '清晰度閾值',
+          smoothingSliderLabel: '音高平滑度',
+          framesUnit: (n) => `${n} 幀`,
+          historyTitle: '最近辨識的音階紀錄',
+          clearHistoryBtn: '清除紀錄',
+          historyEmptyText: '辨識到的音階將按順序顯示於此處。',
+          solfege: ['Do', 'Do#', 'Re', 'Re#', 'Mi', 'Fa', 'Fa#', 'Sol', 'Sol#', 'La', 'La#', 'Si'],
+          instruments: {
+            guitar: '🎸 吉他',
+            ukulele: '🏝️ 烏克麗麗',
+            violin: '🎻 小提琴',
+            bass: '🎸 貝斯'
+          },
+          presets: {
+            '표준 (E A D G B E)': '標準調弦 (E A D G B E)',
+            'Drop D (D A D G B E)': 'Drop D 降D調弦 (D A D G B E)',
+            '반음 다운 (Eb Ab Db Gb Bb Eb)': '降半音調弦 (Eb Ab Db Gb Bb Eb)',
+            '1온음 다운 (D G C F A D)': '降全音調弦 (D G C F A D)',
+            'DADGAD (모달 튜닝)': 'DADGAD (調式調弦)',
+            'Open G (D G D G B D)': '開放G調弦 (D G D G B D)',
+            'Open D (D A D F# A D)': '開放D調弦 (D A D F# A D)',
+            '표준 High-G (G4 C4 E4 A4)': '標準 High-G (G4 C4 E4 A4)',
+            'Low-G 튜닝 (G3 C4 E4 A4)': 'Low-G 低音G調弦 (G3 C4 E4 A4)',
+            '바리톤 (D3 G3 B3 E4)': '上低音烏克麗麗 (D3 G3 B3 E4)',
+            '표준 (G3 D4 A4 E5)': '標準定弦 (G3 D4 A4 E5)',
+            'Open D (D3 A3 D4 F#4)': '開放D調弦 (D3 A3 D4 F#4)',
+            '4현 표준 (E1 A1 D2 G2)': '4弦標準調弦 (E1 A1 D2 G2)',
+            '4현 Drop D (D1 A1 D2 G2)': '4弦 Drop D (D1 A1 D2 G2)',
+            '5현 표준 (B0 E1 A1 D2 G2)': '5弦標準調弦 (B0 E1 A1 D2 G2)'
+          },
+          presetLabel: '調弦預設 (標準及特殊調弦)',
+          stringManageLabel: '琴弦偵測與進度管理',
+          autoLockOn: '🔄 自動識弦',
+          autoLockOff: '🔒 手動鎖弦',
+          resetStringsBtn: '重置',
+          targetStringHeader: '目前目標弦',
+          realtimeMeasureHeader: '即時測量',
+          stringGridTitle: '各弦目標音高與調音狀態',
+          stringGridHint: '保持音準即可觸發提示音並亮起綠燈',
+          stringNum: (n) => `第${n}弦`,
+          tunedBadge: '✓ 已調準',
+          pluckPrompt: '請撥動琴弦',
+          inTuneMsg: '✓ 音準完美！ (IN TUNE)',
+          tooLowMsg: '▲ 音偏低 (請轉緊弦鈕)',
+          tooHighMsg: '▼ 音偏高 (請放鬆弦鈕)',
+          tempoHeaderLabel: '速度 (BPM)',
+          metroTapBtn: '👆 點擊測速 (TAP)',
+          beatAccentLabel: '節拍重音 (點擊切換 強·中·弱·靜音)',
+          accentNames: ['靜音', '弱', '中', '強'],
+          timeSigLabel: '拍號',
+          timeSigs: {
+            '4/4': '4/4 拍 (標準)',
+            '3/4': '3/4 拍 (華爾滋)',
+            '2/4': '2/4 拍 (進行曲)',
+            '6/8': '6/8 拍 (複拍子)',
+            '5/4': '5/4 拍 (混合拍)',
+            '7/8': '7/8 拍 (混合拍)',
+            '12/8': '12/8 拍 (慢搖滾)',
+            '1/4': '1/4 拍 (無重音)'
+          },
+          subdivLabel: '節奏細分',
+          subdivs: {
+            '1': '四分音符 (基本1拍)',
+            '2': '八分音符 (2等分)',
+            '3': '三連音 (3等分)',
+            '4': '十六分音符 (4等分)',
+            'swing': '搖擺 / 曳步 (Swing)'
+          },
+          metroSoundLabel: '節拍器音色',
+          metroSounds: {
+            woodblock: '木魚 (Woodblock)',
+            digital: '電子蜂鳴 (Digital)',
+            mechanical: '機械擺錘 (Mechanical)',
+            drum: '鼓邊敲擊 / 踩鈸',
+            marimba: '馬林巴與鈴聲 (Marimba)'
+          },
+          metroStart: '▶️ 啟動節拍器',
+          metroStop: '⏹️ 停止節拍器',
+          tempoMarkings: {
+            grave: 'Grave (極緩且莊重)',
+            largo: 'Largo (廣板 · 寬廣緩慢)',
+            larghetto: 'Larghetto (小廣板 · 稍快於Largo)',
+            adagio: 'Adagio (柔板 · 緩慢深情)',
+            andante: 'Andante (行板 · 步行速度)',
+            moderato: 'Moderato (中板 · 速度適中)',
+            allegretto: 'Allegretto (小快板 · 稍快)',
+            allegro: 'Allegro (快板 · 快速輕快)',
+            vivace: 'Vivace (急快板 · 活潑快速)',
+            presto: 'Presto (急板 · 非常快速)',
+            prestissimo: 'Prestissimo (最急板 · 盡可能快)'
+          },
+          toastA4Changed: (hz) => `基準頻率已變更為 A4 = ${hz} Hz`,
+          toastCalibrated: (db) => `環境噪音校正完成 (門檻: ${db} dB)`,
+          toastStringsReset: '已重置所有琴弦的調音完成狀態',
+          toastStringLocked: (num, note) => `已選定第${num}弦 (${note}) 為目標`,
+          toastRefTone: (note, hz) => `正在播放基準音 ${note} (${hz} Hz)`,
+          toastStringDone: (num, note) => `🔔 第${num}弦 (${note}) 調音完成！`,
+          toastMicDenied: '麥克風權限被拒絕，請在設定中允許存取。',
+          toastMicNotFound: '找不到可用的麥克風裝置。',
+          toastMicBusy: '麥克風正被其他應用程式佔用。',
+          toastMicUnsupported: '目前環境不支援麥克風 API。',
+          toastMicError: '連接麥克風時發生錯誤。'
+        }
+      };
+
+      /* ======================================================================
+         2. 음계 및 현악기 튜닝 상수 테이블
+         ====================================================================== */
+      const NOTE_NAMES_CHROMATIC = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+      const DIATONIC_NOTES = [
+        { name: 'C', semitone: 0 },
+        { name: 'D', semitone: 2 },
+        { name: 'E', semitone: 4 },
+        { name: 'F', semitone: 5 },
+        { name: 'G', semitone: 7 },
+        { name: 'A', semitone: 9 },
+        { name: 'B', semitone: 11 }
+      ];
+
+      const INSTRUMENT_PRESETS = {
+        guitar: {
+          '표준 (E A D G B E)': ['E2', 'A2', 'D3', 'G3', 'B3', 'E4'],
+          'Drop D (D A D G B E)': ['D2', 'A2', 'D3', 'G3', 'B3', 'E4'],
+          '반음 다운 (Eb Ab Db Gb Bb Eb)': ['D#2', 'G#2', 'C#3', 'F#3', 'A#3', 'D#4'],
+          '1온음 다운 (D G C F A D)': ['D2', 'G2', 'C3', 'F3', 'A3', 'D4'],
+          'DADGAD (모달 튜닝)': ['D2', 'A2', 'D3', 'G3', 'A3', 'D4'],
+          'Open G (D G D G B D)': ['D2', 'G2', 'D3', 'G3', 'B3', 'D4'],
+          'Open D (D A D F# A D)': ['D2', 'A2', 'D3', 'F#3', 'A3', 'D4']
+        },
+        ukulele: {
+          '표준 High-G (G4 C4 E4 A4)': ['G4', 'C4', 'E4', 'A4'],
+          'Low-G 튜닝 (G3 C4 E4 A4)': ['G3', 'C4', 'E4', 'A4'],
+          '바리톤 (D3 G3 B3 E4)': ['D3', 'G3', 'B3', 'E4']
+        },
+        violin: {
+          '표준 (G3 D4 A4 E5)': ['G3', 'D4', 'A4', 'E5'],
+          'Open D (D3 A3 D4 F#4)': ['D3', 'A3', 'D4', 'F#4']
+        },
+        bass: {
+          '4현 표준 (E1 A1 D2 G2)': ['E1', 'A1', 'D2', 'G2'],
+          '4현 Drop D (D1 A1 D2 G2)': ['D1', 'A1', 'D2', 'G2'],
+          '5현 표준 (B0 E1 A1 D2 G2)': ['B0', 'E1', 'A1', 'D2', 'G2']
+        }
+      };
+
+      /* ======================================================================
+         3. 전역 상태(State) 및 DOM 요소 참조
+         ====================================================================== */
+      const state = {
+        lang: 'ko',
+        activeTab: 'detector',
+        a4Freq: 440,
+        scaleMode: 'diatonic',
+        noiseGateDb: -42,
+        clarityThreshold: 0.86,
+        smoothingFrames: 3,
+
+        // 오디오 수음 / 시뮬레이션 상태
+        isMicRunning: false,
+        isMicStarting: false,
+        micAbortRequested: false,
+        isSimRunning: false,
+        audioCtx: null,
+        mediaStream: null,
+        sourceNode: null,
+        highPassNode: null,
+        lowPassNode: null,
+        analyserNode: null,
+        timeDomainBuffer: null,
+        rafId: null,
+
+        // 가상 테스트 신호 상태
+        simOscNodes: [],
+        simGainNode: null,
+        simTimerId: null,
+        simStepIdx: 0,
+
+        // 소음 자동 보정 및 음정 안정화 상태
+        isCalibrating: false,
+        calibrationSamples: [],
+        lastDiatonicMidi: null,
+        candidateNoteKey: '',
+        candidateCount: 0,
+        lastConfirmedNoteKey: '',
+        noteHistory: [],
+
+        // 조율기 상태
+        instrument: 'guitar',
+        presetKey: '표준 (E A D G B E)',
+        currentStrings: ['E2', 'A2', 'D3', 'G3', 'B3', 'E4'],
+        tunedStrings: [false, false, false, false, false, false],
+        autoStringLock: true,
+        lockedStringIndex: 0,
+        inTuneStartTime: 0,
+        lastTunerVerdictKey: 'pluck',
+        refAudioCtx: null,
+        activeRefOscs: [],
+
+        // 메트로놈 상태
+        bpm: 120,
+        timeSig: '4/4',
+        subdiv: '1',
+        soundType: 'woodblock',
+        beatAccents: [3, 1, 2, 1],
+        isMetroRunning: false,
+        metroAudioCtx: null,
+        metroTimerId: null,
+        nextNoteTime: 0,
+        currentBeatStep: 0,
+        currentSubStep: 0,
+        tapTimes: [],
+
+        toastTimerId: null
+      };
+
+      const el = {
+        appTitle: document.getElementById('appTitle'),
+        appSubtitle: document.getElementById('appSubtitle'),
+        langSelect: document.getElementById('langSelect'),
+        a4Select: document.getElementById('a4Select'),
+        statusBadge: document.getElementById('statusBadge'),
+        statusDot: document.getElementById('statusDot'),
+        statusText: document.getElementById('statusText'),
+        micToggleBtn: document.getElementById('micToggleBtn'),
+        simToggleBtn: document.getElementById('simToggleBtn'),
+
+        tabDetector: document.getElementById('tabDetector'),
+        tabTuner: document.getElementById('tabTuner'),
+        tabMetronome: document.getElementById('tabMetronome'),
+        panelDetector: document.getElementById('panelDetector'),
+        panelTuner: document.getElementById('panelTuner'),
+        panelMetronome: document.getElementById('panelMetronome'),
+
+        scaleModeLabel: document.getElementById('scaleModeLabel'),
+        scaleModeHint: document.getElementById('scaleModeHint'),
+        scaleModeSelect: document.getElementById('scaleModeSelect'),
+        targetAnalysisLabel: document.getElementById('targetAnalysisLabel'),
+        clarityHeaderLabel: document.getElementById('clarityHeaderLabel'),
+        clarityPercentText: document.getElementById('clarityPercentText'),
+        detectedNoteLetter: document.getElementById('detectedNoteLetter'),
+        detectedNoteOctave: document.getElementById('detectedNoteOctave'),
+        detectedSolfegeText: document.getElementById('detectedSolfegeText'),
+        detectedFreqText: document.getElementById('detectedFreqText'),
+        detectedCentsText: document.getElementById('detectedCentsText'),
+        detectorNeedle: document.getElementById('detectorNeedle'),
+        inputLevelLabel: document.getElementById('inputLevelLabel'),
+        rmsDbText: document.getElementById('rmsDbText'),
+        calibrateNoiseBtn: document.getElementById('calibrateNoiseBtn'),
+        volumeBar: document.getElementById('volumeBar'),
+        gateMarker: document.getElementById('gateMarker'),
+        noiseFilterTitle: document.getElementById('noiseFilterTitle'),
+        gateSliderLabel: document.getElementById('gateSliderLabel'),
+        gateValueText: document.getElementById('gateValueText'),
+        gateSlider: document.getElementById('gateSlider'),
+        claritySliderLabel: document.getElementById('claritySliderLabel'),
+        clarityThresholdText: document.getElementById('clarityThresholdText'),
+        claritySlider: document.getElementById('claritySlider'),
+        smoothingSliderLabel: document.getElementById('smoothingSliderLabel'),
+        smoothingValueText: document.getElementById('smoothingValueText'),
+        smoothingSlider: document.getElementById('smoothingSlider'),
+        historyTitle: document.getElementById('historyTitle'),
+        clearHistoryBtn: document.getElementById('clearHistoryBtn'),
+        historyContainer: document.getElementById('historyContainer'),
+        historyEmptyText: document.getElementById('historyEmptyText'),
+
+        instrumentBtnGroup: document.getElementById('instrumentBtnGroup'),
+        presetLabel: document.getElementById('presetLabel'),
+        tunerPresetSelect: document.getElementById('tunerPresetSelect'),
+        stringManageLabel: document.getElementById('stringManageLabel'),
+        autoStringLockBtn: document.getElementById('autoStringLockBtn'),
+        resetTunedStringsBtn: document.getElementById('resetTunedStringsBtn'),
+        tunerGaugeCard: document.getElementById('tunerGaugeCard'),
+        targetStringHeader: document.getElementById('targetStringHeader'),
+        tunerTargetStringLabel: document.getElementById('tunerTargetStringLabel'),
+        tunerTargetNoteDisplay: document.getElementById('tunerTargetNoteDisplay'),
+        tunerTargetFreqText: document.getElementById('tunerTargetFreqText'),
+        realtimeMeasureHeader: document.getElementById('realtimeMeasureHeader'),
+        tunerMeasuredText: document.getElementById('tunerMeasuredText'),
+        tunerCentsReadout: document.getElementById('tunerCentsReadout'),
+        tunerNeedle: document.getElementById('tunerNeedle'),
+        tunerStatusVerdict: document.getElementById('tunerStatusVerdict'),
+        stringGridTitle: document.getElementById('stringGridTitle'),
+        stringGridHint: document.getElementById('stringGridHint'),
+        tunerStringsGrid: document.getElementById('tunerStringsGrid'),
+
+        tempoHeaderLabel: document.getElementById('tempoHeaderLabel'),
+        metroTempoName: document.getElementById('metroTempoName'),
+        metroTapBtn: document.getElementById('metroTapBtn'),
+        metroBpmInput: document.getElementById('metroBpmInput'),
+        metroBpmSlider: document.getElementById('metroBpmSlider'),
+        beatAccentLabel: document.getElementById('beatAccentLabel'),
+        metroBeatLeds: document.getElementById('metroBeatLeds'),
+        timeSigLabel: document.getElementById('timeSigLabel'),
+        metroTimeSigSelect: document.getElementById('metroTimeSigSelect'),
+        subdivLabel: document.getElementById('subdivLabel'),
+        metroSubdivSelect: document.getElementById('metroSubdivSelect'),
+        metroSoundLabel: document.getElementById('metroSoundLabel'),
+        metroSoundSelect: document.getElementById('metroSoundSelect'),
+        metroToggleBtn: document.getElementById('metroToggleBtn'),
+
+        toastBanner: document.getElementById('toastBanner')
+      };
+
+      /* ======================================================================
+         4. 다국어 헬퍼 및 토스트 알림
+         ====================================================================== */
+      function getDict() {
+        return I18N[state.lang] || I18N.ko;
+      }
+
+      function showToast(msg) {
+        if (!el.toastBanner) return;
+        el.toastBanner.textContent = msg;
+        el.toastBanner.classList.remove('hidden');
+        if (state.toastTimerId) clearTimeout(state.toastTimerId);
+        state.toastTimerId = setTimeout(() => {
+          el.toastBanner.classList.add('hidden');
+        }, 2800);
+      }
+
+      function updateStatusUI() {
+        const d = getDict();
+        if (state.isMicRunning) {
+          el.statusDot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse-dot';
+          el.statusText.textContent = d.statusMic;
+          el.statusText.className = 'text-xs font-bold text-emerald-300';
+          el.micToggleBtn.textContent = d.micStop;
+          el.micToggleBtn.className = 'min-h-[44px] px-3.5 py-2 rounded-xl bg-rose-600 text-white text-xs sm:text-sm font-extrabold shadow-lg transition-all';
+        } else {
+          el.micToggleBtn.textContent = d.micStart;
+          el.micToggleBtn.className = 'min-h-[44px] px-3.5 py-2 rounded-xl bg-emerald-600 text-white text-xs sm:text-sm font-extrabold shadow-lg transition-all';
+          if (state.isSimRunning) {
+            el.statusDot.className = 'w-2.5 h-2.5 rounded-full bg-sky-400 animate-pulse-dot';
+            el.statusText.textContent = d.statusSim;
+            el.statusText.className = 'text-xs font-bold text-sky-300';
+          } else {
+            el.statusDot.className = 'w-2.5 h-2.5 rounded-full bg-slate-500';
+            el.statusText.textContent = d.statusIdle;
+            el.statusText.className = 'text-xs font-bold text-slate-300';
+          }
+        }
+
+        if (state.isSimRunning) {
+          el.simToggleBtn.textContent = d.simStop;
+          el.simToggleBtn.className = 'min-h-[44px] px-3 py-2 rounded-xl bg-sky-500/20 border border-sky-500/40 text-sky-300 text-xs sm:text-sm font-extrabold transition-all';
+        } else {
+          el.simToggleBtn.textContent = d.simStart;
+          el.simToggleBtn.className = 'min-h-[44px] px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-xs sm:text-sm font-bold transition-all';
+        }
+      }
+
+      function applyLanguage(langCode) {
+        if (!I18N[langCode]) langCode = 'ko';
+        state.lang = langCode;
+        try {
+          localStorage.setItem('easy_dynatone_lang', langCode);
+        } catch (e) { /* 저장소 제한 환경 무시 */ }
+
+        const d = getDict();
+        document.documentElement.lang = langCode;
+        document.title = `${d.appTitle} — ${d.appSubtitle}`;
+
+        el.appTitle.textContent = d.appTitle;
+        el.appSubtitle.textContent = d.appSubtitle;
+        el.tabDetector.textContent = d.tabDetector;
+        el.tabTuner.textContent = d.tabTuner;
+        el.tabMetronome.textContent = d.tabMetronome;
+
+        // 음계 인식 UI
+        el.scaleModeLabel.textContent = d.scaleModeLabel;
+        el.scaleModeHint.textContent = d.scaleModeHint;
+        el.scaleModeSelect.options[0].textContent = d.modeDiatonic;
+        el.scaleModeSelect.options[1].textContent = d.modeChromatic;
+        el.targetAnalysisLabel.textContent = d.targetAnalysisLabel;
+        el.clarityHeaderLabel.textContent = d.clarityHeaderLabel;
+        el.inputLevelLabel.textContent = d.inputLevelLabel;
+        el.calibrateNoiseBtn.textContent = state.isCalibrating ? d.calibratingNoiseBtn : d.calibrateNoiseBtn;
+        el.noiseFilterTitle.textContent = d.noiseFilterTitle;
+        el.gateSliderLabel.textContent = d.gateSliderLabel;
+        el.claritySliderLabel.textContent = d.claritySliderLabel;
+        el.smoothingSliderLabel.textContent = d.smoothingSliderLabel;
+        el.smoothingValueText.textContent = d.framesUnit(state.smoothingFrames);
+        el.historyTitle.textContent = d.historyTitle;
+        el.clearHistoryBtn.textContent = d.clearHistoryBtn;
+        if (el.historyEmptyText) {
+          el.historyEmptyText.textContent = d.historyEmptyText;
+        }
+
+        // 대기/인식 중 계이름 배지 동기화
+        if (el.detectedNoteLetter.textContent === '--') {
+          el.detectedSolfegeText.textContent = (state.isMicRunning || state.isSimRunning)
+            ? d.listeningWaiting
+            : d.promptInputSound;
+        } else {
+          const noteLetter = el.detectedNoteLetter.textContent;
+          const oct = el.detectedNoteOctave.textContent;
+          const semitoneIdx = NOTE_NAMES_CHROMATIC.indexOf(noteLetter);
+          if (semitoneIdx >= 0) {
+            el.detectedSolfegeText.textContent = `${d.solfege[semitoneIdx]} (${noteLetter}${oct})`;
+          }
+        }
+
+        // 조율기 UI
+        const instBtns = el.instrumentBtnGroup.querySelectorAll('.inst-select-btn');
+        instBtns.forEach((btn) => {
+          const key = btn.getAttribute('data-inst');
+          if (d.instruments[key]) btn.textContent = d.instruments[key];
+        });
+        el.presetLabel.textContent = d.presetLabel;
+        el.stringManageLabel.textContent = d.stringManageLabel;
+        el.autoStringLockBtn.textContent = state.autoStringLock ? d.autoLockOn : d.autoLockOff;
+        el.resetTunedStringsBtn.textContent = d.resetStringsBtn;
+        el.targetStringHeader.textContent = d.targetStringHeader;
+        el.realtimeMeasureHeader.textContent = d.realtimeMeasureHeader;
+        el.stringGridTitle.textContent = d.stringGridTitle;
+        el.stringGridHint.textContent = d.stringGridHint;
+
+        renderTunerPresets(true);
+        updateTargetHeaderUI();
+        renderTunerStrings();
+
+        if (state.lastTunerVerdictKey === 'inTune') {
+          el.tunerStatusVerdict.textContent = d.inTuneMsg;
+        } else if (state.lastTunerVerdictKey === 'low') {
+          el.tunerStatusVerdict.textContent = d.tooLowMsg;
+        } else if (state.lastTunerVerdictKey === 'high') {
+          el.tunerStatusVerdict.textContent = d.tooHighMsg;
+        } else {
+          el.tunerStatusVerdict.textContent = d.pluckPrompt;
+        }
+
+        // 메트로놈 UI
+        el.tempoHeaderLabel.textContent = d.tempoHeaderLabel;
+        el.metroTapBtn.textContent = d.metroTapBtn;
+        el.beatAccentLabel.textContent = d.beatAccentLabel;
+        el.timeSigLabel.textContent = d.timeSigLabel;
+        Array.from(el.metroTimeSigSelect.options).forEach((opt) => {
+          if (d.timeSigs[opt.value]) opt.textContent = d.timeSigs[opt.value];
+        });
+        el.subdivLabel.textContent = d.subdivLabel;
+        Array.from(el.metroSubdivSelect.options).forEach((opt) => {
+          if (d.subdivs[opt.value]) opt.textContent = d.subdivs[opt.value];
+        });
+        el.metroSoundLabel.textContent = d.metroSoundLabel;
+        Array.from(el.metroSoundSelect.options).forEach((opt) => {
+          if (d.metroSounds[opt.value]) opt.textContent = d.metroSounds[opt.value];
+        });
+        el.metroToggleBtn.textContent = state.isMetroRunning ? d.metroStop : d.metroStart;
+
+        updateTempoMarkingUI();
+        renderMetroBeatLeds();
+        updateStatusUI();
+      }
+
+      /* ======================================================================
+         5. 주파수 ↔ 음계 변환 및 YIN 피치 검출 엔진
+         ====================================================================== */
+      function noteToFreq(noteStr) {
+        const match = /^([A-G]#?)(-?\d+)$/.exec(noteStr.trim());
+        if (!match) return 440;
+        const semitone = NOTE_NAMES_CHROMATIC.indexOf(match[1]);
+        const octave = parseInt(match[2], 10);
+        const midi = (octave + 1) * 12 + semitone;
+        return state.a4Freq * Math.pow(2, (midi - 69) / 12);
+      }
+
+      function freqToNoteInfo(freq) {
+        const d = getDict();
+        const exactMidi = 69 + 12 * Math.log2(freq / state.a4Freq);
+
+        if (state.scaleMode === 'chromatic') {
+          const midi = Math.round(exactMidi);
+          const cents = Math.round((exactMidi - midi) * 100);
+          const semitoneIdx = ((midi % 12) + 12) % 12;
+          const octave = Math.floor(midi / 12) - 1;
+          const letter = NOTE_NAMES_CHROMATIC[semitoneIdx];
+          return {
+            midi,
+            letter,
+            octave,
+            solfege: d.solfege[semitoneIdx],
+            cents,
+            key: `${letter}${octave}`
+          };
+        }
+
+        // 다이나톤 7음계(CDEFGAB) 모드: 반음 경계 떨림 방지를 위한 히스테리시스 적용
+        let bestMidi = Math.round(exactMidi);
+        let bestDist = Infinity;
+
+        const baseOctave = Math.floor(exactMidi / 12) - 1;
+        for (let oct = baseOctave - 1; oct <= baseOctave + 1; oct++) {
+          for (const dn of DIATONIC_NOTES) {
+            const candidateMidi = (oct + 1) * 12 + dn.semitone;
+            let dist = Math.abs(exactMidi - candidateMidi);
+            if (state.lastDiatonicMidi === candidateMidi && dist <= 0.58) {
+              dist -= 0.12;
+            }
+            if (dist < bestDist) {
+              bestDist = dist;
+              bestMidi = candidateMidi;
+            }
+          }
+        }
+
+        state.lastDiatonicMidi = bestMidi;
+        const cents = Math.max(-50, Math.min(50, Math.round((exactMidi - bestMidi) * 100)));
+        const semitoneIdx = ((bestMidi % 12) + 12) % 12;
+        const octave = Math.floor(bestMidi / 12) - 1;
+        const letter = NOTE_NAMES_CHROMATIC[semitoneIdx];
+
+        return {
+          midi: bestMidi,
+          letter,
+          octave,
+          solfege: d.solfege[semitoneIdx],
+          cents,
+          key: `${letter}${octave}`
+        };
+      }
+
+      function detectPitchYIN(buffer, sampleRate) {
+        const n = buffer.length;
+        let sumSq = 0;
+        for (let i = 0; i < n; i++) {
+          sumSq += buffer[i] * buffer[i];
+        }
+        const rms = Math.sqrt(sumSq / n);
+        const db = 20 * Math.log10(rms + 1e-12);
+
+        if (db < state.noiseGateDb) {
+          return { freq: -1, clarity: 0, db };
+        }
+
+        // 탐색 주파수 범위: 28 Hz (5현 베이스 B0 ~30.87Hz) ~ 2600 Hz
+        const minFreq = 28;
+        const maxFreq = 2600;
+        const minPeriod = Math.max(2, Math.floor(sampleRate / maxFreq));
+        const maxPeriod = Math.min(Math.floor(n / 2) - 1, Math.ceil(sampleRate / minFreq));
+
+        if (maxPeriod <= minPeriod) {
+          return { freq: -1, clarity: 0, db };
+        }
+
+        const yinBuffer = new Float32Array(maxPeriod + 1);
+        yinBuffer[0] = 1;
+        let runningSum = 0;
+
+        for (let tau = 1; tau <= maxPeriod; tau++) {
+          let diffSum = 0;
+          const limit = n - maxPeriod;
+          for (let i = 0; i < limit; i++) {
+            const delta = buffer[i] - buffer[i + tau];
+            diffSum += delta * delta;
+          }
+          runningSum += diffSum;
+          yinBuffer[tau] = runningSum > 0 ? (diffSum * tau) / runningSum : 1;
+        }
+
+        const threshold = 1 - state.clarityThreshold;
+        let tauEstimate = -1;
+
+        for (let tau = minPeriod; tau <= maxPeriod; tau++) {
+          if (yinBuffer[tau] < threshold) {
+            while (tau + 1 <= maxPeriod && yinBuffer[tau + 1] < yinBuffer[tau]) {
+              tau++;
+            }
+            tauEstimate = tau;
+            break;
+          }
+        }
+
+        if (tauEstimate === -1) {
+          let minVal = 1;
+          let minIdx = -1;
+          for (let tau = minPeriod; tau <= maxPeriod; tau++) {
+            if (yinBuffer[tau] < minVal) {
+              minVal = yinBuffer[tau];
+              minIdx = tau;
+            }
+          }
+          if (minIdx !== -1 && (1 - minVal) >= state.clarityThreshold * 0.94) {
+            tauEstimate = minIdx;
+          } else {
+            return { freq: -1, clarity: Math.max(0, 1 - minVal), db };
+          }
+        }
+
+        // 저음현 배음(2배음/3배음) 오인식 방지를 위한 역추적 검증
+        const baseVal = yinBuffer[tauEstimate];
+        const pureMargin = baseVal < 0.035 ? -0.015 : 0.03;
+
+        // 2배음 역추적 (한 옥타브 아래 기본음 확인)
+        const subCenter = tauEstimate * 2;
+        if (subCenter <= maxPeriod) {
+          let bestSub = -1;
+          let bestSubVal = 1;
+          const searchStart = Math.max(minPeriod, subCenter - 3);
+          const searchEnd = Math.min(maxPeriod, subCenter + 3);
+          for (let t = searchStart; t <= searchEnd; t++) {
+            if (yinBuffer[t] < bestSubVal) {
+              bestSubVal = yinBuffer[t];
+              bestSub = t;
+            }
+          }
+          if (bestSub !== -1 && bestSubVal <= baseVal + pureMargin) {
+            tauEstimate = bestSub;
+          }
+        }
+
+        // 3배음 역추적 (기타/베이스 브릿지 근처 3배음 오인식 방지)
+        const thirdCenter = tauEstimate * 3;
+        if (thirdCenter <= maxPeriod) {
+          let bestThird = -1;
+          let bestThirdVal = 1;
+          const searchStart3 = Math.max(minPeriod, thirdCenter - 4);
+          const searchEnd3 = Math.min(maxPeriod, thirdCenter + 4);
+          for (let t = searchStart3; t <= searchEnd3; t++) {
+            if (yinBuffer[t] < bestThirdVal) {
+              bestThirdVal = yinBuffer[t];
+              bestThird = t;
+            }
+          }
+          if (bestThird !== -1 && bestThirdVal <= yinBuffer[tauEstimate] + pureMargin) {
+            tauEstimate = bestThird;
+          }
+        }
+
+        // 포물선 보간법(Parabolic Interpolation)으로 서브샘플 정밀 주파수 계산
+        let betterTau = tauEstimate;
+        if (tauEstimate > 0 && tauEstimate < maxPeriod) {
+          const s0 = yinBuffer[tauEstimate - 1];
+          const s1 = yinBuffer[tauEstimate];
+          const s2 = yinBuffer[tauEstimate + 1];
+          const denom = 2 * (2 * s1 - s2 - s0);
+          if (Math.abs(denom) > 1e-9) {
+            betterTau = tauEstimate + (s2 - s0) / denom;
+          }
+        }
+
+        const clarity = Math.max(0, Math.min(1, 1 - yinBuffer[tauEstimate]));
+        const freq = sampleRate / betterTau;
+        return { freq, clarity, db };
+      }
+
+      /* ======================================================================
+         6. Web Audio 마이크 수음 및 가상 테스트 신호 제어
+         ====================================================================== */
+      function setupAudioFilters(ctx) {
+        const sr = ctx.sampleRate || 48000;
+        let targetFft = sr >= 88200 ? 8192 : 4096;
+        // 비표준 샘플레이트(64kHz, 128kHz 등)에서도 2의 거듭제곱 보장
+        targetFft = Math.pow(2, Math.round(Math.log2(targetFft)));
+        targetFft = Math.max(2048, Math.min(16384, targetFft));
+
+        const highPass = ctx.createBiquadFilter();
+        highPass.type = 'highpass';
+        highPass.frequency.value = state.activeTab === 'tuner' ? 26 : 60;
+        highPass.Q.value = 0.707;
+
+        const lowPass = ctx.createBiquadFilter();
+        lowPass.type = 'lowpass';
+        lowPass.frequency.value = 3400;
+        lowPass.Q.value = 0.707;
+
+        const analyser = ctx.createAnalyser();
+        analyser.fftSize = targetFft;
+        analyser.smoothingTimeConstant = 0;
+
+        highPass.connect(lowPass);
+        lowPass.connect(analyser);
+
+        state.highPassNode = highPass;
+        state.lowPassNode = lowPass;
+        state.analyserNode = analyser;
+        state.timeDomainBuffer = new Float32Array(analyser.fftSize);
+      }
+
+      async function startMicrophone() {
+        const d = getDict();
+        if (state.isMicRunning || state.isMicStarting) return;
+
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          showToast(d.toastMicUnsupported);
+          return;
+        }
+
+        if (state.isSimRunning) {
+          stopSimulation();
+        }
+
+        state.isMicStarting = true;
+        state.micAbortRequested = false;
+
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+              echoCancellation: false,
+              noiseSuppression: false,
+              autoGainControl: false
+            }
+          });
+
+          if (state.micAbortRequested) {
+            stream.getTracks().forEach((t) => t.stop());
+            state.isMicStarting = false;
+            return;
+          }
+
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          const ctx = new AudioCtx();
+          if (ctx.state === 'suspended') {
+            await ctx.resume();
+          }
+
+          setupAudioFilters(ctx);
+          const source = ctx.createMediaStreamSource(stream);
+          source.connect(state.highPassNode);
+
+          state.audioCtx = ctx;
+          state.mediaStream = stream;
+          state.sourceNode = source;
+          state.isMicRunning = true;
+          state.isMicStarting = false;
+
+          if (el.detectedNoteLetter.textContent === '--') {
+            el.detectedSolfegeText.textContent = d.listeningWaiting;
+          }
+
+          updateStatusUI();
+          if (!state.rafId) {
+            state.rafId = requestAnimationFrame(processAudioFrame);
+          }
+        } catch (err) {
+          state.isMicStarting = false;
+          state.isMicRunning = false;
+          updateStatusUI();
+
+          const errName = err && err.name ? err.name : '';
+          if (errName === 'NotAllowedError' || errName === 'PermissionDeniedError') {
+            showToast(d.toastMicDenied);
+          } else if (errName === 'NotFoundError' || errName === 'DevicesNotFoundError') {
+            showToast(d.toastMicNotFound);
+          } else if (errName === 'NotReadableError' || errName === 'TrackStartError') {
+            showToast(d.toastMicBusy);
+          } else {
+            showToast(d.toastMicError);
+          }
+        }
+      }
+
+      function stopMicrophone() {
+        state.micAbortRequested = true;
+        state.isMicRunning = false;
+        state.isCalibrating = false;
+        el.calibrateNoiseBtn.textContent = getDict().calibrateNoiseBtn;
+
+        if (state.rafId) {
+          cancelAnimationFrame(state.rafId);
+          state.rafId = null;
+        }
+        if (state.sourceNode) {
+          try { state.sourceNode.disconnect(); } catch (e) {}
+          state.sourceNode = null;
+        }
+        if (state.mediaStream) {
+          state.mediaStream.getTracks().forEach((track) => track.stop());
+          state.mediaStream = null;
+        }
+        if (state.audioCtx) {
+          try { state.audioCtx.close(); } catch (e) {}
+          state.audioCtx = null;
+        }
+
+        resetDetectorDisplay();
+        resetTunerGaugeDisplay();
+        updateStatusUI();
+      }
+
+      function startSimulation() {
+        const d = getDict();
+        if (state.isSimRunning) return;
+        if (state.isMicRunning || state.isMicStarting) {
+          stopMicrophone();
+        }
+
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        const ctx = new AudioCtx();
+        if (ctx.state === 'suspended') {
+          ctx.resume();
+        }
+
+        setupAudioFilters(ctx);
+
+        const gain = ctx.createGain();
+        gain.gain.value = 0.16;
+
+        const osc1 = ctx.createOscillator();
+        const osc2 = ctx.createOscillator();
+        const subGain = ctx.createGain();
+        subGain.gain.value = 0.25;
+
+        osc1.type = 'sine';
+        osc2.type = 'triangle';
+
+        osc1.connect(gain);
+        osc2.connect(subGain);
+        subGain.connect(gain);
+
+        gain.connect(state.highPassNode);
+        gain.connect(ctx.destination);
+
+        state.audioCtx = ctx;
+        state.simOscNodes = [osc1, osc2];
+        state.simGainNode = gain;
+        state.isSimRunning = true;
+        state.simStepIdx = 0;
+
+        const applySimNote = () => {
+          if (!state.isSimRunning || !state.audioCtx) return;
+          const notesPool = state.activeTab === 'tuner'
+            ? state.currentStrings
+            : ['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5'];
+          const note = notesPool[state.simStepIdx % notesPool.length];
+          const freq = noteToFreq(note);
+          const now = state.audioCtx.currentTime;
+          osc1.frequency.setValueAtTime(freq, now);
+          osc2.frequency.setValueAtTime(freq * 2, now);
+          state.simStepIdx++;
+        };
+
+        applySimNote();
+        osc1.start();
+        osc2.start();
+
+        state.simTimerId = setInterval(applySimNote, 1350);
+        updateStatusUI();
+
+        if (!state.rafId) {
+          state.rafId = requestAnimationFrame(processAudioFrame);
+        }
+      }
+
+      function stopSimulation() {
+        state.isSimRunning = false;
+        if (state.simTimerId) {
+          clearInterval(state.simTimerId);
+          state.simTimerId = null;
+        }
+        if (state.rafId) {
+          cancelAnimationFrame(state.rafId);
+          state.rafId = null;
+        }
+        state.simOscNodes.forEach((osc) => {
+          try { osc.stop(); osc.disconnect(); } catch (e) {}
+        });
+        state.simOscNodes = [];
+        if (state.simGainNode) {
+          try { state.simGainNode.disconnect(); } catch (e) {}
+          state.simGainNode = null;
+        }
+        if (state.audioCtx) {
+          try { state.audioCtx.close(); } catch (e) {}
+          state.audioCtx = null;
+        }
+
+        resetDetectorDisplay();
+        resetTunerGaugeDisplay();
+        updateStatusUI();
+      }
+
+      function processAudioFrame() {
+        if ((!state.isMicRunning && !state.isSimRunning) || !state.analyserNode || !state.audioCtx) {
+          state.rafId = null;
+          return;
+        }
+
+        state.analyserNode.getFloatTimeDomainData(state.timeDomainBuffer);
+        const { freq, clarity, db } = detectPitchYIN(state.timeDomainBuffer, state.audioCtx.sampleRate);
+
+        // 음량 게이지 갱신 (-65 dB ~ 0 dB 정규화)
+        const clampedDb = Math.max(-65, Math.min(0, db));
+        const volPct = Math.round(((clampedDb + 65) / 65) * 100);
+        el.rmsDbText.textContent = `${clampedDb.toFixed(1)} dB`;
+        el.volumeBar.style.width = `${volPct}%`;
+        el.volumeBar.className = db >= state.noiseGateDb
+          ? 'h-full bg-emerald-500 rounded-full transition-all'
+          : 'h-full bg-slate-600 rounded-full transition-all';
+
+        if (state.isCalibrating && isFinite(db)) {
+          state.calibrationSamples.push(db);
+        }
+
+        el.clarityPercentText.textContent = `${Math.round(clarity * 100)}%`;
+
+        if (freq > 0 && clarity >= state.clarityThreshold) {
+          if (state.activeTab === 'tuner') {
+            updateTunerWithPitch(freq);
+          } else {
+            updateDetectorWithPitch(freq);
+          }
+        } else {
+          handleSilentFrame();
+        }
+
+        state.rafId = requestAnimationFrame(processAudioFrame);
+      }
+
+      /* ======================================================================
+         7. [TAB 1] 음계 인식 화면 갱신 및 히스토리
+         ====================================================================== */
+      function resetDetectorDisplay() {
+        const d = getDict();
+        state.candidateCount = 0;
+        state.lastDiatonicMidi = null;
+        el.detectedNoteLetter.textContent = '--';
+        el.detectedNoteLetter.className = 'text-6xl sm:text-7xl font-extrabold text-slate-500 tracking-tight transition-all';
+        el.detectedNoteOctave.textContent = '';
+        el.detectedNoteOctave.className = 'text-2xl sm:text-3xl font-extrabold text-slate-500 tabular-nums';
+        el.detectedSolfegeText.textContent = (state.isMicRunning || state.isSimRunning)
+          ? d.listeningWaiting
+          : d.promptInputSound;
+        el.detectedFreqText.textContent = '0.00 Hz';
+        el.detectedCentsText.textContent = '0 cents';
+        el.clarityPercentText.textContent = '0%';
+        el.rmsDbText.textContent = '-60.0 dB';
+        el.volumeBar.style.width = '0%';
+        el.detectorNeedle.style.left = '50%';
+        el.detectorNeedle.style.backgroundColor = '#475569';
+      }
+
+      function handleSilentFrame() {
+        state.candidateCount = 0;
+        state.inTuneStartTime = 0;
+
+        if (el.detectedNoteLetter.textContent !== '--') {
+          el.detectedNoteLetter.className = 'text-6xl sm:text-7xl font-extrabold text-slate-500 tracking-tight transition-all';
+          el.detectedNoteOctave.className = 'text-2xl sm:text-3xl font-extrabold text-slate-500 tabular-nums';
+        }
+        el.detectorNeedle.style.backgroundColor = '#475569';
+        el.tunerNeedle.style.backgroundColor = '#475569';
+      }
+
+      function updateDetectorWithPitch(freq) {
+        const info = freqToNoteInfo(freq);
+
+        // 시간축 안정화 (지정 프레임 이상 연속 감지 시 확정)
+        if (state.candidateNoteKey === info.key) {
+          state.candidateCount++;
+        } else {
+          state.candidateNoteKey = info.key;
+          state.candidateCount = 1;
+        }
+
+        const needlePct = Math.max(4, Math.min(96, 50 + info.cents));
+        el.detectorNeedle.style.left = `${needlePct}%`;
+        el.detectorNeedle.style.backgroundColor = Math.abs(info.cents) <= 8
+          ? '#34d399'
+          : (info.cents < 0 ? '#38bdf8' : '#fbbf24');
+
+        el.detectedFreqText.textContent = `${freq.toFixed(2)} Hz`;
+        el.detectedCentsText.textContent = `${info.cents > 0 ? '+' : ''}${info.cents} cents`;
+
+        if (state.candidateCount >= state.smoothingFrames) {
+          el.detectedNoteLetter.textContent = info.letter;
+          el.detectedNoteLetter.className = 'text-6xl sm:text-7xl font-extrabold text-emerald-400 tracking-tight transition-all';
+          el.detectedNoteOctave.textContent = String(info.octave);
+          el.detectedNoteOctave.className = 'text-2xl sm:text-3xl font-extrabold text-emerald-300 tabular-nums';
+          el.detectedSolfegeText.textContent = `${info.solfege} (${info.letter}${info.octave})`;
+
+          if (state.lastConfirmedNoteKey !== info.key) {
+            state.lastConfirmedNoteKey = info.key;
+            appendNoteHistory(info);
+          }
+        }
+      }
+
+      function appendNoteHistory(info) {
+        state.noteHistory.push({ key: info.key, solfege: info.solfege });
+        if (state.noteHistory.length > 18) {
+          state.noteHistory.shift();
+        }
+        renderHistory();
+      }
+
+      function renderHistory() {
+        const d = getDict();
+        el.historyContainer.innerHTML = '';
+        if (state.noteHistory.length === 0) {
+          const span = document.createElement('span');
+          span.id = 'historyEmptyText';
+          span.className = 'text-xs text-slate-400';
+          span.textContent = d.historyEmptyText;
+          el.historyContainer.appendChild(span);
+          return;
+        }
+
+        state.noteHistory.forEach((item, idx) => {
+          const isLatest = idx === state.noteHistory.length - 1;
+          const chip = document.createElement('span');
+          chip.className = isLatest
+            ? 'px-2.5 py-1 rounded-lg bg-emerald-500/20 border border-emerald-400 text-xs font-extrabold text-emerald-200'
+            : 'px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 text-xs font-bold text-slate-300';
+          chip.textContent = `${item.key} (${item.solfege})`;
+          el.historyContainer.appendChild(chip);
+        });
+      }
+
+      /* ======================================================================
+         8. [TAB 2] 현악기 4종 정밀 조율기 로직
+         ====================================================================== */
+      function renderTunerPresets(keepCurrent = false) {
+        const d = getDict();
+        const presetMap = INSTRUMENT_PRESETS[state.instrument];
+        const keys = Object.keys(presetMap);
+
+        if (!keepCurrent || !presetMap[state.presetKey]) {
+          state.presetKey = keys[0];
+        }
+
+        el.tunerPresetSelect.innerHTML = '';
+        keys.forEach((key) => {
+          const opt = document.createElement('option');
+          opt.value = key;
+          opt.textContent = d.presets[key] || key;
+          if (key === state.presetKey) opt.selected = true;
+          el.tunerPresetSelect.appendChild(opt);
+        });
+
+        const notes = presetMap[state.presetKey];
+        if (!keepCurrent) {
+          state.currentStrings = [...notes];
+          state.tunedStrings = new Array(notes.length).fill(false);
+          state.lockedStringIndex = 0;
+          state.inTuneStartTime = 0;
+        }
+        updateTargetHeaderUI();
+        renderTunerStrings();
+      }
+
+      function updateTargetHeaderUI() {
+        const d = getDict();
+        const total = state.currentStrings.length;
+        const idx = Math.max(0, Math.min(total - 1, state.lockedStringIndex));
+        const targetNote = state.currentStrings[idx];
+        const targetFreq = noteToFreq(targetNote);
+
+        el.tunerTargetStringLabel.textContent = d.stringNum(total - idx);
+        el.tunerTargetNoteDisplay.textContent = targetNote;
+        el.tunerTargetFreqText.textContent = `(${targetFreq.toFixed(2)} Hz)`;
+      }
+
+      function renderTunerStrings() {
+        const d = getDict();
+        const total = state.currentStrings.length;
+        el.tunerStringsGrid.innerHTML = '';
+
+        state.currentStrings.forEach((noteStr, idx) => {
+          const isTarget = idx === state.lockedStringIndex;
+          const isTuned = state.tunedStrings[idx];
+          const freq = noteToFreq(noteStr);
+
+          const card = document.createElement('div');
+          card.setAttribute('data-string-idx', String(idx));
+          card.className = `tuner-string-card ${isTuned ? 'tuned-done' : ''} ${isTarget ? 'target-active' : ''}`;
+
+          card.innerHTML = `
+            <div class="flex items-center justify-between gap-1">
+              <span class="text-xs font-extrabold ${isTarget ? 'text-emerald-300' : 'text-slate-300'} whitespace-nowrap">
+                ${d.stringNum(total - idx)}
+              </span>
+              <button type="button" data-ref-note="${noteStr}" class="ref-tone-btn px-2 py-1 rounded-lg bg-slate-800 border border-slate-700 text-xs font-bold text-sky-300" title="Reference Tone">
+                🔊
+              </button>
+            </div>
+            <div class="flex items-baseline justify-between mt-1">
+              <span class="text-xl font-extrabold text-white">${noteStr}</span>
+              <span class="text-[11px] font-bold text-slate-400 tabular-nums">${freq.toFixed(1)} Hz</span>
+            </div>
+            <div class="mt-1 min-h-[20px]">
+              ${isTuned
+                ? `<span class="inline-block px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400 text-[11px] font-extrabold text-emerald-300">${d.tunedBadge}</span>`
+                : `<span class="text-[11px] font-medium text-slate-500">—</span>`
+              }
+            </div>
+          `;
+          el.tunerStringsGrid.appendChild(card);
+        });
+      }
+
+      function resetTunerGaugeDisplay() {
+        const d = getDict();
+        state.lastTunerVerdictKey = 'pluck';
+        state.inTuneStartTime = 0;
+        el.tunerMeasuredText.textContent = '-- Hz';
+        el.tunerCentsReadout.textContent = '0 cents';
+        el.tunerNeedle.style.left = '50%';
+        el.tunerNeedle.style.backgroundColor = '#475569';
+        el.tunerStatusVerdict.textContent = d.pluckPrompt;
+        el.tunerStatusVerdict.className = 'text-center text-sm sm:text-base font-extrabold text-slate-300 bg-slate-950/80 border border-slate-800 rounded-xl py-2 px-3 mt-2';
+        el.tunerGaugeCard.classList.remove('in-tune-glow');
+      }
+
+      function getRefAudioContext() {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!state.refAudioCtx || state.refAudioCtx.state === 'closed') {
+          state.refAudioCtx = new AudioCtx();
+        }
+        if (state.refAudioCtx.state === 'suspended') {
+          state.refAudioCtx.resume();
+        }
+        return state.refAudioCtx;
+      }
+
+      function playReferenceTone(noteStr) {
+        const d = getDict();
+        const freq = noteToFreq(noteStr);
+        const ctx = getRefAudioContext();
+        const now = ctx.currentTime;
+
+        // 기존 재생 중인 기준음 정리
+        state.activeRefOscs.forEach((osc) => {
+          try { osc.stop(); osc.disconnect(); } catch (e) {}
+        });
+        state.activeRefOscs = [];
+
+        const master = ctx.createGain();
+        master.gain.setValueAtTime(0.001, now);
+        master.gain.exponentialRampToValueAtTime(0.24, now + 0.03);
+        master.gain.exponentialRampToValueAtTime(0.0008, now + 1.35);
+        master.connect(ctx.destination);
+
+        const osc1 = ctx.createOscillator();
+        const osc2 = ctx.createOscillator();
+        const subGain = ctx.createGain();
+        subGain.gain.value = 0.28;
+
+        osc1.type = 'triangle';
+        osc2.type = 'sine';
+        osc1.frequency.setValueAtTime(freq, now);
+        osc2.frequency.setValueAtTime(freq * 2, now);
+
+        osc1.connect(master);
+        osc2.connect(subGain);
+        subGain.connect(master);
+
+        osc1.onended = () => {
+          try {
+            osc1.disconnect();
+            osc2.disconnect();
+            subGain.disconnect();
+            master.disconnect();
+          } catch (e) {}
+        };
+
+        osc1.start(now);
+        osc2.start(now);
+        osc1.stop(now + 1.4);
+        osc2.stop(now + 1.4);
+        state.activeRefOscs = [osc1, osc2];
+
+        showToast(d.toastRefTone(noteStr, freq.toFixed(1)));
+      }
+
+      function playTuneCompleteChime() {
+        try {
+          const ctx = getRefAudioContext();
+          const now = ctx.currentTime;
+
+          const notes = [1046.5, 1318.51]; // C6 -> E6 맑은 차임벨 화음
+          notes.forEach((freq, i) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            const start = now + i * 0.09;
+            osc.frequency.setValueAtTime(freq, start);
+
+            gain.gain.setValueAtTime(0.001, start);
+            gain.gain.exponentialRampToValueAtTime(0.18, start + 0.015);
+            gain.gain.exponentialRampToValueAtTime(0.0008, start + 0.45);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.onended = () => {
+              try {
+                osc.disconnect();
+                gain.disconnect();
+              } catch (e) {}
+            };
+            osc.start(start);
+            osc.stop(start + 0.48);
+          });
+        } catch (e) { /* 오디오 제한 환경 무시 */ }
+      }
+
+      function updateTunerWithPitch(freq) {
+        const d = getDict();
+        const total = state.currentStrings.length;
+
+        // 자동 현 감지 모드일 때 가장 주파수가 가까운 현을 자동 선택
+        if (state.autoStringLock) {
+          let bestIdx = state.lockedStringIndex;
+          let minSemitoneDiff = Infinity;
+          state.currentStrings.forEach((noteStr, idx) => {
+            const targetFreq = noteToFreq(noteStr);
+            const diff = Math.abs(12 * Math.log2(freq / targetFreq));
+            if (diff < minSemitoneDiff) {
+              minSemitoneDiff = diff;
+              bestIdx = idx;
+            }
+          });
+
+          if (bestIdx !== state.lockedStringIndex) {
+            state.lockedStringIndex = bestIdx;
+            state.inTuneStartTime = 0;
+            updateTargetHeaderUI();
+            renderTunerStrings();
+          }
+        }
+
+        const idx = state.lockedStringIndex;
+        const targetNote = state.currentStrings[idx];
+        const targetFreq = noteToFreq(targetNote);
+        const rawCents = Math.round(1200 * Math.log2(freq / targetFreq));
+        const clampedCents = Math.max(-50, Math.min(50, rawCents));
+
+        el.tunerMeasuredText.textContent = `${freq.toFixed(2)} Hz`;
+        el.tunerCentsReadout.textContent = `${rawCents > 0 ? '+' : ''}${rawCents} cents`;
+        el.tunerNeedle.style.left = `${50 + clampedCents}%`;
+
+        if (Math.abs(rawCents) <= 5) {
+          state.lastTunerVerdictKey = 'inTune';
+          el.tunerNeedle.style.backgroundColor = '#34d399';
+          el.tunerStatusVerdict.textContent = d.inTuneMsg;
+          el.tunerStatusVerdict.className = 'text-center text-sm sm:text-base font-extrabold text-emerald-300 bg-emerald-500/15 border border-emerald-500/40 rounded-xl py-2 px-3 mt-2';
+          el.tunerGaugeCard.classList.add('in-tune-glow');
+
+          const now = performance.now();
+          if (!state.inTuneStartTime) {
+            state.inTuneStartTime = now;
+          }
+          if (now - state.inTuneStartTime >= 450 && !state.tunedStrings[idx]) {
+            state.tunedStrings[idx] = true;
+            playTuneCompleteChime();
+            renderTunerStrings();
+            showToast(d.toastStringDone(total - idx, targetNote));
+          }
+        } else {
+          state.inTuneStartTime = 0;
+          el.tunerGaugeCard.classList.remove('in-tune-glow');
+          if (rawCents < 0) {
+            state.lastTunerVerdictKey = 'low';
+            el.tunerNeedle.style.backgroundColor = '#38bdf8';
+            el.tunerStatusVerdict.textContent = d.tooLowMsg;
+            el.tunerStatusVerdict.className = 'text-center text-sm sm:text-base font-extrabold text-sky-300 bg-sky-500/15 border border-sky-500/40 rounded-xl py-2 px-3 mt-2';
+          } else {
+            state.lastTunerVerdictKey = 'high';
+            el.tunerNeedle.style.backgroundColor = '#fbbf24';
+            el.tunerStatusVerdict.textContent = d.tooHighMsg;
+            el.tunerStatusVerdict.className = 'text-center text-sm sm:text-base font-extrabold text-amber-300 bg-amber-500/15 border border-amber-500/40 rounded-xl py-2 px-3 mt-2';
+          }
+        }
+      }
+
+      /* ======================================================================
+         9. [TAB 3] 정밀 메트로놈 엔진 (Web Audio Lookahead Scheduler)
+         ====================================================================== */
+      function getTempoMarkingKey(bpm) {
+        if (bpm < 40) return 'grave';
+        if (bpm < 60) return 'largo';
+        if (bpm < 66) return 'larghetto';
+        if (bpm < 76) return 'adagio';
+        if (bpm < 108) return 'andante';
+        if (bpm < 120) return 'moderato';
+        if (bpm < 132) return 'allegretto';
+        if (bpm < 168) return 'allegro';
+        if (bpm < 176) return 'vivace';
+        if (bpm < 200) return 'presto';
+        return 'prestissimo';
+      }
+
+      function updateTempoMarkingUI() {
+        const d = getDict();
+        const key = getTempoMarkingKey(state.bpm);
+        el.metroTempoName.textContent = d.tempoMarkings[key];
+      }
+
+      function setBpm(newBpm) {
+        const clamped = Math.max(30, Math.min(260, Math.round(newBpm)));
+        state.bpm = clamped;
+        el.metroBpmInput.value = String(clamped);
+        el.metroBpmSlider.value = String(clamped);
+        updateTempoMarkingUI();
+      }
+
+      function getBeatsCountForTimeSig(sig) {
+        const num = parseInt(sig.split('/')[0], 10);
+        return isNaN(num) ? 4 : num;
+      }
+
+      function setupBeatAccentsForTimeSig(sig) {
+        const count = getBeatsCountForTimeSig(sig);
+        const accents = [];
+        for (let i = 0; i < count; i++) {
+          if (sig === '1/4') {
+            accents.push(2);
+          } else if (i === 0) {
+            accents.push(3);
+          } else if (sig === '6/8' && i === 3) {
+            accents.push(2);
+          } else if (sig === '12/8' && (i === 3 || i === 6 || i === 9)) {
+            accents.push(2);
+          } else if (sig === '5/4' && i === 3) {
+            accents.push(2);
+          } else if (sig === '7/8' && (i === 3 || i === 5)) {
+            accents.push(2);
+          } else {
+            accents.push(1);
+          }
+        }
+        state.beatAccents = accents;
+        state.currentBeatStep = 0;
+        state.currentSubStep = 0;
+        renderMetroBeatLeds();
+      }
+
+      function renderMetroBeatLeds() {
+        const d = getDict();
+        const count = state.beatAccents.length;
+        el.metroBeatLeds.className = count <= 4
+          ? 'grid grid-cols-4 gap-2'
+          : 'grid grid-cols-4 sm:grid-cols-6 gap-2';
+        el.metroBeatLeds.innerHTML = '';
+
+        state.beatAccents.forEach((level, idx) => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.setAttribute('data-beat-idx', String(idx));
+
+          let styleClass = 'bg-slate-950 border-slate-800 text-slate-500';
+          if (level === 3) styleClass = 'bg-emerald-500/20 border-emerald-400 text-emerald-300';
+          else if (level === 2) styleClass = 'bg-amber-500/15 border-amber-500/50 text-amber-300';
+          else if (level === 1) styleClass = 'bg-slate-800 border-slate-700 text-slate-200';
+
+          btn.className = `metro-led-pad rounded-xl border p-2 flex flex-col items-center justify-center ${styleClass}`;
+          btn.innerHTML = `
+            <span class="text-sm font-extrabold tabular-nums">${idx + 1}</span>
+            <span class="text-[11px] font-bold">${d.accentNames[level]}</span>
+          `;
+          el.metroBeatLeds.appendChild(btn);
+        });
+      }
+
+      function flashBeatLed(beatIdx) {
+        const pads = el.metroBeatLeds.querySelectorAll('.metro-led-pad');
+        pads.forEach((pad, idx) => {
+          if (idx === beatIdx) {
+            pad.classList.add('beat-flash');
+            setTimeout(() => pad.classList.remove('beat-flash'), 120);
+          }
+        });
+      }
+
+      function playMetronomeClick(time, accentLevel, isSubdivision) {
+        if (!state.metroAudioCtx || accentLevel === 0) return;
+        const ctx = state.metroAudioCtx;
+
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        let freq = 880;
+        let vol = isSubdivision ? 0.14 : (accentLevel === 3 ? 0.42 : accentLevel === 2 ? 0.28 : 0.2);
+        let duration = 0.055;
+
+        if (state.soundType === 'woodblock') {
+          osc.type = 'sine';
+          freq = isSubdivision ? 620 : (accentLevel === 3 ? 1150 : accentLevel === 2 ? 920 : 780);
+          duration = 0.048;
+        } else if (state.soundType === 'digital') {
+          osc.type = 'square';
+          freq = isSubdivision ? 700 : (accentLevel === 3 ? 1560 : accentLevel === 2 ? 1180 : 980);
+          vol *= 0.55;
+          duration = 0.04;
+        } else if (state.soundType === 'mechanical') {
+          osc.type = 'triangle';
+          freq = isSubdivision ? 440 : (accentLevel === 3 ? 980 : accentLevel === 2 ? 720 : 580);
+          duration = 0.035;
+        } else if (state.soundType === 'drum') {
+          osc.type = isSubdivision ? 'highpass' in osc ? 'sawtooth' : 'triangle' : 'triangle';
+          freq = isSubdivision ? 2400 : (accentLevel === 3 ? 420 : accentLevel === 2 ? 310 : 250);
+          duration = isSubdivision ? 0.025 : 0.06;
+        } else {
+          osc.type = 'sine';
+          freq = isSubdivision ? 587.33 : (accentLevel === 3 ? 1046.5 : accentLevel === 2 ? 783.99 : 659.25);
+          duration = 0.09;
+        }
+
+        osc.frequency.setValueAtTime(freq, time);
+        gain.gain.setValueAtTime(0.001, time);
+        gain.gain.exponentialRampToValueAtTime(Math.max(0.002, vol), time + 0.004);
+        gain.gain.exponentialRampToValueAtTime(0.0008, time + duration);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.onended = () => {
+          try {
+            osc.disconnect();
+            gain.disconnect();
+          } catch (e) {}
+        };
+        osc.start(time);
+        osc.stop(time + duration + 0.01);
+      }
+
+      function scheduler() {
+        if (!state.isMetroRunning || !state.metroAudioCtx) return;
+        const lookaheadSec = 0.1;
+
+        while (state.nextNoteTime < state.metroAudioCtx.currentTime + lookaheadSec) {
+          const beatIdx = state.currentBeatStep;
+          const subIdx = state.currentSubStep;
+          const accent = state.beatAccents[beatIdx] ?? 1;
+          const isSub = subIdx > 0;
+
+          playMetronomeClick(state.nextNoteTime, accent, isSub);
+
+          if (!isSub) {
+            const delayMs = Math.max(0, (state.nextNoteTime - state.metroAudioCtx.currentTime) * 1000);
+            setTimeout(() => {
+              if (state.isMetroRunning) flashBeatLed(beatIdx);
+            }, delayMs);
+          }
+
+          const secondsPerBeat = 60.0 / state.bpm;
+          if (state.subdiv === 'swing') {
+            if (state.currentSubStep === 0) {
+              state.nextNoteTime += secondsPerBeat * (2 / 3);
+              state.currentSubStep = 1;
+            } else {
+              state.nextNoteTime += secondsPerBeat * (1 / 3);
+              state.currentSubStep = 0;
+              state.currentBeatStep = (state.currentBeatStep + 1) % state.beatAccents.length;
+            }
+          } else {
+            const subCount = parseInt(state.subdiv, 10) || 1;
+            state.nextNoteTime += secondsPerBeat / subCount;
+            state.currentSubStep++;
+            if (state.currentSubStep >= subCount) {
+              state.currentSubStep = 0;
+              state.currentBeatStep = (state.currentBeatStep + 1) % state.beatAccents.length;
+            }
+          }
+        }
+      }
+
+      function startMetronome() {
+        const d = getDict();
+        if (state.isMetroRunning) return;
+
+        // 입력칸에 확정되지 않은 값이 있을 경우 안전 보정
+        const parsedBpm = parseInt(el.metroBpmInput.value, 10);
+        setBpm(isNaN(parsedBpm) ? state.bpm : parsedBpm);
+
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!state.metroAudioCtx || state.metroAudioCtx.state === 'closed') {
+          state.metroAudioCtx = new AudioCtx();
+        }
+        if (state.metroAudioCtx.state === 'suspended') {
+          state.metroAudioCtx.resume();
+        }
+
+        state.isMetroRunning = true;
+        state.currentBeatStep = 0;
+        state.currentSubStep = 0;
+        state.nextNoteTime = state.metroAudioCtx.currentTime + 0.04;
+
+        el.metroToggleBtn.textContent = d.metroStop;
+        el.metroToggleBtn.className = 'w-full min-h-[54px] py-3 px-4 rounded-2xl bg-rose-600 text-white text-base font-extrabold shadow-lg transition-all';
+
+        scheduler();
+        state.metroTimerId = setInterval(scheduler, 25);
+      }
+
+      function stopMetronome() {
+        const d = getDict();
+        state.isMetroRunning = false;
+        if (state.metroTimerId) {
+          clearInterval(state.metroTimerId);
+          state.metroTimerId = null;
+        }
+        el.metroToggleBtn.textContent = d.metroStart;
+        el.metroToggleBtn.className = 'w-full min-h-[54px] py-3 px-4 rounded-2xl bg-emerald-600 text-white text-base font-extrabold shadow-lg transition-all';
+      }
+
+      /* ======================================================================
+         10. 탭 전환 및 전체 이벤트 바인딩 · 초기화
+         ====================================================================== */
+      function switchTab(tabName) {
+        state.activeTab = tabName;
+        state.lastDiatonicMidi = null;
+        state.candidateCount = 0;
+        state.inTuneStartTime = 0;
+
+        if (state.highPassNode) {
+          state.highPassNode.frequency.value = tabName === 'tuner' ? 26 : 60;
+        }
+
+        if (tabName === 'detector' && el.detectedNoteLetter.textContent === '--') {
+          const d = getDict();
+          el.detectedSolfegeText.textContent = (state.isMicRunning || state.isSimRunning)
+            ? d.listeningWaiting
+            : d.promptInputSound;
+        }
+
+        const tabs = [
+          { name: 'detector', btn: el.tabDetector, panel: el.panelDetector },
+          { name: 'tuner', btn: el.tabTuner, panel: el.panelTuner },
+          { name: 'metronome', btn: el.tabMetronome, panel: el.panelMetronome }
+        ];
+
+        tabs.forEach(({ name, btn, panel }) => {
+          const active = name === tabName;
+          btn.setAttribute('aria-selected', active ? 'true' : 'false');
+          btn.className = active
+            ? 'min-h-[44px] py-2 px-2 rounded-xl bg-emerald-600 text-white text-xs sm:text-sm font-extrabold transition-all'
+            : 'min-h-[44px] py-2 px-2 rounded-xl bg-transparent text-slate-300 text-xs sm:text-sm font-bold transition-all';
+          if (active) panel.classList.remove('hidden');
+          else panel.classList.add('hidden');
+        });
+      }
+
+      function updateGateMarkerUI() {
+        const pct = Math.max(0, Math.min(100, Math.round(((state.noiseGateDb + 65) / 65) * 100)));
+        el.gateMarker.style.left = `${pct}%`;
+        el.gateValueText.textContent = `${state.noiseGateDb} dB`;
+      }
+
+      function bindEvents() {
+        // 언어 전환
+        el.langSelect.addEventListener('change', (e) => {
+          applyLanguage(e.target.value);
+        });
+
+        // A4 기준 주파수 변경
+        el.a4Select.addEventListener('change', (e) => {
+          state.a4Freq = parseInt(e.target.value, 10) || 440;
+          state.inTuneStartTime = 0;
+          updateTargetHeaderUI();
+          renderTunerStrings();
+          showToast(getDict().toastA4Changed(state.a4Freq));
+        });
+
+        // 마이크 & 테스트 신호 버튼
+        el.micToggleBtn.addEventListener('click', () => {
+          if (state.isMicRunning || state.isMicStarting) {
+            stopMicrophone();
+          } else {
+            startMicrophone();
+          }
+        });
+
+        el.simToggleBtn.addEventListener('click', () => {
+          if (state.isSimRunning) {
+            stopSimulation();
+          } else {
+            startSimulation();
+          }
+        });
+
+        // 상단 3개 탭
+        el.tabDetector.addEventListener('click', () => switchTab('detector'));
+        el.tabTuner.addEventListener('click', () => switchTab('tuner'));
+        el.tabMetronome.addEventListener('click', () => switchTab('metronome'));
+
+        // 음계 표기 모드 (7음계 / 12음계)
+        el.scaleModeSelect.addEventListener('change', (e) => {
+          state.scaleMode = e.target.value;
+          state.lastDiatonicMidi = null;
+          state.candidateCount = 0;
+        });
+
+        // 노이즈 게이트 / 명료도 / 안정화 슬라이더
+        el.gateSlider.addEventListener('input', (e) => {
+          state.noiseGateDb = parseInt(e.target.value, 10);
+          updateGateMarkerUI();
+        });
+
+        el.claritySlider.addEventListener('input', (e) => {
+          const pct = parseInt(e.target.value, 10);
+          state.clarityThreshold = pct / 100;
+          el.clarityThresholdText.textContent = `${pct}%`;
+        });
+
+        el.smoothingSlider.addEventListener('input', (e) => {
+          const val = parseInt(e.target.value, 10);
+          state.smoothingFrames = val;
+          el.smoothingValueText.textContent = getDict().framesUnit(val);
+        });
+
+        // 주변 소음 자동 보정
+        el.calibrateNoiseBtn.addEventListener('click', async () => {
+          if (state.isCalibrating) return;
+          if (state.isSimRunning) {
+            stopSimulation();
+          }
+          if (!state.isMicRunning) {
+            await startMicrophone();
+            if (!state.isMicRunning) return;
+          }
+
+          const d = getDict();
+          state.isCalibrating = true;
+          state.calibrationSamples = [];
+          el.calibrateNoiseBtn.textContent = d.calibratingNoiseBtn;
+
+          setTimeout(() => {
+            state.isCalibrating = false;
+            el.calibrateNoiseBtn.textContent = getDict().calibrateNoiseBtn;
+            if (state.calibrationSamples.length > 0) {
+              const avg = state.calibrationSamples.reduce((a, b) => a + b, 0) / state.calibrationSamples.length;
+              const newGate = Math.max(-62, Math.min(-18, Math.round(avg + 6)));
+              state.noiseGateDb = newGate;
+              el.gateSlider.value = String(newGate);
+              updateGateMarkerUI();
+              showToast(getDict().toastCalibrated(newGate));
+            }
+          }, 1100);
+        });
+
+        // 히스토리 지우기
+        el.clearHistoryBtn.addEventListener('click', () => {
+          state.noteHistory = [];
+          state.lastConfirmedNoteKey = '';
+          renderHistory();
+        });
+
+        // 조율기 악기 4종 선택
+        el.instrumentBtnGroup.addEventListener('click', (e) => {
+          const btn = e.target.closest('.inst-select-btn');
+          if (!btn) return;
+          const inst = btn.getAttribute('data-inst');
+          if (!inst || !INSTRUMENT_PRESETS[inst]) return;
+
+          state.instrument = inst;
+          el.instrumentBtnGroup.querySelectorAll('.inst-select-btn').forEach((b) => {
+            const active = b === btn;
+            b.className = active
+              ? 'inst-select-btn min-h-[44px] py-2 px-3 rounded-xl bg-emerald-600 text-white text-xs sm:text-sm font-extrabold border border-emerald-400'
+              : 'inst-select-btn min-h-[44px] py-2 px-3 rounded-xl bg-slate-800 text-slate-200 text-xs sm:text-sm font-bold border border-slate-700';
+          });
+
+          renderTunerPresets(false);
+          if (!state.isMicRunning && !state.isSimRunning) {
+            resetTunerGaugeDisplay();
+          }
+        });
+
+        // 조율기 프리셋 선택
+        el.tunerPresetSelect.addEventListener('change', (e) => {
+          state.presetKey = e.target.value;
+          const notes = INSTRUMENT_PRESETS[state.instrument][state.presetKey];
+          if (notes) {
+            state.currentStrings = [...notes];
+            state.tunedStrings = new Array(notes.length).fill(false);
+            state.lockedStringIndex = 0;
+            state.inTuneStartTime = 0;
+            updateTargetHeaderUI();
+            renderTunerStrings();
+            if (!state.isMicRunning && !state.isSimRunning) {
+              resetTunerGaugeDisplay();
+            }
+          }
+        });
+
+        // 자동 현 감지 토글
+        el.autoStringLockBtn.addEventListener('click', () => {
+          state.autoStringLock = !state.autoStringLock;
+          const d = getDict();
+          el.autoStringLockBtn.textContent = state.autoStringLock ? d.autoLockOn : d.autoLockOff;
+          el.autoStringLockBtn.className = state.autoStringLock
+            ? 'flex-1 min-h-[44px] px-2.5 py-2 rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-xs font-extrabold'
+            : 'flex-1 min-h-[44px] px-2.5 py-2 rounded-xl bg-amber-500/15 border border-amber-500/40 text-amber-300 text-xs font-extrabold';
+        });
+
+        // 조율 완료 초기화
+        el.resetTunedStringsBtn.addEventListener('click', () => {
+          state.tunedStrings = new Array(state.currentStrings.length).fill(false);
+          state.inTuneStartTime = 0;
+          renderTunerStrings();
+          if (!state.isMicRunning && !state.isSimRunning) {
+            resetTunerGaugeDisplay();
+          }
+          showToast(getDict().toastStringsReset);
+        });
+
+        // 현 카드 터치 (현 고정 및 기준음 재생)
+        el.tunerStringsGrid.addEventListener('click', (e) => {
+          const refBtn = e.target.closest('.ref-tone-btn');
+          const card = e.target.closest('.tuner-string-card');
+          if (!card) return;
+
+          const idx = parseInt(card.getAttribute('data-string-idx'), 10);
+          if (isNaN(idx)) return;
+
+          state.lockedStringIndex = idx;
+          state.inTuneStartTime = 0;
+          state.autoStringLock = false;
+          const d = getDict();
+          el.autoStringLockBtn.textContent = d.autoLockOff;
+          el.autoStringLockBtn.className = 'flex-1 min-h-[44px] px-2.5 py-2 rounded-xl bg-amber-500/15 border border-amber-500/40 text-amber-300 text-xs font-extrabold';
+
+          updateTargetHeaderUI();
+          renderTunerStrings();
+
+          const noteStr = state.currentStrings[idx];
+          if (refBtn) {
+            playReferenceTone(noteStr);
+          } else {
+            showToast(d.toastStringLocked(state.currentStrings.length - idx, noteStr));
+          }
+        });
+
+        // 메트로놈 BPM 조절
+        document.querySelectorAll('.bpm-step-btn').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const delta = parseInt(btn.getAttribute('data-bpm-delta'), 10) || 0;
+            setBpm(state.bpm + delta);
+          });
+        });
+
+        el.metroBpmSlider.addEventListener('input', (e) => {
+          setBpm(parseInt(e.target.value, 10));
+        });
+
+        el.metroBpmInput.addEventListener('input', (e) => {
+          const val = parseInt(e.target.value, 10);
+          if (!isNaN(val) && val >= 30 && val <= 260) {
+            state.bpm = val;
+            el.metroBpmSlider.value = String(val);
+            updateTempoMarkingUI();
+          }
+        });
+
+        el.metroBpmInput.addEventListener('change', (e) => {
+          const val = parseInt(e.target.value, 10);
+          setBpm(isNaN(val) ? state.bpm : val);
+        });
+
+        el.metroBpmInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            el.metroBpmInput.blur();
+          }
+        });
+
+        // 탭 템포 (TAP)
+        el.metroTapBtn.addEventListener('click', () => {
+          const now = performance.now();
+          if (state.tapTimes.length > 0 && now - state.tapTimes[state.tapTimes.length - 1] > 2200) {
+            state.tapTimes = [];
+          }
+          state.tapTimes.push(now);
+          if (state.tapTimes.length > 5) state.tapTimes.shift();
+
+          if (state.tapTimes.length >= 2) {
+            let sum = 0;
+            for (let i = 1; i < state.tapTimes.length; i++) {
+              sum += state.tapTimes[i] - state.tapTimes[i - 1];
+            }
+            const avgMs = sum / (state.tapTimes.length - 1);
+            if (avgMs > 0) {
+              setBpm(60000 / avgMs);
+            }
+          }
+        });
+
+        // 박자 강세 패드 터치 (강 3 -> 중 2 -> 약 1 -> 묵음 0 -> 강 3)
+        el.metroBeatLeds.addEventListener('click', (e) => {
+          const pad = e.target.closest('.metro-led-pad');
+          if (!pad) return;
+          const idx = parseInt(pad.getAttribute('data-beat-idx'), 10);
+          if (isNaN(idx)) return;
+          const curr = state.beatAccents[idx];
+          state.beatAccents[idx] = curr === 0 ? 3 : curr - 1;
+          renderMetroBeatLeds();
+        });
+
+        // 박자표 · 리듬 세분화 · 음색
+        el.metroTimeSigSelect.addEventListener('change', (e) => {
+          state.timeSig = e.target.value;
+          setupBeatAccentsForTimeSig(state.timeSig);
+        });
+
+        el.metroSubdivSelect.addEventListener('change', (e) => {
+          state.subdiv = e.target.value;
+          state.currentSubStep = 0;
+        });
+
+        el.metroSoundSelect.addEventListener('change', (e) => {
+          state.soundType = e.target.value;
+        });
+
+        // 메트로놈 시작 / 정지
+        el.metroToggleBtn.addEventListener('click', () => {
+          if (state.isMetroRunning) stopMetronome();
+          else startMetronome();
+        });
+
+        // 백그라운드 복귀 시 AudioContext 재개 및 페이지 이탈 시 정리
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') {
+            if (state.audioCtx && state.audioCtx.state === 'suspended') {
+              state.audioCtx.resume();
+            }
+            if (state.metroAudioCtx && state.metroAudioCtx.state === 'suspended' && state.isMetroRunning) {
+              state.metroAudioCtx.resume();
+            }
+          }
+        });
+
+        window.addEventListener('pagehide', () => {
+          stopMicrophone();
+          stopSimulation();
+          stopMetronome();
+        });
+      }
+
+      function init() {
+        // A4 기준 주파수 옵션 생성 (430 Hz ~ 465 Hz)
+        el.a4Select.innerHTML = '';
+        for (let hz = 430; hz <= 465; hz++) {
+          const opt = document.createElement('option');
+          opt.value = String(hz);
+          opt.textContent = `${hz} Hz`;
+          if (hz === 440) opt.selected = true;
+          el.a4Select.appendChild(opt);
+        }
+
+        // 저장된 언어 복원 또는 브라우저 기본 언어 감지
+        let savedLang = null;
+        try {
+          savedLang = localStorage.getItem('easy_dynatone_lang');
+        } catch (e) {}
+
+        if (savedLang && I18N[savedLang]) {
+          state.lang = savedLang;
+        } else {
+          const navLang = (navigator.language || 'ko').toLowerCase();
+          if (navLang.startsWith('ja')) state.lang = 'ja';
+          else if (navLang.startsWith('es')) state.lang = 'es';
+          else if (navLang === 'zh-tw' || navLang === 'zh-hk' || navLang === 'zh-mo') state.lang = 'zh-TW';
+          else if (navLang.startsWith('zh')) state.lang = 'zh-CN';
+          else if (navLang.startsWith('en')) state.lang = 'en';
+          else state.lang = 'ko';
+        }
+        el.langSelect.value = state.lang;
+
+        updateGateMarkerUI();
+        renderTunerPresets(false);
+        setupBeatAccentsForTimeSig(state.timeSig);
+        applyLanguage(state.lang);
+        bindEvents();
+      }
+
+      init();
+    })();
+  </script>
+</body>
+</html>
