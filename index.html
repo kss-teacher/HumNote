@@ -6,9 +6,9 @@
   <meta name="theme-color" content="#080c14" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="허밍스코어" />
+  <meta name="apple-mobile-web-app-title" content="HumNote" />
   <link rel="manifest" href="./manifest.json" />
-  <title>허밍스코어 &amp; 튜너 (Hum Score &amp; Tuner)</title>
+  <title>HumNote — 허밍노트 · 튜너</title>
   <style>
     *, *::before, *::after {
       box-sizing: border-box;
@@ -429,8 +429,8 @@
             </svg>
           </div>
           <div class="min-w-0">
-            <h1 id="appTitle" class="text-base sm:text-lg font-extrabold text-white tracking-tight truncate">허밍스코어 &amp; 튜너</h1>
-            <p id="appSubtitle" class="text-[11px] font-medium text-slate-400 truncate">Hum Score &amp; Tuner</p>
+            <h1 id="appTitle" class="text-base sm:text-lg font-extrabold text-white tracking-tight truncate">HumNote</h1>
+            <p id="appSubtitle" class="text-[11px] font-medium text-slate-400 truncate">허밍노트 · 튜너</p>
           </div>
         </div>
 
@@ -469,17 +469,17 @@
       <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-900 border border-slate-800 rounded-2xl p-2">
         <div id="statusBadge" class="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-slate-950 border border-slate-800">
           <span id="statusDot" class="rounded-full bg-slate-500" style="width: 0.5rem; height: 0.5rem;"></span>
-          <span id="statusText" class="text-xs font-semibold text-slate-300">대기 중 (오프라인)</span>
+          <span id="statusText" class="text-xs font-extrabold text-slate-300 tracking-wider tabular-nums">READY</span>
         </div>
 
         <div class="flex items-center gap-1.5 flex-1 sm:flex-initial justify-end">
           <button id="micToggleBtn" type="button" class="studio-btn-primary min-h-[40px] px-3.5 py-1.5 text-xs sm:text-sm font-extrabold">
             <span id="micBtnIcon" class="inline-flex"></span>
-            <span id="micBtnLabel">마이크 시작</span>
+            <span id="micBtnLabel">REC</span>
           </button>
           <button id="simToggleBtn" type="button" class="studio-btn min-h-[40px] px-3 py-1.5 text-xs sm:text-sm font-bold">
             <span id="simBtnIcon" class="inline-flex"></span>
-            <span id="simBtnLabel">테스트</span>
+            <span id="simBtnLabel">TEST</span>
           </button>
         </div>
       </div>
@@ -491,11 +491,11 @@
             <circle cx="6" cy="18" r="3" />
             <circle cx="18" cy="16" r="3" />
           </svg>
-          <span id="tabDetectorLabel" class="truncate">음성 채보</span>
+          <span id="tabDetectorLabel" class="truncate">채보</span>
         </button>
         <button id="tabScores" type="button" role="tab" aria-selected="false" class="min-h-[42px] py-2 px-1.5 rounded-xl text-slate-300 text-[11px] sm:text-sm font-bold inline-flex items-center justify-center gap-1 transition-all truncate" style="background: transparent;">
           <span data-icon="folder" class="inline-flex"></span>
-          <span id="tabScoresLabel" class="truncate">내 악보함</span>
+          <span id="tabScoresLabel" class="truncate">보관함</span>
         </button>
         <button id="tabTuner" type="button" role="tab" aria-selected="false" class="min-h-[42px] py-2 px-1.5 rounded-xl text-slate-300 text-[11px] sm:text-sm font-bold inline-flex items-center justify-center gap-1 transition-all truncate" style="background: transparent;">
           <svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true">
@@ -503,7 +503,7 @@
             <path d="M8 2v6a4 4 0 0 0 8 0V2" />
             <circle cx="12" cy="18" r="3" />
           </svg>
-          <span id="tabTunerLabel" class="truncate">악기 조율</span>
+          <span id="tabTunerLabel" class="truncate">튜너</span>
         </button>
         <button id="tabMetronome" type="button" role="tab" aria-selected="false" class="min-h-[42px] py-2 px-1.5 rounded-xl text-slate-300 text-[11px] sm:text-sm font-bold inline-flex items-center justify-center gap-1 transition-all truncate" style="background: transparent;">
           <svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true">
@@ -520,20 +520,20 @@
   <main class="mx-auto px-3 sm:px-4 space-y-3" style="max-width: 48rem; padding-top: 0.75rem;">
     <section id="panelDetector" class="space-y-3" role="tabpanel">
       <div class="studio-card p-3 flex items-center justify-between gap-2">
-        <label id="scaleModeLabel" for="scaleModeSelect" class="text-xs font-bold text-slate-300">음계 모드</label>
+        <label id="scaleModeLabel" for="scaleModeSelect" class="text-xs font-extrabold text-slate-400 tracking-wider uppercase">SCALE</label>
         <select id="scaleModeSelect" class="text-xs sm:text-sm font-bold">
-          <option value="diatonic">7음계 (CDEFGAB)</option>
-          <option value="chromatic">12음계 (♯)</option>
+          <option value="diatonic">7음계 (Major)</option>
+          <option value="chromatic">12음계 (Chromatic)</option>
         </select>
       </div>
 
       <div class="studio-card p-4 sm:p-5 space-y-3.5">
         <div class="flex items-center justify-between">
-          <span id="targetAnalysisLabel" class="text-xs font-bold text-slate-400 uppercase tracking-wider">피치 분석</span>
+          <span id="targetAnalysisLabel" class="text-xs font-extrabold text-slate-400 uppercase tracking-wider">PITCH</span>
           <div class="flex items-center gap-1.5">
             <span id="tempoSyncBadge" class="px-2 py-0.5 rounded-full bg-slate-950 border border-slate-800 text-[11px] font-bold text-slate-400 tabular-nums">♩=120</span>
             <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-950 border border-slate-800 text-xs font-semibold text-slate-400">
-              <span id="clarityHeaderLabel">명료도</span>
+              <span id="clarityHeaderLabel">CLARITY</span>
               <span id="clarityPercentText" class="font-extrabold text-emerald-400 tabular-nums">0%</span>
             </div>
           </div>
@@ -576,7 +576,7 @@
         <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 space-y-2">
           <div class="flex items-center justify-between gap-2">
             <div class="flex items-center gap-2">
-              <span id="inputLevelLabel" class="text-xs font-semibold text-slate-400">입력</span>
+              <span id="inputLevelLabel" class="text-xs font-extrabold text-slate-400 tracking-wider">IN</span>
               <span id="rmsDbText" class="text-xs font-extrabold text-emerald-400 tabular-nums">-60.0 dB</span>
             </div>
             <button id="calibrateNoiseBtn" type="button" class="studio-btn-amber min-h-[38px] px-2.5 py-1 text-xs font-bold">
@@ -585,7 +585,7 @@
                 <line x1="23" y1="9" x2="17" y2="15" />
                 <line x1="17" y1="9" x2="23" y2="15" />
               </svg>
-              <span id="calibrateBtnLabel">소음 보정</span>
+              <span id="calibrateBtnLabel">GATE</span>
             </button>
           </div>
 
@@ -599,7 +599,7 @@
       <div class="studio-card p-3.5 sm:p-4 space-y-2.5">
         <div class="flex flex-wrap items-center justify-between gap-1.5">
           <div class="flex items-center gap-1.5">
-            <h2 id="scoreStudioTitle" class="text-xs sm:text-sm font-extrabold text-white">오선지 악보</h2>
+            <h2 id="scoreStudioTitle" class="text-xs sm:text-sm font-extrabold text-white tracking-wider uppercase">SCORE</h2>
             <select id="scoreTimeSigSelect" aria-label="Time Signature" class="py-1 px-2 text-xs font-extrabold text-emerald-300 bg-slate-950 border-slate-700 rounded-lg tabular-nums">
               <option value="4/4" selected>C (4/4)</option>
               <option value="3/4">3/4</option>
@@ -611,8 +611,8 @@
               <option value="5/4">5/4</option>
               <option value="7/8">7/8</option>
             </select>
-            <span id="scoreStatsBadge" class="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/40 text-[11px] font-bold text-emerald-300 tabular-nums">
-              0마디 · 0음
+            <span id="scoreStatsBadge" class="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/40 text-[11px] font-extrabold text-emerald-300 tabular-nums">
+              0M · 0N
             </span>
           </div>
 
@@ -639,7 +639,7 @@
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <input id="songTitleInput" type="text" maxlength="40" placeholder="곡 제목"
+          <input id="songTitleInput" type="text" maxlength="40" placeholder="제목"
             class="w-full px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-700 text-xs sm:text-sm font-bold text-white" />
 
           <div class="flex items-center justify-between sm:justify-end gap-1.5">
@@ -735,7 +735,7 @@
 
     <section id="panelScores" class="hidden space-y-3" role="tabpanel">
       <div class="studio-card p-3 flex items-center justify-between gap-2">
-        <h2 id="scoresLibraryBannerTitle" class="text-xs font-bold text-slate-200">로컬 악보 라이브러리</h2>
+        <h2 id="scoresLibraryBannerTitle" class="text-xs font-extrabold text-slate-200 tracking-wider uppercase">LIBRARY</h2>
         <div class="flex items-center gap-1.5">
           <button id="scoresSaveCurrentBtn" type="button" class="studio-btn-primary min-h-[38px] px-3 py-1 text-xs font-extrabold">
             <span data-icon="save" class="inline-flex"></span>
@@ -743,23 +743,23 @@
           </button>
           <button id="newScoreBtn" type="button" class="studio-btn min-h-[38px] px-3 py-1 text-xs font-bold">
             <span data-icon="newDoc" class="inline-flex"></span>
-            <span id="newScoreLabel">새 악보</span>
+            <span id="newScoreLabel">신규</span>
           </button>
         </div>
       </div>
 
       <div class="studio-card p-4 sm:p-5 space-y-3">
         <div class="flex items-center justify-between">
-          <span id="activeWorkspaceHeader" class="text-xs font-bold text-slate-400 uppercase tracking-wider">현재 슬롯</span>
+          <span id="activeWorkspaceHeader" class="text-xs font-extrabold text-slate-400 uppercase tracking-wider">ACTIVE</span>
           <span id="activeWorkspaceBadge" class="px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/40 text-[11px] font-bold text-emerald-300">
-            작업 중
+            DRAFT
           </span>
         </div>
 
         <div class="studio-lcd p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div class="min-w-0 space-y-1">
-            <div id="activeScoreLcdTitle" class="text-lg sm:text-xl font-extrabold text-white truncate">나의 허밍 악보</div>
-            <div id="activeScoreLcdMeta" class="text-xs font-bold text-slate-400 tabular-nums">4/4 · 0마디 · 0음 · 0</div>
+            <div id="activeScoreLcdTitle" class="text-lg sm:text-xl font-extrabold text-white truncate">Untitled 01</div>
+            <div id="activeScoreLcdMeta" class="text-xs font-bold text-slate-400 tabular-nums">4/4 · 0M · 0N · 0</div>
           </div>
 
           <div class="flex flex-wrap items-center gap-1.5">
@@ -783,9 +783,9 @@
         <div class="flex items-center justify-between">
           <div class="inline-flex items-center gap-1.5 text-emerald-300">
             <span data-icon="folder" class="inline-flex"></span>
-            <h3 id="savedScoresHeader" class="text-xs sm:text-sm font-extrabold text-white">내 악보함 (0)</h3>
+            <h3 id="savedScoresHeader" class="text-xs sm:text-sm font-extrabold text-white tracking-wider">SAVED (0)</h3>
           </div>
-          <span id="savedScoresStorageHint" class="text-[11px] font-medium text-slate-400">로컬 저장소</span>
+          <span id="savedScoresStorageHint" class="text-[11px] font-bold text-slate-400 uppercase">LOCAL</span>
         </div>
 
         <div id="savedScoresList" class="space-y-2"></div>
@@ -815,19 +815,19 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           <div class="space-y-1">
-            <label id="presetLabel" for="tunerPresetSelect" class="block text-xs font-semibold text-slate-400">튜닝 프리셋</label>
+            <label id="presetLabel" for="tunerPresetSelect" class="block text-xs font-extrabold text-slate-400 tracking-wider uppercase">PRESET</label>
             <select id="tunerPresetSelect" class="w-full text-xs sm:text-sm font-bold"></select>
           </div>
 
           <div class="space-y-1">
-            <span id="stringManageLabel" class="block text-xs font-semibold text-slate-400">현 감지 모드</span>
+            <span id="stringManageLabel" class="block text-xs font-extrabold text-slate-400 tracking-wider uppercase">DETECT</span>
             <div class="flex items-center gap-1.5">
               <button id="autoStringLockBtn" type="button" class="flex-1 min-h-[38px] px-2.5 py-1.5 rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-xs font-bold inline-flex items-center justify-center gap-1.5">
                 <span id="autoLockIcon" class="inline-flex"></span>
-                <span id="autoLockLabel">자동 감지</span>
+                <span id="autoLockLabel">AUTO</span>
               </button>
               <button id="resetTunedStringsBtn" type="button" class="studio-btn min-h-[38px] px-3 py-1.5 text-xs font-bold">
-                초기화
+                RESET
               </button>
             </div>
           </div>
@@ -837,7 +837,7 @@
       <div id="tunerGaugeCard" class="studio-card p-4 sm:p-5 space-y-3.5 transition-all">
         <div class="studio-lcd p-3.5 flex items-center justify-between gap-2">
           <div>
-            <span id="targetStringHeader" class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">대상 현</span>
+            <span id="targetStringHeader" class="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">TARGET</span>
             <div class="flex items-baseline gap-2" style="margin-top: 0.125rem;">
               <span id="tunerTargetStringLabel" class="text-xs sm:text-sm font-extrabold text-emerald-400">6번줄</span>
               <span id="tunerTargetNoteDisplay" class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">E2</span>
@@ -845,7 +845,7 @@
             </div>
           </div>
           <div class="text-right">
-            <span id="realtimeMeasureHeader" class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">측정값</span>
+            <span id="realtimeMeasureHeader" class="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">LIVE</span>
             <div id="tunerMeasuredText" class="text-lg sm:text-xl font-extrabold text-slate-200 tabular-nums" style="margin-top: 0.125rem;">-- Hz</div>
             <div id="tunerCentsReadout" class="text-xs font-bold text-slate-400 tabular-nums">0 cents</div>
           </div>
@@ -865,7 +865,7 @@
 
         <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 space-y-2">
           <div class="flex items-center justify-between gap-2">
-            <span id="tunerInputLevelLabel" class="text-xs font-semibold text-slate-400">입력</span>
+            <span id="tunerInputLevelLabel" class="text-xs font-extrabold text-slate-400 tracking-wider">IN</span>
             <span id="tunerRmsDbText" class="text-xs font-extrabold text-emerald-400 tabular-nums">-60.0 dB</span>
           </div>
           <div class="relative bg-slate-800 rounded-full overflow-hidden" style="height: 0.625rem;">
@@ -881,7 +881,7 @@
 
       <div class="studio-card p-3.5 sm:p-4 space-y-2.5">
         <div class="flex items-center justify-between">
-          <h2 id="stringGridTitle" class="text-xs font-extrabold text-slate-200">현별 목표 음정</h2>
+          <h2 id="stringGridTitle" class="text-xs font-extrabold text-slate-400 tracking-wider uppercase">STRINGS</h2>
         </div>
         <div id="tunerStringsGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
       </div>
@@ -890,7 +890,7 @@
     <section id="panelMetronome" class="hidden space-y-3" role="tabpanel">
       <div class="studio-card p-3.5 grid grid-cols-2 gap-2.5">
         <div class="space-y-1">
-          <label id="timeSigLabel" for="metroTimeSigSelect" class="block text-xs font-semibold text-slate-400">박자</label>
+          <label id="timeSigLabel" for="metroTimeSigSelect" class="block text-xs font-extrabold text-slate-400 tracking-wider uppercase">METER</label>
           <select id="metroTimeSigSelect" class="w-full text-xs sm:text-sm font-bold tabular-nums">
             <option value="4/4" selected>C (4/4)</option>
             <option value="3/4">3 / 4</option>
@@ -905,7 +905,7 @@
         </div>
 
         <div class="space-y-1">
-          <label id="subdivLabel" for="metroSubdivSelect" class="block text-xs font-semibold text-slate-400">세분화</label>
+          <label id="subdivLabel" for="metroSubdivSelect" class="block text-xs font-extrabold text-slate-400 tracking-wider uppercase">SUBDIV</label>
           <select id="metroSubdivSelect" class="w-full text-xs sm:text-sm font-bold">
             <option value="1" selected>♩ ×1</option>
             <option value="2">♫ ×2</option>
@@ -956,7 +956,7 @@
 
       <div class="studio-card p-4 space-y-3">
         <div class="space-y-1.5">
-          <span id="beatLedHeader" class="block text-xs font-semibold text-slate-400">박자 LED</span>
+          <span id="beatLedHeader" class="block text-xs font-extrabold text-slate-400 tracking-wider uppercase">BEATS</span>
           <div id="metroBeatPads" class="grid grid-cols-4 gap-2"></div>
         </div>
 
@@ -1005,7 +1005,7 @@
         </div>
 
         <div id="a4SheetFooter" class="text-center text-[11px] font-bold text-slate-500 border-t border-slate-300" style="padding-top: 0.75rem;">
-          Hum Score &amp; Tuner
+          HumNote · Pitch &amp; Tuner
         </div>
       </div>
     </div>
@@ -1014,7 +1014,7 @@
   <div id="infoPrivacyModal" class="hidden fixed inset-0 z-50 bg-slate-950/90 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="infoModalTitle">
     <div class="studio-card w-full p-5 space-y-3.5 shadow-2xl" style="max-width: 32rem;">
       <div class="flex items-center justify-between border-b border-slate-800" style="padding-bottom: 0.625rem;">
-        <h2 id="infoModalTitle" class="text-base font-extrabold text-white">Hum Score &amp; Tuner · 정보 및 개인정보처리방침</h2>
+        <h2 id="infoModalTitle" class="text-base font-extrabold text-white">HumNote · 정보 및 개인정보처리방침</h2>
         <button id="closeInfoModalBtn" type="button" class="studio-btn min-h-[38px] px-2.5 py-1 text-xs font-bold">
           <span data-icon="close" class="inline-flex"></span>
         </button>
@@ -1066,80 +1066,91 @@
       };
 
       const I18N_COMMON = {
-        appSubtitle: 'Hum Score & Tuner',
+        appTitle: 'HumNote',
+        statusStandby: 'READY',
+        statusMicActive: 'MIC ON',
+        statusSimActive: 'TEST',
+        micStart: 'REC',
+        micStop: 'STOP',
+        simStart: 'TEST',
+        simStop: 'STOP',
         waitingSound: '—',
-        holdLabels: { 0.5: '♪ 0.5', 1: '♩ 1', 2: '𝅗𝅥 2', 3: '𝅗𝅥. 3', 4: '𝅝 4' },
+        holdLabels: { 0.25: '♬ 0.25', 0.5: '♪ 0.5', 0.75: '♪. 0.75', 1: '♩ 1', 1.5: '♩. 1.5', 2: '𝅗𝅥 2', 3: '𝅗𝅥. 3', 4: '𝅝 4' },
+        scaleModeLabel: 'SCALE',
+        targetAnalysisLabel: 'PITCH',
+        clarityHeaderLabel: 'CLARITY',
+        inputLevelLabel: 'IN',
+        calibrateNoiseBtn: 'GATE',
+        scoreStudioTitle: 'SCORE',
+        scoreStats: (bars, notes) => `${bars}M · ${notes}N`,
         fullscreenBtn: 'A4',
+        defaultSongTitle: 'Untitled 01',
         subLabelLetter: 'CDE',
         subLabelNone: 'OFF',
         transposeOriginal: '0',
+        scoresLibraryBannerTitle: 'LIBRARY',
+        activeWorkspaceHeader: 'ACTIVE',
+        activeWorkspaceSavedBadge: 'SAVED',
+        activeWorkspaceDraftBadge: 'DRAFT',
+        savedScoresTitle: (n) => `SAVED (${n})`,
+        savedScoresStorageHint: 'LOCAL',
         printPdfBtn: 'A4 / PDF',
         exportJpgBtn: 'JPG',
         solfege: ['Do', 'Do♯', 'Re', 'Re♯', 'Mi', 'Fa', 'Fa♯', 'Sol', 'Sol♯', 'La', 'La♯', 'Si'],
+        presetLabel: 'PRESET',
+        stringManageLabel: 'DETECT',
+        autoStringOn: 'AUTO',
+        autoStringLocked: 'LOCK',
+        resetStringsBtn: 'RESET',
+        targetStringHeader: 'TARGET',
+        realtimeMeasureHeader: 'LIVE',
         pluckPrompt: '—',
         verdictInTune: 'IN TUNE',
         tunedTag: 'OK',
+        stringGridTitle: 'STRINGS',
         tempoHeaderLabel: 'BPM',
         tapBtn: 'TAP',
-        subdivOptions: ['♩ ×1', '♫ ×2', '3 ×3', '♬ ×4']
+        timeSigLabel: 'METER',
+        subdivLabel: 'SUBDIV',
+        subdivOptions: ['♩ ×1', '♫ ×2', '3 ×3', '♬ ×4'],
+        beatLedHeader: 'BEATS'
       };
 
       const I18N = {
         ko: {
-          appTitle: '허밍스코어 & 튜너',
-          statusStandby: '대기 중 (오프라인)',
-          statusMicActive: '마이크 활성',
-          statusSimActive: '테스트 신호',
-          micStart: '마이크 시작',
-          micStop: '마이크 정지',
-          simStart: '테스트',
-          simStop: '정지',
-          tabDetector: '음성 채보',
-          tabScores: '내 악보함',
-          tabTuner: '악기 조율',
+          appSubtitle: '허밍노트 · 튜너',
+          tabDetector: '채보',
+          tabScores: '보관함',
+          tabTuner: '튜너',
           tabMetronome: '메트로놈',
-          scaleModeLabel: '음계 모드',
-          modeDiatonic: '7음계 (CDEFGAB)',
-          modeChromatic: '12음계 (♯)',
-          targetAnalysisLabel: '피치 분석',
-          clarityHeaderLabel: '명료도',
-          inputLevelLabel: '입력',
-          calibrateNoiseBtn: '소음 보정',
+          modeDiatonic: '7음계 (Major)',
+          modeChromatic: '12음계 (Chromatic)',
           calibratingNoiseBtn: '측정 중...',
-          scoreStudioTitle: '오선지 악보',
-          scoreStats: (bars, notes) => `${bars}마디 · ${notes}음`,
           playScoreBtn: '재생',
           stopScoreBtn: '정지',
-          songTitlePlaceholder: '곡 제목',
-          defaultSongTitle: '나의 허밍 악보',
+          songTitlePlaceholder: '제목',
           subLabelSolfege: '도레미',
-          toastNoNotes: '재생할 음표가 없습니다.',
+          toastNoNotes: '음표 없음',
           saveScoreBtn: '저장',
-          scoresLibraryBannerTitle: '로컬 악보 라이브러리',
           scoresSaveCurrentBtn: '저장',
-          newScoreBtn: '새 악보',
-          activeWorkspaceHeader: '현재 슬롯',
-          activeWorkspaceSavedBadge: '저장됨',
-          activeWorkspaceDraftBadge: '작업 중',
+          newScoreBtn: '신규',
           scoresEditActiveBtn: '편집',
-          savedScoresTitle: (n) => `내 악보함 (${n})`,
-          savedScoresStorageHint: '로컬 저장소',
-          savedEmptyText: '저장된 악보가 없습니다.',
+          savedEmptyText: '저장된 악보 없음',
           previewPlayBtn: '재생',
           loadToStaffBtn: '열기',
-          toastSavedScore: (t) => `"${t}" 저장 완료`,
-          toastLoadedScore: (t) => `"${t}" 불러옴`,
-          toastDeletedScore: '삭제 완료',
-          toastNoNotesToSave: '저장할 음표가 없습니다.',
-          toastStorageFull: '저장 공간이 부족합니다.',
-          toastNewScoreReady: '새 악보 준비 완료',
-          modalTitle: 'A4 악보 출력',
+          toastSavedScore: (t) => `"${t}" 저장됨`,
+          toastLoadedScore: (t) => `"${t}" 열림`,
+          toastDeletedScore: '삭제됨',
+          toastNoNotesToSave: '음표 없음',
+          toastStorageFull: '저장 공간 부족',
+          toastNewScoreReady: '새 악보',
+          modalTitle: 'A4 출력',
           closeModalBtn: '닫기',
-          toastJpgSaved: (name) => `"${name}.jpg" 저장 완료`,
-          toastJpgError: 'JPG 생성 오류',
+          toastJpgSaved: (name) => `"${name}.jpg" 저장됨`,
+          toastJpgError: 'JPG 오류',
           solfege: ['도', '도♯', '레', '레♯', '미', '파', '파♯', '솔', '솔♯', '라', '라♯', '시'],
           glyphTitles: {
-            playMeasure: '이 마디 연주',
+            playMeasure: '마디 연주',
             playFrom: '여기부터 연주',
             repeatStart: '도돌이표 시작 (|:)',
             repeatEnd: '도돌이표 끝 (:|)',
@@ -1148,203 +1159,139 @@
             quarter: '4분음표 (1박)',
             eighth: '8분음표 (0.5박)',
             sixteenth: '16분음표 (0.25박)',
-            dot: '부점 (1.5배 길이)',
-            triplet: '셋잇단음 (3연음)',
+            dot: '부점 (1.5×)',
+            triplet: '셋잇단음 (3)',
             stepDown: '음높이 내림',
             stepUp: '음높이 올림',
-            accidental: '임시표 전환 (♯/♭/♮)',
-            rest: '쉼표 전환',
-            insertAfter: '뒤에 음표 추가',
-            deleteNote: '선택 음표 삭제'
+            accidental: '임시표 (♯/♭/♮)',
+            rest: '쉼표',
+            insertAfter: '음표 추가',
+            deleteNote: '음표 삭제'
           },
           instGuitar: '기타',
           instUkulele: '우쿠렐레',
           instViolin: '바이올린',
           instBass: '베이스',
-          presetLabel: '튜닝 프리셋',
-          stringManageLabel: '현 감지 모드',
-          autoStringOn: '자동 감지',
-          autoStringLocked: '수동 고정',
-          resetStringsBtn: '초기화',
-          targetStringHeader: '대상 현',
-          realtimeMeasureHeader: '측정값',
           verdictTooLow: '♭ 낮음',
           verdictSlightlyLow: '♭ 미세 낮음',
           verdictSlightlyHigh: '♯ 미세 높음',
           verdictTooHigh: '♯ 높음',
-          stringGridTitle: '현별 목표 음정',
           stringNum: (n) => `${n}번줄`,
-          timeSigLabel: '박자',
-          subdivLabel: '세분화',
-          beatLedHeader: '박자 LED',
           metroStart: '시작',
           metroStop: '정지',
-          toastMicError: '마이크 권한이 필요합니다. [테스트] 모드를 사용해 보세요.',
-          toastCalibrated: (db) => `소음 기준: ${db} dB`,
+          toastMicError: '마이크 권한 필요 ([TEST] 사용 가능)',
+          toastCalibrated: (db) => `GATE: ${db} dB`,
           toastRefTone: (note, hz) => `${note} (${hz} Hz)`,
-          infoModalTitle: 'Hum Score & Tuner · 정보 및 개인정보처리방침',
+          infoModalTitle: 'HumNote · 정보 및 개인정보처리방침',
           infoModalHtml: `
             <p class="font-bold text-emerald-300">1. 100% 기기 내 오프라인 음성 처리</p>
             <p>마이크(RECORD_AUDIO) 권한은 기기 내부에서 실시간 주파수(Hz) 분석에만 사용되며 외부로 전송되지 않습니다.</p>
             <p class="font-bold text-emerald-300">2. 개인정보 비수집</p>
             <p>음성 녹음 파일이나 개인 식별 정보를 수집하지 않으며, 저장된 악보는 기기 내부에만 보관됩니다.</p>
-            <p class="text-[11px] text-slate-400 pt-1">Version 3.8 Studio Edition · Final Release</p>
+            <p class="text-[11px] text-slate-400 pt-1">HumNote v4.0 Studio Edition</p>
           `
         },
         en: {
-          appTitle: 'Hum Score & Tuner',
-          statusStandby: 'Standby (Offline)',
-          statusMicActive: 'Mic Active',
-          statusSimActive: 'Test Signal',
-          micStart: 'Start Mic',
-          micStop: 'Stop Mic',
-          simStart: 'Test',
-          simStop: 'Stop',
+          appSubtitle: 'Pitch & Tuner',
           tabDetector: 'Score',
           tabScores: 'Library',
           tabTuner: 'Tuner',
           tabMetronome: 'Metronome',
-          scaleModeLabel: 'Scale Mode',
-          modeDiatonic: '7-Note (CDEFGAB)',
-          modeChromatic: '12-Tone (♯)',
-          targetAnalysisLabel: 'Pitch Analysis',
-          clarityHeaderLabel: 'Clarity',
-          inputLevelLabel: 'Input',
-          calibrateNoiseBtn: 'Calibrate',
-          calibratingNoiseBtn: 'Measuring...',
-          scoreStudioTitle: 'Staff',
-          scoreStats: (bars, notes) => `${bars}m · ${notes}n`,
+          modeDiatonic: '7-Note (Major)',
+          modeChromatic: '12-Tone (Chromatic)',
+          calibratingNoiseBtn: 'MEASURING...',
           playScoreBtn: 'Play',
           stopScoreBtn: 'Stop',
-          songTitlePlaceholder: 'Song Title',
-          defaultSongTitle: 'My Hum Score',
+          songTitlePlaceholder: 'Title',
           subLabelSolfege: 'Do-Re-Mi',
-          toastNoNotes: 'No notes to play.',
+          toastNoNotes: 'No notes',
           saveScoreBtn: 'Save',
-          scoresLibraryBannerTitle: 'Local Score Library',
           scoresSaveCurrentBtn: 'Save',
           newScoreBtn: 'New',
-          activeWorkspaceHeader: 'Active Slot',
-          activeWorkspaceSavedBadge: 'Saved',
-          activeWorkspaceDraftBadge: 'Draft',
           scoresEditActiveBtn: 'Edit',
-          savedScoresTitle: (n) => `Library (${n})`,
-          savedScoresStorageHint: 'Local Storage',
-          savedEmptyText: 'No saved scores.',
+          savedEmptyText: 'No saved scores',
           previewPlayBtn: 'Play',
           loadToStaffBtn: 'Open',
           toastSavedScore: (t) => `Saved "${t}"`,
-          toastLoadedScore: (t) => `Loaded "${t}"`,
+          toastLoadedScore: (t) => `Opened "${t}"`,
           toastDeletedScore: 'Deleted',
-          toastNoNotesToSave: 'No notes to save.',
-          toastStorageFull: 'Storage quota exceeded.',
-          toastNewScoreReady: 'New score ready',
-          modalTitle: 'A4 Sheet Export',
+          toastNoNotesToSave: 'No notes',
+          toastStorageFull: 'Storage full',
+          toastNewScoreReady: 'New score',
+          modalTitle: 'A4 Export',
           closeModalBtn: 'Close',
           toastJpgSaved: (name) => `Saved "${name}.jpg"`,
-          toastJpgError: 'JPG export failed',
+          toastJpgError: 'JPG error',
           glyphTitles: {
             playMeasure: 'Play Measure',
             playFrom: 'Play From Here',
             repeatStart: 'Repeat Start (|:)',
             repeatEnd: 'Repeat End (:|)',
-            whole: 'Whole Note (4 beats)',
-            half: 'Half Note (2 beats)',
-            quarter: 'Quarter Note (1 beat)',
-            eighth: 'Eighth Note (0.5 beat)',
-            sixteenth: 'Sixteenth Note (0.25 beat)',
-            dot: 'Dotted Note (1.5×)',
-            triplet: 'Triplet (3-tuplet)',
-            stepDown: 'Step Pitch Down',
-            stepUp: 'Step Pitch Up',
-            accidental: 'Toggle Accidental (♯/♭/♮)',
-            rest: 'Toggle Rest',
-            insertAfter: 'Insert Note After',
-            deleteNote: 'Delete Selected Note'
+            whole: 'Whole Note (4)',
+            half: 'Half Note (2)',
+            quarter: 'Quarter Note (1)',
+            eighth: 'Eighth Note (0.5)',
+            sixteenth: 'Sixteenth Note (0.25)',
+            dot: 'Dotted (1.5×)',
+            triplet: 'Triplet (3)',
+            stepDown: 'Step Down',
+            stepUp: 'Step Up',
+            accidental: 'Accidental (♯/♭/♮)',
+            rest: 'Rest',
+            insertAfter: 'Insert Note',
+            deleteNote: 'Delete Note'
           },
           instGuitar: 'Guitar',
           instUkulele: 'Ukulele',
           instViolin: 'Violin',
           instBass: 'Bass',
-          presetLabel: 'Tuning Preset',
-          stringManageLabel: 'String Mode',
-          autoStringOn: 'Auto',
-          autoStringLocked: 'Locked',
-          resetStringsBtn: 'Reset',
-          targetStringHeader: 'Target',
-          realtimeMeasureHeader: 'Live',
           verdictTooLow: '♭ Flat',
           verdictSlightlyLow: '♭ Slightly Low',
           verdictSlightlyHigh: '♯ Slightly High',
           verdictTooHigh: '♯ Sharp',
-          stringGridTitle: 'String Targets',
           stringNum: (n) => `S${n}`,
-          timeSigLabel: 'Meter',
-          subdivLabel: 'Subdivision',
-          beatLedHeader: 'Beat LEDs',
           metroStart: 'Start',
           metroStop: 'Stop',
-          toastMicError: 'Microphone unavailable. Try [Test] mode.',
-          toastCalibrated: (db) => `Gate: ${db} dB`,
+          toastMicError: 'Mic unavailable ([TEST] available)',
+          toastCalibrated: (db) => `GATE: ${db} dB`,
           toastRefTone: (note, hz) => `${note} (${hz} Hz)`,
-          infoModalTitle: 'Hum Score & Tuner · Info & Privacy Policy',
+          infoModalTitle: 'HumNote · Info & Privacy Policy',
           infoModalHtml: `
             <p class="font-bold text-emerald-300">1. 100% On-Device Offline Audio Processing</p>
             <p>Microphone access (RECORD_AUDIO) is used exclusively in real time on your device for pitch detection and never leaves your device.</p>
             <p class="font-bold text-emerald-300">2. Zero Data Collection</p>
             <p>No audio recordings or personal data are collected or transmitted.</p>
-            <p class="text-[11px] text-slate-400 pt-1">Version 3.8 Studio Edition · Final Release</p>
+            <p class="text-[11px] text-slate-400 pt-1">HumNote v4.0 Studio Edition</p>
           `
         },
         es: {
-          appTitle: 'Hum Score & Tuner',
-          statusStandby: 'En espera',
-          statusMicActive: 'Mic activo',
-          statusSimActive: 'Prueba',
-          micStart: 'Iniciar Mic',
-          micStop: 'Detener Mic',
-          simStart: 'Prueba',
-          simStop: 'Parar',
+          appSubtitle: 'Pitch & Tuner',
           tabDetector: 'Partitura',
           tabScores: 'Archivo',
           tabTuner: 'Afinador',
           tabMetronome: 'Metrónomo',
-          scaleModeLabel: 'Escala',
-          modeDiatonic: '7 Notas (CDEFGAB)',
-          modeChromatic: '12 Notas (♯)',
-          targetAnalysisLabel: 'Análisis',
-          clarityHeaderLabel: 'Claridad',
-          inputLevelLabel: 'Nivel',
-          calibrateNoiseBtn: 'Calibrar',
-          calibratingNoiseBtn: 'Midiendo...',
-          scoreStudioTitle: 'Pentagrama',
-          scoreStats: (bars, notes) => `${bars}c · ${notes}n`,
+          modeDiatonic: '7 Notas (Mayor)',
+          modeChromatic: '12 Notas (Cromática)',
+          calibratingNoiseBtn: 'MIDIENDO...',
           playScoreBtn: 'Oír',
           stopScoreBtn: 'Parar',
           songTitlePlaceholder: 'Título',
-          defaultSongTitle: 'Mi Partitura',
           subLabelSolfege: 'Do-Re-Mi',
-          toastNoNotes: 'Sin notas.',
+          toastNoNotes: 'Sin notas',
           saveScoreBtn: 'Guardar',
-          scoresLibraryBannerTitle: 'Biblioteca Local',
           scoresSaveCurrentBtn: 'Guardar',
           newScoreBtn: 'Nueva',
-          activeWorkspaceHeader: 'Activa',
-          activeWorkspaceSavedBadge: 'Guardada',
-          activeWorkspaceDraftBadge: 'Borrador',
           scoresEditActiveBtn: 'Editar',
-          savedScoresTitle: (n) => `Archivo (${n})`,
-          savedScoresStorageHint: 'Local',
-          savedEmptyText: 'Sin partituras.',
+          savedEmptyText: 'Sin partituras',
           previewPlayBtn: 'Oír',
           loadToStaffBtn: 'Abrir',
           toastSavedScore: (t) => `"${t}" guardada`,
-          toastLoadedScore: (t) => `"${t}" cargada`,
+          toastLoadedScore: (t) => `"${t}" abierta`,
           toastDeletedScore: 'Eliminada',
-          toastNoNotesToSave: 'Sin notas.',
-          toastStorageFull: 'Almacenamiento lleno.',
-          toastNewScoreReady: 'Lista',
-          modalTitle: 'Exportación A4',
+          toastNoNotesToSave: 'Sin notas',
+          toastStorageFull: 'Sin espacio',
+          toastNewScoreReady: 'Nueva partitura',
+          modalTitle: 'Exportar A4',
           closeModalBtn: 'Cerrar',
           toastJpgSaved: (name) => `"${name}.jpg" guardada`,
           toastJpgError: 'Error JPG',
@@ -1353,360 +1300,253 @@
             playFrom: 'Oír desde aquí',
             repeatStart: 'Inicio repetición (|:)',
             repeatEnd: 'Fin repetición (:|)',
-            whole: 'Redonda (4 tiempos)',
-            half: 'Blanca (2 tiempos)',
-            quarter: 'Negra (1 tiempo)',
+            whole: 'Redonda (4)',
+            half: 'Blanca (2)',
+            quarter: 'Negra (1)',
             eighth: 'Corchea (0.5)',
             sixteenth: 'Semicorchea (0.25)',
             dot: 'Puntillo (1.5×)',
-            triplet: 'Tresillo',
-            stepDown: 'Bajar tono',
-            stepUp: 'Subir tono',
+            triplet: 'Tresillo (3)',
+            stepDown: 'Bajar',
+            stepUp: 'Subir',
             accidental: 'Alteración (♯/♭/♮)',
             rest: 'Silencio',
-            insertAfter: 'Insertar nota',
-            deleteNote: 'Eliminar nota'
+            insertAfter: 'Insertar',
+            deleteNote: 'Eliminar'
           },
           instGuitar: 'Guitarra',
           instUkulele: 'Ukelele',
           instViolin: 'Violín',
           instBass: 'Bajo',
-          presetLabel: 'Preajuste',
-          stringManageLabel: 'Cuerda',
-          autoStringOn: 'Auto',
-          autoStringLocked: 'Fija',
-          resetStringsBtn: 'Reset',
-          targetStringHeader: 'Objetivo',
-          realtimeMeasureHeader: 'Entrada',
           verdictTooLow: '♭ Bajo',
           verdictSlightlyLow: '♭ Poco bajo',
           verdictSlightlyHigh: '♯ Poco alto',
           verdictTooHigh: '♯ Alto',
-          stringGridTitle: 'Cuerdas',
           stringNum: (n) => `C${n}`,
-          timeSigLabel: 'Compás',
-          subdivLabel: 'Subdivisión',
-          beatLedHeader: 'LEDs',
           metroStart: 'Iniciar',
           metroStop: 'Parar',
-          toastMicError: 'Micrófono no disponible.',
-          toastCalibrated: (db) => `Umbral: ${db} dB`,
+          toastMicError: 'Sin micrófono ([TEST] disponible)',
+          toastCalibrated: (db) => `GATE: ${db} dB`,
           toastRefTone: (note, hz) => `${note} (${hz} Hz)`,
-          infoModalTitle: 'Hum Score & Tuner · Privacidad',
+          infoModalTitle: 'HumNote · Privacidad',
           infoModalHtml: `
             <p class="font-bold text-emerald-300">1. Procesamiento local sin conexión</p>
             <p>El micrófono se procesa exclusivamente en el dispositivo en tiempo real.</p>
-            <p class="text-[11px] text-slate-400 pt-1">Version 3.8 Studio Edition</p>
+            <p class="text-[11px] text-slate-400 pt-1">HumNote v4.0 Studio Edition</p>
           `
         },
         ja: {
-          appTitle: 'ハミングスコア & チューナー',
-          statusStandby: '待機中',
-          statusMicActive: 'マイク分析中',
-          statusSimActive: 'テスト信号',
-          micStart: 'マイク開始',
-          micStop: 'マイク停止',
-          simStart: 'テスト',
-          simStop: '停止',
+          appSubtitle: 'ハミングノート · チューナー',
           tabDetector: '採譜',
-          tabScores: '楽譜一覧',
-          tabTuner: '調律器',
+          tabScores: '保管庫',
+          tabTuner: 'チューナー',
           tabMetronome: 'メトロノーム',
-          scaleModeLabel: '音階モード',
-          modeDiatonic: '7音階 (CDEFGAB)',
-          modeChromatic: '12音階 (♯)',
-          targetAnalysisLabel: 'ピッチ分析',
-          clarityHeaderLabel: '明瞭度',
-          inputLevelLabel: '入力',
-          calibrateNoiseBtn: 'ノイズ補正',
+          modeDiatonic: '7音階 (Major)',
+          modeChromatic: '12音階 (Chromatic)',
           calibratingNoiseBtn: '測定中...',
-          scoreStudioTitle: '五線譜',
-          scoreStats: (bars, notes) => `${bars}小節 · ${notes}音`,
           playScoreBtn: '再生',
           stopScoreBtn: '停止',
-          songTitlePlaceholder: '曲名',
-          defaultSongTitle: 'マイ・ハミング楽譜',
+          songTitlePlaceholder: 'タイトル',
           subLabelSolfege: 'ドレミ',
-          toastNoNotes: '音符がありません。',
+          toastNoNotes: '音符なし',
           saveScoreBtn: '保存',
-          scoresLibraryBannerTitle: 'ローカル楽譜ライブラリ',
           scoresSaveCurrentBtn: '保存',
           newScoreBtn: '新規',
-          activeWorkspaceHeader: '作業スロット',
-          activeWorkspaceSavedBadge: '保存済',
-          activeWorkspaceDraftBadge: '編集中',
           scoresEditActiveBtn: '編集',
-          savedScoresTitle: (n) => `楽譜一覧 (${n})`,
-          savedScoresStorageHint: '端末内保存',
-          savedEmptyText: '保存された楽譜はありません。',
+          savedEmptyText: '保存済み楽譜なし',
           previewPlayBtn: '再生',
           loadToStaffBtn: '開く',
-          toastSavedScore: (t) => `「${t}」保存完了`,
-          toastLoadedScore: (t) => `「${t}」読込完了`,
-          toastDeletedScore: '削除完了',
-          toastNoNotesToSave: '音符がありません。',
-          toastStorageFull: '保存容量が不足しています。',
-          toastNewScoreReady: '新規楽譜準備完了',
-          modalTitle: 'A4 楽譜出力',
+          toastSavedScore: (t) => `「${t}」保存済`,
+          toastLoadedScore: (t) => `「${t}」読込済`,
+          toastDeletedScore: '削除済',
+          toastNoNotesToSave: '音符なし',
+          toastStorageFull: '容量不足',
+          toastNewScoreReady: '新規楽譜',
+          modalTitle: 'A4 出力',
           closeModalBtn: '閉じる',
-          toastJpgSaved: (name) => `「${name}.jpg」保存完了`,
-          toastJpgError: 'JPG出力エラー',
+          toastJpgSaved: (name) => `「${name}.jpg」保存済`,
+          toastJpgError: 'JPGエラー',
           solfege: ['ド', 'ド♯', 'レ', 'レ♯', 'ミ', 'ファ', 'ファ♯', 'ソ', 'ソ♯', 'ラ', 'ラ♯', 'シ'],
           glyphTitles: {
-            playMeasure: 'この小節を再生',
+            playMeasure: '小節再生',
             playFrom: 'ここから再生',
             repeatStart: '反復開始 (|:)',
             repeatEnd: '反復終了 (:|)',
-            whole: '全音符 (4拍)',
-            half: '2分音符 (2拍)',
-            quarter: '4分音符 (1拍)',
-            eighth: '8分音符 (0.5拍)',
-            sixteenth: '16分音符 (0.25拍)',
-            dot: '付点 (1.5倍)',
-            triplet: '3連符',
-            stepDown: '音高を下げる',
-            stepUp: '音高を上げる',
-            accidental: '臨時記号切替 (♯/♭/♮)',
-            rest: '休符切替',
-            insertAfter: '後ろに音符追加',
-            deleteNote: '選択音符を削除'
+            whole: '全音符 (4)',
+            half: '2分音符 (2)',
+            quarter: '4分音符 (1)',
+            eighth: '8分音符 (0.5)',
+            sixteenth: '16分音符 (0.25)',
+            dot: '付点 (1.5×)',
+            triplet: '3連符 (3)',
+            stepDown: '下げる',
+            stepUp: '上げる',
+            accidental: '臨時記号 (♯/♭/♮)',
+            rest: '休符',
+            insertAfter: '追加',
+            deleteNote: '削除'
           },
           instGuitar: 'ギター',
           instUkulele: 'ウクレレ',
           instViolin: 'バイオリン',
           instBass: 'ベース',
-          presetLabel: 'プリセット',
-          stringManageLabel: '弦検出',
-          autoStringOn: '自動',
-          autoStringLocked: '固定',
-          resetStringsBtn: 'リセット',
-          targetStringHeader: '対象弦',
-          realtimeMeasureHeader: '測定値',
           verdictTooLow: '♭ 低い',
           verdictSlightlyLow: '♭ やや低い',
           verdictSlightlyHigh: '♯ やや高い',
           verdictTooHigh: '♯ 高い',
-          stringGridTitle: '弦別目標音程',
           stringNum: (n) => `${n}弦`,
-          timeSigLabel: '拍子',
-          subdivLabel: '分割',
-          beatLedHeader: '拍子 LED',
           metroStart: '開始',
           metroStop: '停止',
-          toastMicError: 'マイクが利用できません。',
-          toastCalibrated: (db) => `基準: ${db} dB`,
+          toastMicError: 'マイク権限が必要 ([TEST]利用可)',
+          toastCalibrated: (db) => `GATE: ${db} dB`,
           toastRefTone: (note, hz) => `${note} (${hz} Hz)`,
-          infoModalTitle: 'Hum Score & Tuner · プライバシーポリシー',
+          infoModalTitle: 'HumNote · プライバシーポリシー',
           infoModalHtml: `
             <p class="font-bold text-emerald-300">1. 端末内でのオフライン音声処理</p>
             <p>マイク権限は端末内部での音程解析のみに使用され、外部送信されません。</p>
-            <p class="text-[11px] text-slate-400 pt-1">Version 3.8 Studio Edition</p>
+            <p class="text-[11px] text-slate-400 pt-1">HumNote v4.0 Studio Edition</p>
           `
         },
         'zh-CN': {
-          appTitle: '哼唱乐谱 & 调音器',
-          statusStandby: '待机中',
-          statusMicActive: '麦克风分析中',
-          statusSimActive: '测试信号',
-          micStart: '开启麦克风',
-          micStop: '停止麦克风',
-          simStart: '测试',
-          simStop: '停止',
+          appSubtitle: '哼唱笔记 · 调音器',
           tabDetector: '记谱',
-          tabScores: '乐谱库',
+          tabScores: '曲库',
           tabTuner: '调音器',
           tabMetronome: '节拍器',
-          scaleModeLabel: '音阶模式',
-          modeDiatonic: '7音阶 (CDEFGAB)',
-          modeChromatic: '12音阶 (♯)',
-          targetAnalysisLabel: '音高分析',
-          clarityHeaderLabel: '清晰度',
-          inputLevelLabel: '输入',
-          calibrateNoiseBtn: '噪音校准',
+          modeDiatonic: '7音阶 (Major)',
+          modeChromatic: '12音阶 (Chromatic)',
           calibratingNoiseBtn: '测量中...',
-          scoreStudioTitle: '五线谱',
-          scoreStats: (bars, notes) => `${bars}小节 · ${notes}音`,
           playScoreBtn: '播放',
           stopScoreBtn: '停止',
-          songTitlePlaceholder: '曲名',
-          defaultSongTitle: '我的哼唱乐谱',
+          songTitlePlaceholder: '标题',
           subLabelSolfege: 'DoReMi',
-          toastNoNotes: '暂无音符。',
+          toastNoNotes: '无音符',
           saveScoreBtn: '保存',
-          scoresLibraryBannerTitle: '本地乐谱库',
           scoresSaveCurrentBtn: '保存',
           newScoreBtn: '新建',
-          activeWorkspaceHeader: '当前槽位',
-          activeWorkspaceSavedBadge: '已保存',
-          activeWorkspaceDraftBadge: '编辑中',
           scoresEditActiveBtn: '编辑',
-          savedScoresTitle: (n) => `乐谱库 (${n})`,
-          savedScoresStorageHint: '本地存储',
-          savedEmptyText: '暂无乐谱。',
+          savedEmptyText: '暂无乐谱',
           previewPlayBtn: '播放',
           loadToStaffBtn: '打开',
           toastSavedScore: (t) => `《${t}》已保存`,
-          toastLoadedScore: (t) => `《${t}》已载入`,
+          toastLoadedScore: (t) => `《${t}》已打开`,
           toastDeletedScore: '已删除',
-          toastNoNotesToSave: '暂无音符。',
-          toastStorageFull: '存储空间不足。',
+          toastNoNotesToSave: '无音符',
+          toastStorageFull: '空间不足',
           toastNewScoreReady: '新建就绪',
           modalTitle: 'A4 导出',
           closeModalBtn: '关闭',
           toastJpgSaved: (name) => `"${name}.jpg" 已保存`,
-          toastJpgError: 'JPG 导出失败',
+          toastJpgError: 'JPG错误',
           glyphTitles: {
-            playMeasure: '播放本小节',
-            playFrom: '从此音开始播放',
+            playMeasure: '播放小节',
+            playFrom: '从此播放',
             repeatStart: '反复开始 (|:)',
             repeatEnd: '反复结束 (:|)',
-            whole: '全音符 (4拍)',
-            half: '二分音符 (2拍)',
-            quarter: '四分音符 (1拍)',
-            eighth: '八分音符 (0.5拍)',
-            sixteenth: '十六分音符 (0.25拍)',
-            dot: '附点 (1.5倍)',
-            triplet: '三连音',
-            stepDown: '降低音高',
-            stepUp: '升高音高',
-            accidental: '变音记号 (♯/♭/♮)',
-            rest: '休止符切换',
-            insertAfter: '在后插入音符',
-            deleteNote: '删除选中音符'
+            whole: '全音符 (4)',
+            half: '二分音符 (2)',
+            quarter: '四分音符 (1)',
+            eighth: '八分音符 (0.5)',
+            sixteenth: '十六分音符 (0.25)',
+            dot: '附点 (1.5×)',
+            triplet: '三连音 (3)',
+            stepDown: '降低',
+            stepUp: '升高',
+            accidental: '变音 (♯/♭/♮)',
+            rest: '休止符',
+            insertAfter: '添加',
+            deleteNote: '删除'
           },
           instGuitar: '吉他',
           instUkulele: '尤克里里',
           instViolin: '小提琴',
           instBass: '贝斯',
-          presetLabel: '调音预设',
-          stringManageLabel: '琴弦检测',
-          autoStringOn: '自动',
-          autoStringLocked: '锁定',
-          resetStringsBtn: '重置',
-          targetStringHeader: '目标弦',
-          realtimeMeasureHeader: '测量',
           verdictTooLow: '♭ 偏低',
           verdictSlightlyLow: '♭ 略低',
           verdictSlightlyHigh: '♯ 略高',
           verdictTooHigh: '♯ 偏高',
-          stringGridTitle: '各弦目标音高',
           stringNum: (n) => `${n}弦`,
-          timeSigLabel: '拍号',
-          subdivLabel: '细分',
-          beatLedHeader: '节拍 LED',
           metroStart: '启动',
           metroStop: '停止',
-          toastMicError: '无法访问麦克风。',
-          toastCalibrated: (db) => `阈值: ${db} dB`,
+          toastMicError: '需要麦克风权限 (可用[TEST])',
+          toastCalibrated: (db) => `GATE: ${db} dB`,
           toastRefTone: (note, hz) => `${note} (${hz} Hz)`,
-          infoModalTitle: 'Hum Score & Tuner · 隐私政策',
+          infoModalTitle: 'HumNote · 隐私政策',
           infoModalHtml: `
             <p class="font-bold text-emerald-300">1. 100% 本地离线音频处理</p>
             <p>麦克风仅在设备本地实时分析音高，不上传任何数据。</p>
-            <p class="text-[11px] text-slate-400 pt-1">Version 3.8 Studio Edition</p>
+            <p class="text-[11px] text-slate-400 pt-1">HumNote v4.0 Studio Edition</p>
           `
         },
         'zh-TW': {
-          appTitle: '哼唱樂譜 & 調音器',
-          statusStandby: '待機中',
-          statusMicActive: '麥克風分析中',
-          statusSimActive: '測試訊號',
-          micStart: '開啟麥克風',
-          micStop: '停止麥克風',
-          simStart: '測試',
-          simStop: '停止',
+          appSubtitle: '哼唱筆記 · 調音器',
           tabDetector: '記譜',
-          tabScores: '樂譜庫',
+          tabScores: '曲庫',
           tabTuner: '調音器',
           tabMetronome: '節拍器',
-          scaleModeLabel: '音階模式',
-          modeDiatonic: '7音階 (CDEFGAB)',
-          modeChromatic: '12音階 (♯)',
-          targetAnalysisLabel: '音高分析',
-          clarityHeaderLabel: '清晰度',
-          inputLevelLabel: '輸入',
-          calibrateNoiseBtn: '噪音校準',
+          modeDiatonic: '7音階 (Major)',
+          modeChromatic: '12音階 (Chromatic)',
           calibratingNoiseBtn: '測量中...',
-          scoreStudioTitle: '五線譜',
-          scoreStats: (bars, notes) => `${bars}小節 · ${notes}音`,
           playScoreBtn: '播放',
           stopScoreBtn: '停止',
-          songTitlePlaceholder: '曲名',
-          defaultSongTitle: '我的哼唱樂譜',
+          songTitlePlaceholder: '標題',
           subLabelSolfege: 'DoReMi',
-          toastNoNotes: '尚無音符。',
+          toastNoNotes: '無音符',
           saveScoreBtn: '儲存',
-          scoresLibraryBannerTitle: '本地樂譜庫',
           scoresSaveCurrentBtn: '儲存',
           newScoreBtn: '新增',
-          activeWorkspaceHeader: '目前槽位',
-          activeWorkspaceSavedBadge: '已儲存',
-          activeWorkspaceDraftBadge: '編輯中',
           scoresEditActiveBtn: '編輯',
-          savedScoresTitle: (n) => `樂譜庫 (${n})`,
-          savedScoresStorageHint: '本地儲存',
-          savedEmptyText: '尚無樂譜。',
+          savedEmptyText: '尚無樂譜',
           previewPlayBtn: '播放',
           loadToStaffBtn: '開啟',
           toastSavedScore: (t) => `《${t}》已儲存`,
-          toastLoadedScore: (t) => `《${t}》已載入`,
+          toastLoadedScore: (t) => `《${t}》已開啟`,
           toastDeletedScore: '已刪除',
-          toastNoNotesToSave: '尚無音符。',
-          toastStorageFull: '儲存空間不足。',
+          toastNoNotesToSave: '無音符',
+          toastStorageFull: '空間不足',
           toastNewScoreReady: '新增就緒',
           modalTitle: 'A4 匯出',
           closeModalBtn: '關閉',
           toastJpgSaved: (name) => `"${name}.jpg" 已儲存`,
-          toastJpgError: 'JPG 匯出失敗',
+          toastJpgError: 'JPG錯誤',
           glyphTitles: {
-            playMeasure: '播放本小節',
-            playFrom: '從此音開始播放',
+            playMeasure: '播放小節',
+            playFrom: '從此播放',
             repeatStart: '反覆開始 (|:)',
             repeatEnd: '反覆結束 (:|)',
-            whole: '全音符 (4拍)',
-            half: '二分音符 (2拍)',
-            quarter: '四分音符 (1拍)',
-            eighth: '八分音符 (0.5拍)',
-            sixteenth: '十六分音符 (0.25拍)',
-            dot: '附點 (1.5倍)',
-            triplet: '三連音',
-            stepDown: '降低音高',
-            stepUp: '升高音高',
-            accidental: '變音記號 (♯/♭/♮)',
-            rest: '休止符切換',
-            insertAfter: '在後插入音符',
-            deleteNote: '刪除選中音符'
+            whole: '全音符 (4)',
+            half: '二分音符 (2)',
+            quarter: '四分音符 (1)',
+            eighth: '八分音符 (0.5)',
+            sixteenth: '十六分音符 (0.25)',
+            dot: '附點 (1.5×)',
+            triplet: '三連音 (3)',
+            stepDown: '降低',
+            stepUp: '升高',
+            accidental: '變音 (♯/♭/♮)',
+            rest: '休止符',
+            insertAfter: '新增',
+            deleteNote: '刪除'
           },
           instGuitar: '吉他',
           instUkulele: '烏克麗麗',
           instViolin: '小提琴',
           instBass: '貝斯',
-          presetLabel: '調音預設',
-          stringManageLabel: '琴弦偵測',
-          autoStringOn: '自動',
-          autoStringLocked: '鎖定',
-          resetStringsBtn: '重設',
-          targetStringHeader: '目標弦',
-          realtimeMeasureHeader: '測量',
           verdictTooLow: '♭ 偏低',
           verdictSlightlyLow: '♭ 略低',
           verdictSlightlyHigh: '♯ 略高',
           verdictTooHigh: '♯ 偏高',
-          stringGridTitle: '各弦目標音高',
           stringNum: (n) => `${n}弦`,
-          timeSigLabel: '拍號',
-          subdivLabel: '細分',
-          beatLedHeader: '節拍 LED',
           metroStart: '啟動',
           metroStop: '停止',
-          toastMicError: '無法存取麥克風。',
-          toastCalibrated: (db) => `門檻: ${db} dB`,
+          toastMicError: '需要麥克風權限 (可用[TEST])',
+          toastCalibrated: (db) => `GATE: ${db} dB`,
           toastRefTone: (note, hz) => `${note} (${hz} Hz)`,
-          infoModalTitle: 'Hum Score & Tuner · 隱私權政策',
+          infoModalTitle: 'HumNote · 隱私權政策',
           infoModalHtml: `
             <p class="font-bold text-emerald-300">1. 100% 本地離線音訊處理</p>
             <p>麥克風僅在裝置本地即時分析音高，不上傳任何資料。</p>
-            <p class="text-[11px] text-slate-400 pt-1">Version 3.8 Studio Edition</p>
+            <p class="text-[11px] text-slate-400 pt-1">HumNote v4.0 Studio Edition</p>
           `
         }
       };
@@ -1753,9 +1593,9 @@
         activeTab: 'detector',
         a4Freq: 440,
         scaleMode: 'diatonic',
-        noiseGateDb: -40,
-        clarityThreshold: 0.90,
-        smoothingFrames: 3,
+        noiseGateDb: -42,
+        clarityThreshold: 0.82,
+        smoothingFrames: 2,
 
         audioCtx: null,
         micStream: null,
@@ -1789,6 +1629,10 @@
         candidateStartTime: 0,
         lastStablePitchTime: 0,
         silenceStartTime: 0,
+        pendingShiftMidi: null,
+        pendingShiftStartTime: 0,
+        prevFrameDb: -100,
+        noteMinDb: 0,
         isPlayingScore: false,
         playingNoteIdx: -1,
         playingSavedScoreId: null,
@@ -2353,24 +2197,36 @@
         }
         if (state.simOscillator) {
           try { state.simOscillator.stop(); } catch (e) {}
+          state.simOscillator.disconnect();
           state.simOscillator = null;
         }
-        state.simGain = null;
+        if (state.simGain) {
+          state.simGain.disconnect();
+          state.simGain = null;
+        }
         state.isSimRunning = false;
         updateStatusHeader();
         if (!state.isMicRunning) stopAnalysisLoop();
       }
 
+      function getEffectiveCaptureBeatMs() {
+        const activeBpm = state.metroRunning ? (state.metroBpm || 120) : 96;
+        return 60000 / activeBpm;
+      }
+
       function quantizeHoldDurationToBeats(holdMs) {
-        const beatMs = 60000 / (state.metroBpm || 120);
-        const minValidMs = Math.max(150, beatMs * 0.34);
+        const beatMs = getEffectiveCaptureBeatMs();
+        const minValidMs = Math.max(75, beatMs * 0.14);
         if (holdMs < minValidMs) return 0;
 
         const rawBeats = holdMs / beatMs;
-        if (rawBeats < 0.74) return 0.5;
-        if (rawBeats < 1.48) return 1;
-        if (rawBeats < 2.62) return 2;
-        if (rawBeats < 3.55) return 3;
+        if (rawBeats < 0.38) return 0.25;
+        if (rawBeats < 0.64) return 0.5;
+        if (rawBeats < 0.88) return 0.75;
+        if (rawBeats < 1.28) return 1;
+        if (rawBeats < 1.78) return 1.5;
+        if (rawBeats < 2.55) return 2;
+        if (rawBeats < 3.50) return 3;
         return 4;
       }
 
@@ -2389,6 +2245,9 @@
         state.candidateStartTime = 0;
         state.lastStablePitchTime = 0;
         state.silenceStartTime = 0;
+        state.pendingShiftMidi = null;
+        state.pendingShiftStartTime = 0;
+        state.noteMinDb = 0;
         el.detectedDurationBadge.classList.add('hidden');
       }
 
@@ -2468,11 +2327,16 @@
         const clarityPct = Math.round(res.clarity * 100);
         el.clarityPercentText.textContent = `${clarityPct}%`;
 
+        const prevDb = state.prevFrameDb;
+        state.prevFrameDb = res.db;
+
         if (res.freq <= 0 || res.clarity < state.clarityThreshold) {
           state.recentNoteBuffer = [];
+          state.pendingShiftMidi = null;
+          state.pendingShiftStartTime = 0;
           if (state.silenceStartTime === 0) {
             state.silenceStartTime = now;
-          } else if (now - state.silenceStartTime >= 150 && state.candidateMidi !== null) {
+          } else if (now - state.silenceStartTime >= 85 && state.candidateMidi !== null) {
             flushPendingVocalNote();
           }
           return;
@@ -2480,18 +2344,21 @@
 
         state.silenceStartTime = 0;
         const info = freqToPitchInfo(res.freq);
-        const key = `${info.letter}${info.octave}`;
-        state.recentNoteBuffer.push(key);
+        const effectiveMidi = state.scaleMode === 'diatonic'
+          ? info.snappedMidi
+          : info.midi;
+
+        state.recentNoteBuffer.push(effectiveMidi);
         if (state.recentNoteBuffer.length > state.smoothingFrames) {
           state.recentNoteBuffer.shift();
         }
 
-        const allSame = state.recentNoteBuffer.length >= state.smoothingFrames &&
-          state.recentNoteBuffer.every((v) => v === key);
+        const isStableOnset = state.recentNoteBuffer.length >= state.smoothingFrames &&
+          state.recentNoteBuffer.every((v) => v === effectiveMidi);
 
-        if (!allSame) return;
+        if (!isStableOnset && state.candidateMidi === null) return;
 
-        const inTune = Math.abs(info.cents) <= 12;
+        const inTune = Math.abs(info.cents) <= 15;
         el.detectedNoteLetter.textContent = info.letter;
         el.detectedNoteLetter.className = `text-6xl sm:text-7xl font-extrabold tracking-tight transition-all ${inTune ? 'text-emerald-400' : 'text-white'}`;
         el.detectedNoteOctave.textContent = String(info.octave);
@@ -2504,40 +2371,75 @@
         el.detectorNeedle.style.left = `${needlePct}%`;
         el.detectorNeedle.style.backgroundColor = inTune ? '#34d399' : (info.cents < 0 ? '#38bdf8' : '#fbbf24');
 
-        const effectiveMidi = state.scaleMode === 'diatonic'
-          ? info.snappedMidi
-          : info.midi;
-
-        const centsTolerance = state.candidateMidi === effectiveMidi ? 26 : 22;
+        const centsTolerance = state.candidateMidi === effectiveMidi ? 44 : 36;
         if (Math.abs(info.cents) > centsTolerance) return;
 
         if (state.candidateMidi === null) {
           state.candidateMidi = effectiveMidi;
           state.candidateStartTime = now;
           state.lastStablePitchTime = now;
-        } else if (state.candidateMidi !== effectiveMidi) {
+          state.noteMinDb = res.db;
+          state.pendingShiftMidi = null;
+          state.pendingShiftStartTime = 0;
+          return;
+        }
+
+        if (state.candidateMidi !== effectiveMidi) {
+          if (state.pendingShiftMidi !== effectiveMidi) {
+            state.pendingShiftMidi = effectiveMidi;
+            state.pendingShiftStartTime = now;
+          } else if (now - state.pendingShiftStartTime >= 65) {
+            const shiftStart = state.pendingShiftStartTime;
+            state.lastStablePitchTime = shiftStart;
+            flushPendingVocalNote();
+            state.candidateMidi = effectiveMidi;
+            state.candidateStartTime = shiftStart;
+            state.lastStablePitchTime = now;
+            state.noteMinDb = res.db;
+          }
+          return;
+        }
+
+        state.pendingShiftMidi = null;
+        state.pendingShiftStartTime = 0;
+
+        const holdMsBeforeSpike = now - state.candidateStartTime;
+        const dbJumpFromPrev = res.db - prevDb;
+        const dbRiseFromDip = res.db - state.noteMinDb;
+        const isReattackSpike = holdMsBeforeSpike >= 140 &&
+          ((dbJumpFromPrev >= 6.5 && dbRiseFromDip >= 7.5) || (dbRiseFromDip >= 10.5 && dbJumpFromPrev >= 3.5));
+
+        if (isReattackSpike) {
+          state.lastStablePitchTime = now - 15;
           flushPendingVocalNote();
           state.candidateMidi = effectiveMidi;
           state.candidateStartTime = now;
           state.lastStablePitchTime = now;
+          state.noteMinDb = res.db;
+          return;
+        }
+
+        if (res.db < state.noteMinDb) {
+          state.noteMinDb = res.db;
+        }
+        state.lastStablePitchTime = now;
+
+        const holdMs = now - state.candidateStartTime;
+        const beatMs = getEffectiveCaptureBeatMs();
+        const previewBeats = quantizeHoldDurationToBeats(holdMs);
+
+        if (previewBeats > 0) {
+          el.detectedDurationBadge.textContent = d.holdLabels[previewBeats] || `${previewBeats}`;
+          el.detectedDurationBadge.classList.remove('hidden');
         } else {
+          el.detectedDurationBadge.classList.add('hidden');
+        }
+
+        if (holdMs >= beatMs * 4.05) {
+          commitRhythmicNoteToScore(effectiveMidi, 4);
+          state.candidateStartTime = now;
           state.lastStablePitchTime = now;
-          const holdMs = now - state.candidateStartTime;
-          const beatMs = 60000 / (state.metroBpm || 120);
-          const previewBeats = quantizeHoldDurationToBeats(holdMs);
-
-          if (previewBeats > 0) {
-            el.detectedDurationBadge.textContent = d.holdLabels[previewBeats] || `${previewBeats}`;
-            el.detectedDurationBadge.classList.remove('hidden');
-          } else {
-            el.detectedDurationBadge.classList.add('hidden');
-          }
-
-          if (holdMs >= beatMs * 4.05) {
-            commitRhythmicNoteToScore(effectiveMidi, 4);
-            state.candidateStartTime = now;
-            state.lastStablePitchTime = now;
-          }
+          state.noteMinDb = res.db;
         }
       }
 
@@ -4076,7 +3978,7 @@
 
         const title = el.songTitleInput.value.trim() || d.defaultSongTitle;
         const metaText = el.a4SheetMeta.textContent;
-        const footerText = 'Hum Score & Tuner';
+        const footerText = 'HumNote · Pitch & Tuner';
 
         const built = buildStaffSvgMarkup(false);
         const svgXml = `<svg xmlns="http://www.w3.org/2000/svg" width="${built.svgW}" height="${built.svgH}" viewBox="0 0 ${built.svgW} ${built.svgH}">${built.innerMarkup}</svg>`;
@@ -4148,7 +4050,7 @@
             releaseUrl();
 
             const jpgDataUrl = canvas.toDataURL('image/jpeg', 0.94);
-            const safeFilename = title.replace(/[\\/:*?"<>|]/g, '_').trim() || 'HumScore';
+            const safeFilename = title.replace(/[\\/:*?"<>|]/g, '_').trim() || 'HumNote';
             const link = document.createElement('a');
             link.href = jpgDataUrl;
             link.download = `${safeFilename}.jpg`;
