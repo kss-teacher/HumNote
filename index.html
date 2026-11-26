@@ -49,6 +49,17 @@
       border: 1px solid #243249;
       border-radius: 18px;
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 8px 24px rgba(0, 0, 0, 0.45);
+      transition: border-color 0.08s ease, box-shadow 0.08s ease;
+    }
+
+    .studio-display.beat-pulse-accent {
+      border-color: rgba(245, 158, 11, 0.85);
+      box-shadow: inset 0 0 18px rgba(245, 158, 11, 0.18), 0 0 18px rgba(245, 158, 11, 0.35);
+    }
+
+    .studio-display.beat-pulse-normal {
+      border-color: rgba(16, 185, 129, 0.75);
+      box-shadow: inset 0 0 14px rgba(16, 185, 129, 0.14), 0 0 14px rgba(16, 185, 129, 0.25);
     }
 
     .lcd-label {
@@ -95,6 +106,11 @@
     .studio-btn-rose:active:not(:disabled),
     .studio-btn-muted:active:not(:disabled) {
       transform: scale(0.97);
+    }
+
+    .studio-btn-muted:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
     }
 
     .studio-btn-primary {
@@ -310,6 +326,11 @@
             <span data-icon="wave" class="inline-flex"></span>
             <span id="simBtnLabel">TEST</span>
           </button>
+          <input id="audioFileInput" type="file" accept="audio/*" class="hidden" />
+          <button id="importAudioBtn" type="button" class="studio-btn-muted min-h-[36px] px-2.5 text-xs font-extrabold inline-flex items-center gap-1.5 text-sky-300 border-sky-500/40">
+            <span data-icon="upload" class="inline-flex"></span>
+            <span id="importAudioBtnLabel">FILE</span>
+          </button>
         </div>
       </div>
     </header>
@@ -352,6 +373,45 @@
           <button id="scoreOctaveDownBtn" type="button" class="studio-btn-muted min-h-[34px] px-2 text-[11px] font-extrabold text-slate-200 truncate">-8va (전체)</button>
           <button id="scoreOctaveUpBtn" type="button" class="studio-btn-muted min-h-[34px] px-2 text-[11px] font-extrabold text-slate-200 truncate">+8va (전체)</button>
         </div>
+
+        <div class="grid grid-cols-2 gap-1.5 pt-1 border-t border-slate-800/80">
+          <button id="autoKeyDetectBtn" type="button" class="studio-btn-muted min-h-[34px] px-2 text-[11px] font-extrabold text-sky-300 border-sky-500/40 truncate">AUTO-KEY (조표 추론)</button>
+          <button id="cleanupScoreBtn" type="button" class="studio-btn-muted min-h-[34px] px-2 text-[11px] font-extrabold text-amber-300 border-amber-500/40 truncate">CLEANUP (잔음표 정리)</button>
+        </div>
+      </div>
+
+      <!-- Real-Time Vocal Pitch LCD Display -->
+      <div id="detectorHeroCard" class="studio-display p-3.5 space-y-2">
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center gap-1.5">
+            <span id="pitchLockBadge" class="badge-pill bg-slate-900 border border-slate-800 text-slate-400">WAIT</span>
+            <span id="detectorBeatPulseBadge" class="hidden badge-pill bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 tabular-nums">● 1/4</span>
+          </div>
+          <div class="flex items-center gap-2 text-[11px] font-extrabold text-slate-400 tabular-nums">
+            <span>CLARITY <strong id="clarityPercentText" class="text-slate-200">0%</strong></span>
+            <button id="calibrateNoiseBtn" type="button" class="studio-btn-muted px-2 py-0.5 text-[10px] font-black text-amber-300 border-amber-500/40">GATE</button>
+          </div>
+        </div>
+
+        <div class="flex items-baseline justify-center gap-2">
+          <span id="detectedNoteMain" class="text-5xl sm:text-6xl font-black text-slate-500 tracking-tight tabular-nums">--</span>
+          <span id="detectedOctave" class="text-2xl font-extrabold text-slate-500 tabular-nums"></span>
+          <span id="detectedSolfegeBadge" class="badge-pill bg-slate-900 border border-slate-800 text-emerald-300">--</span>
+          <span id="detectedDurBadge" class="hidden badge-pill bg-amber-500/20 border border-amber-500/40 text-amber-300 tabular-nums">♩ 1</span>
+        </div>
+
+        <div class="flex items-center justify-center gap-3 text-[11px] font-bold text-slate-400 tabular-nums">
+          <span id="detectedFreqText">-- Hz</span>
+          <span>•</span>
+          <span id="detectedCentsText">0 cents</span>
+          <span>•</span>
+          <span id="dbValueText">-∞ dB</span>
+        </div>
+
+        <div class="relative h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
+          <div id="volumeBar" class="h-full w-0 bg-emerald-500 transition-all duration-75"></div>
+          <div id="gateMarker" class="absolute top-0 bottom-0 w-0.5 bg-amber-400" style="left: 43%;"></div>
+        </div>
       </div>
 
       <!-- Staff Workspace Card -->
@@ -374,6 +434,8 @@
               <span data-icon="save" class="inline-flex"></span>
               <span id="saveScoreBtnLabel">SAVE</span>
             </button>
+            <button id="undoScoreBtn" type="button" data-icon="undo" title="Undo (Ctrl+Z)" aria-label="Undo" disabled class="studio-btn-muted min-h-[38px] w-[38px] inline-flex items-center justify-center text-amber-300"></button>
+            <button id="redoScoreBtn" type="button" data-icon="redo" title="Redo (Ctrl+Y)" aria-label="Redo" disabled class="studio-btn-muted min-h-[38px] w-[38px] inline-flex items-center justify-center text-emerald-300"></button>
             <button id="clearHistoryBtn" type="button" data-icon="trash" aria-label="Clear" class="studio-btn-muted min-h-[38px] w-[38px] inline-flex items-center justify-center text-rose-300"></button>
           </div>
         </div>
@@ -424,6 +486,25 @@
             <button id="noteRestToggleBtn" type="button" data-action="rest" data-tip="rest" class="ortho-btn"><span data-glyph="rest" class="inline-flex"></span></button>
             <button id="insertNoteAfterBtn" type="button" data-action="insertAfter" data-tip="insertAfter" class="ortho-btn"><span data-glyph="insertAfter" class="inline-flex"></span></button>
             <button id="deleteSelectedNoteBtn" type="button" data-action="delete" data-tip="delete" class="ortho-btn text-rose-300 border-rose-500/30"><span data-glyph="delete" class="inline-flex"></span></button>
+          </div>
+
+          <!-- Lead Sheet Row: Chord Symbol, Lyric & Auto Accompaniment -->
+          <div class="grid grid-cols-3 gap-1.5 pt-1 border-t border-slate-800/80">
+            <button id="toggleChordEditorBtn" type="button" class="ortho-btn text-[11px] px-2 text-sky-300 border-sky-500/35 truncate">CHORD</button>
+            <button id="toggleLyricEditorBtn" type="button" class="ortho-btn text-[11px] px-2 text-emerald-300 border-emerald-500/35 truncate">LYRIC</button>
+            <button id="toggleChordAccompBtn" type="button" class="ortho-btn text-[11px] px-2 text-amber-300 border-amber-500/40 truncate">ACCOMP: ON</button>
+          </div>
+
+          <!-- Inline Lead Sheet Input Drawer (Chord / Lyric) -->
+          <div id="leadSheetEditorBox" class="hidden bg-slate-900/95 border border-slate-700/80 rounded-xl p-2 space-y-2">
+            <div id="chordQuickChips" class="hidden flex flex-wrap gap-1"></div>
+            <div class="flex items-center gap-1.5">
+              <span id="leadEditorModeLabel" class="text-[10px] font-black text-sky-300 uppercase px-1 shrink-0">CHORD</span>
+              <input id="leadSheetInput" type="text" maxlength="12" placeholder="C, Am7, F, G7..." class="flex-1 min-w-0 bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs font-bold text-white outline-none focus:border-emerald-500" />
+              <button id="leadSheetApplyBtn" type="button" class="studio-btn-primary min-h-[32px] px-2.5 text-[11px] font-black shrink-0">OK</button>
+              <button id="leadSheetNextBtn" type="button" class="hidden studio-btn-muted min-h-[32px] px-2 text-[11px] font-black text-emerald-300 shrink-0">NEXT →</button>
+              <button id="leadSheetClearBtn" type="button" class="studio-btn-muted min-h-[32px] px-2 text-[11px] font-black text-rose-300 shrink-0">×</button>
+            </div>
           </div>
         </div>
       </div>
@@ -497,7 +578,6 @@
           <span id="tunerDetectedFreqText">Input: -- Hz</span>
         </div>
 
-        <!-- Cents Meter -->
         <div class="space-y-1 pt-1">
           <div class="flex justify-between text-[10px] font-extrabold text-slate-400 tabular-nums">
             <span>-50c</span>
@@ -510,7 +590,6 @@
           </div>
         </div>
 
-        <!-- Shared Input Level Bar -->
         <div class="pt-1 space-y-1 text-left">
           <div class="flex items-center justify-between text-[11px] font-bold text-slate-400 tabular-nums">
             <span>LEVEL</span>
@@ -538,7 +617,10 @@
     <section id="panelMetronome" class="hidden space-y-3">
       <div class="studio-card p-3.5 flex items-center justify-between gap-2">
         <span class="lcd-label">TEMPO</span>
-        <span id="tempoItalianText" class="badge-pill bg-slate-950 border border-slate-800 text-amber-300">Allegro</span>
+        <div class="flex items-center gap-1.5">
+          <button id="metroMuteBtn" type="button" class="studio-btn-muted min-h-[30px] px-2.5 text-[11px] font-extrabold text-emerald-300 border-emerald-500/40">SOUND: ON</button>
+          <span id="tempoItalianText" class="badge-pill bg-slate-950 border border-slate-800 text-amber-300">Allegro</span>
+        </div>
       </div>
 
       <div class="studio-display p-4 space-y-3 text-center">
@@ -597,6 +679,14 @@
           <span data-icon="image" class="inline-flex"></span>
           <span id="exportJpgLabel">JPG</span>
         </button>
+        <button id="exportMidiBtn" type="button" class="studio-btn-muted min-h-[38px] px-3 text-xs font-extrabold inline-flex items-center gap-1.5 text-emerald-300 border-emerald-500/40">
+          <span data-icon="midi" class="inline-flex"></span>
+          <span>MIDI</span>
+        </button>
+        <button id="exportMusicXmlBtn" type="button" class="studio-btn-muted min-h-[38px] px-3 text-xs font-extrabold inline-flex items-center gap-1.5 text-sky-300 border-sky-500/40">
+          <span data-icon="xml" class="inline-flex"></span>
+          <span>XML</span>
+        </button>
         <button id="closeModalBtn" type="button" class="studio-btn-muted min-h-[38px] px-3 text-xs font-extrabold inline-flex items-center gap-1">
           <span data-icon="close" class="inline-flex"></span>
           <span id="closeModalLabel">CLOSE</span>
@@ -610,7 +700,10 @@
           <h2 id="a4SheetTitle" class="text-2xl font-black tracking-tight text-slate-950">Untitled 01</h2>
           <p id="a4SheetMeta" class="text-xs font-bold text-slate-600 mt-1">HumNote · 4/4 · A4 = 440Hz</p>
         </div>
-        <span id="a4SheetStats" class="text-xs font-extrabold text-slate-500 tabular-nums">0M · 0N</span>
+        <div class="text-right">
+          <p id="a4SheetTempo" class="text-sm font-black text-slate-900 tabular-nums">♩ = 120 (Allegro)</p>
+          <span id="a4SheetStats" class="text-xs font-extrabold text-slate-500 tabular-nums">0M · 0N</span>
+        </div>
       </div>
       <div id="a4StaffMount" class="w-full"></div>
       <div class="pt-4 border-t border-slate-200 flex justify-between text-[11px] font-semibold text-slate-400">
@@ -624,14 +717,17 @@
   <div id="infoModal" class="hidden fixed inset-0 z-50 bg-slate-950/90 flex items-center justify-center p-4">
     <div class="studio-card max-w-md w-full p-5 space-y-3">
       <div class="flex items-center justify-between">
-        <h3 class="text-sm font-black text-white">HumNote Studio · Info &amp; Privacy</h3>
+        <h3 class="text-sm font-black text-white">HumNote Studio · Info &amp; Shortcuts</h3>
         <button id="closeInfoModalBtn" type="button" data-icon="close" class="studio-btn-muted w-8 h-8 inline-flex items-center justify-center"></button>
       </div>
       <p class="text-xs text-slate-300 leading-relaxed">
         <strong>100% On-Device Audio Processing:</strong> All vocal humming and instrument tuning frequencies are analyzed locally inside your browser. No voice data is ever recorded or sent to any external server.
       </p>
       <p class="text-xs text-slate-400 leading-relaxed">
-        <strong>Triplet Subdivision &amp; Lock:</strong> Select a 2-beat, 1-beat, or 0.5-beat note and tap <strong>[3]</strong> to subdivide into triplets. Tap <strong>[3]</strong> again to restore the original note. While locked as a triplet, only pitch edits and unlock are active.
+        <strong>Triplet Subdivision &amp; Lock:</strong> Select a 2-beat, 1-beat, or 0.5-beat note and tap <strong>[3]</strong> to subdivide into triplets. Tap <strong>[3]</strong> again to restore the original note.
+      </p>
+      <p class="text-xs text-slate-400 leading-relaxed">
+        <strong>Keyboard Shortcuts:</strong> <code>Space</code> Play/Stop · <code>↑/↓</code> Pitch ±1 · <code>Delete</code> Remove Note · <code>Ctrl+Z</code> Undo · <code>Ctrl+Y</code> Redo · <code>Esc</code> Close Modal
       </p>
     </div>
   </div>
@@ -642,102 +738,111 @@
   <script>
     (() => {
       const STORAGE_KEY_SCORES = 'humnote_saved_scores_v1';
+      const STORAGE_KEY_DRAFT = 'humnote_active_draft_v1';
       const LEGACY_STORAGE_KEY = 'humscore_saved_scores_v1';
       const TICKS_PER_QUARTER = 24;
-
       const NOTE_NAMES_SHARP = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'];
-      const NOTE_NAMES_FLAT = ['C', 'D♭', 'D', 'E♭', 'E', 'F', 'G♭', 'G', 'A♭', 'A', 'B♭', 'B'];
-
-      const KEY_SIGNATURES = {
-        0:  { type: 'none',  count: 0, label: 'C',  alteredPcs: [] },
-        1:  { type: 'flat',  count: 5, label: 'D♭', alteredPcs: [10, 3, 8, 1, 6] },
-        2:  { type: 'sharp', count: 2, label: 'D',  alteredPcs: [6, 1] },
-        3:  { type: 'flat',  count: 3, label: 'E♭', alteredPcs: [10, 3, 8] },
-        4:  { type: 'sharp', count: 4, label: 'E',  alteredPcs: [6, 1, 8, 3] },
-        5:  { type: 'flat',  count: 1, label: 'F',  alteredPcs: [10] },
-        6:  { type: 'sharp', count: 6, label: 'F♯', alteredPcs: [6, 1, 8, 3, 10, 5] },
-        7:  { type: 'sharp', count: 1, label: 'G',  alteredPcs: [6] },
-        8:  { type: 'flat',  count: 4, label: 'A♭', alteredPcs: [10, 3, 8, 1] },
-        9:  { type: 'sharp', count: 3, label: 'A',  alteredPcs: [6, 1, 8] },
-        10: { type: 'flat',  count: 2, label: 'B♭', alteredPcs: [10, 3] },
-        11: { type: 'sharp', count: 5, label: 'B',  alteredPcs: [6, 1, 8, 3, 10] }
-      };
+      const NOTE_NAMES_FLAT  = ['C', 'D♭', 'D', 'E♭', 'E', 'F', 'G♭', 'G', 'A♭', 'A', 'B♭', 'B'];
 
       const TIME_SIGNATURES = {
-        '4/4':  { top: 4,  bottom: 4, symbol: 'C',  beats: 4, beatUnit: 4, ticksPerBar: 96,  accentMask: [1, 0, 0.5, 0] },
-        '3/4':  { top: 3,  bottom: 4, symbol: null, beats: 3, beatUnit: 4, ticksPerBar: 72,  accentMask: [1, 0, 0] },
-        '2/4':  { top: 2,  bottom: 4, symbol: null, beats: 2, beatUnit: 4, ticksPerBar: 48,  accentMask: [1, 0] },
-        '2/2':  { top: 2,  bottom: 2, symbol: '₵',  beats: 2, beatUnit: 2, ticksPerBar: 96,  accentMask: [1, 0] },
-        '6/8':  { top: 6,  bottom: 8, symbol: null, beats: 6, beatUnit: 8, ticksPerBar: 72,  accentMask: [1, 0, 0, 0.6, 0, 0] },
-        '9/8':  { top: 9,  bottom: 8, symbol: null, beats: 9, beatUnit: 8, ticksPerBar: 108, accentMask: [1, 0, 0, 0.6, 0, 0, 0.6, 0, 0] },
-        '12/8': { top: 12, bottom: 8, symbol: null, beats: 12,beatUnit: 8, ticksPerBar: 144, accentMask: [1, 0, 0, 0.6, 0, 0, 0.6, 0, 0, 0.6, 0, 0] },
-        '5/4':  { top: 5,  bottom: 4, symbol: null, beats: 5, beatUnit: 4, ticksPerBar: 120, accentMask: [1, 0, 0, 0.6, 0] },
-        '7/8':  { top: 7,  bottom: 8, symbol: null, beats: 7, beatUnit: 8, ticksPerBar: 84,  accentMask: [1, 0, 0.6, 0, 0.6, 0, 0] }
+        '4/4':  { top: 4,  bottom: 4, beats: 4,  beatUnit: 4, ticksPerBar: 96,  symbol: 'C',    accentMask: [1, 0.3, 0.7, 0.3] },
+        '3/4':  { top: 3,  bottom: 4, beats: 3,  beatUnit: 4, ticksPerBar: 72,  symbol: '3/4',  accentMask: [1, 0.3, 0.3] },
+        '2/4':  { top: 2,  bottom: 4, beats: 2,  beatUnit: 4, ticksPerBar: 48,  symbol: '2/4',  accentMask: [1, 0.3] },
+        '2/2':  { top: 2,  bottom: 2, beats: 2,  beatUnit: 2, ticksPerBar: 96,  symbol: '₵',    accentMask: [1, 0.4] },
+        '6/8':  { top: 6,  bottom: 8, beats: 6,  beatUnit: 8, ticksPerBar: 72,  symbol: '6/8',  accentMask: [1, 0.25, 0.25, 0.75, 0.25, 0.25] },
+        '9/8':  { top: 9,  bottom: 8, beats: 9,  beatUnit: 8, ticksPerBar: 108, symbol: '9/8',  accentMask: [1, 0.25, 0.25, 0.7, 0.25, 0.25, 0.7, 0.25, 0.25] },
+        '12/8': { top: 12, bottom: 8, beats: 12, beatUnit: 8, ticksPerBar: 144, symbol: '12/8', accentMask: [1, 0.25, 0.25, 0.7, 0.25, 0.25, 0.85, 0.25, 0.25, 0.7, 0.25, 0.25] },
+        '5/4':  { top: 5,  bottom: 4, beats: 5,  beatUnit: 4, ticksPerBar: 120, symbol: '5/4',  accentMask: [1, 0.3, 0.3, 0.75, 0.3] },
+        '7/8':  { top: 7,  bottom: 8, beats: 7,  beatUnit: 8, ticksPerBar: 84,  symbol: '7/8',  accentMask: [1, 0.25, 0.7, 0.25, 0.75, 0.25, 0.25] }
+      };
+
+      const KEY_SIGNATURES = {
+        0:  { label: 'C',  type: 'none',  count: 0, alteredPcs: [] },
+        1:  { label: 'D♭', type: 'flat',  count: 5, alteredPcs: [10, 3, 8, 1, 6] },
+        2:  { label: 'D',  type: 'sharp', count: 2, alteredPcs: [6, 1] },
+        3:  { label: 'E♭', type: 'flat',  count: 3, alteredPcs: [10, 3, 8] },
+        4:  { label: 'E',  type: 'sharp', count: 4, alteredPcs: [6, 1, 8, 3] },
+        5:  { label: 'F',  type: 'flat',  count: 1, alteredPcs: [10] },
+        6:  { label: 'F♯', type: 'sharp', count: 6, alteredPcs: [6, 1, 8, 3, 10, 5] },
+        7:  { label: 'G',  type: 'sharp', count: 1, alteredPcs: [6] },
+        8:  { label: 'A♭', type: 'flat',  count: 4, alteredPcs: [10, 3, 8, 1] },
+        9:  { label: 'A',  type: 'sharp', count: 3, alteredPcs: [6, 1, 8] },
+        10: { label: 'B♭', type: 'flat',  count: 2, alteredPcs: [10, 3] },
+        11: { label: 'B',  type: 'sharp', count: 5, alteredPcs: [6, 1, 8, 3, 10] }
       };
 
       const INSTRUMENTS = {
         guitar: {
           presets: {
-            standard: { label: 'Standard (E A D G B E)', notes: [40, 45, 50, 55, 59, 64] },
-            dropD:    { label: 'Drop D (D A D G B E)',   notes: [38, 45, 50, 55, 59, 64] },
-            halfDown: { label: 'Eb Standard (D♯ G♯ C♯ F♯ A♯ D♯)', notes: [39, 44, 49, 54, 58, 63] }
+            standard: { label: 'Standard (EADGBE)', notes: [40, 45, 50, 55, 59, 64] },
+            dropD:    { label: 'Drop D (DADGBE)',   notes: [38, 45, 50, 55, 59, 64] },
+            halfDown: { label: 'Eb Standard',       notes: [39, 44, 49, 54, 58, 63] }
           }
         },
         ukulele: {
           presets: {
-            standard: { label: 'High-G (G4 C4 E4 A4)', notes: [67, 60, 64, 69] },
-            lowG:     { label: 'Low-G (G3 C4 E4 A4)',  notes: [55, 60, 64, 69] }
+            standard: { label: 'Standard (GCEA)',   notes: [67, 60, 64, 69] },
+            lowG:     { label: 'Low G (gCEA)',      notes: [55, 60, 64, 69] }
           }
         },
         violin: {
           presets: {
-            standard: { label: 'Standard (G3 D4 A4 E5)', notes: [55, 62, 69, 76] }
+            standard: { label: 'Standard (GDAE)',   notes: [55, 62, 69, 76] }
           }
         },
         bass: {
           presets: {
-            standard: { label: '4-String (E1 A1 D2 G2)', notes: [28, 33, 38, 43] },
-            dropD:    { label: 'Drop D (D1 A1 D2 G2)',   notes: [26, 33, 38, 43] }
+            standard: { label: 'Standard (EADG)',   notes: [28, 33, 38, 43] },
+            dropD:    { label: 'Drop D (DADG)',     notes: [26, 33, 38, 43] }
           }
         }
       };
 
+      const makeSvg = (w, h, vb, inner, filled = false) =>
+        `<svg width="${w}" height="${h}" viewBox="${vb}" ${filled ? 'fill="currentColor"' : 'fill="none" stroke="currentColor" stroke-width="2.2"'}>${inner}</svg>`;
+
       const SVG_ICONS = {
-        mic: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 19v3M8 22h8"/></svg>',
-        wave: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M2 12h3l2-6 4 12 3-8 2 4h6"/></svg>',
-        play: '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="6,4 20,12 6,20"/></svg>',
-        stop: '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>',
-        expand: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>',
-        save: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>',
-        trash: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/></svg>',
-        print: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>',
-        image: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>',
-        close: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
-        info: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>'
+        mic: makeSvg(14, 14, '0 0 24 24', '<rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 19v3M8 22h8"/>'),
+        wave: makeSvg(14, 14, '0 0 24 24', '<path d="M2 12h3l2-6 4 12 3-8 2 4h6"/>'),
+        play: makeSvg(13, 13, '0 0 24 24', '<polygon points="6,4 20,12 6,20"/>', true),
+        stop: makeSvg(13, 13, '0 0 24 24', '<rect x="6" y="6" width="12" height="12" rx="2"/>', true),
+        expand: makeSvg(13, 13, '0 0 24 24', '<path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>'),
+        save: makeSvg(13, 13, '0 0 24 24', '<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>'),
+        undo: makeSvg(14, 14, '0 0 24 24', '<polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/>'),
+        redo: makeSvg(14, 14, '0 0 24 24', '<polyline points="15 14 20 9 15 4"/><path d="M4 20v-7a4 4 0 0 1 4-4h12"/>'),
+        trash: makeSvg(14, 14, '0 0 24 24', '<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/>'),
+        print: makeSvg(14, 14, '0 0 24 24', '<polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>'),
+        image: makeSvg(14, 14, '0 0 24 24', '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>'),
+        midi: makeSvg(14, 14, '0 0 24 24', '<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>'),
+        xml: makeSvg(14, 14, '0 0 24 24', '<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/><line x1="14" y1="4" x2="10" y2="20"/>'),
+        upload: makeSvg(14, 14, '0 0 24 24', '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>'),
+        close: makeSvg(14, 14, '0 0 24 24', '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>'),
+        info: makeSvg(15, 15, '0 0 24 24', '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>')
       };
 
       const GLYPH_SVGS = {
-        whole: '<svg width="20" height="16" viewBox="0 0 24 20"><ellipse cx="12" cy="10" rx="6.5" ry="4.4" fill="none" stroke="currentColor" stroke-width="2.1" transform="rotate(-15 12 10)"/></svg>',
-        half: '<svg width="20" height="18" viewBox="0 0 24 22"><ellipse cx="10" cy="16" rx="5.2" ry="3.6" fill="none" stroke="currentColor" stroke-width="2" transform="rotate(-18 10 16)"/><line x1="14.6" y1="15" x2="14.6" y2="3" stroke="currentColor" stroke-width="2"/></svg>',
-        quarter: '<svg width="20" height="18" viewBox="0 0 24 22"><ellipse cx="10" cy="16" rx="5.2" ry="3.6" fill="currentColor" transform="rotate(-18 10 16)"/><line x1="14.6" y1="15" x2="14.6" y2="3" stroke="currentColor" stroke-width="2"/></svg>',
-        eighth: '<svg width="20" height="18" viewBox="0 0 24 22"><ellipse cx="9" cy="16" rx="5" ry="3.5" fill="currentColor" transform="rotate(-18 9 16)"/><line x1="13.5" y1="15" x2="13.5" y2="3" stroke="currentColor" stroke-width="2"/><path d="M13.5 3 C18 5 19 9 17 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
-        sixteenth: '<svg width="20" height="18" viewBox="0 0 24 22"><ellipse cx="9" cy="16" rx="5" ry="3.5" fill="currentColor" transform="rotate(-18 9 16)"/><line x1="13.5" y1="15" x2="13.5" y2="3" stroke="currentColor" stroke-width="2"/><path d="M13.5 3 C18 5 19 8 17 10.5 M13.5 7 C18 9 19 12 17 14.5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>',
-        dot: '<svg width="16" height="16" viewBox="0 0 20 20"><circle cx="10" cy="10" r="2.8" fill="currentColor"/></svg>',
-        triplet: '<svg width="24" height="18" viewBox="0 0 28 20"><path d="M4 7V4H10M18 4H24V7" fill="none" stroke="currentColor" stroke-width="1.7"/><text x="14" y="14" text-anchor="middle" font-size="11" font-weight="900" font-style="italic" fill="currentColor">3</text></svg>',
-        pitchDown: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>',
-        pitchUp: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>',
+        whole: makeSvg(20, 16, '0 0 24 20', '<ellipse cx="12" cy="10" rx="6.5" ry="4.4" transform="rotate(-15 12 10)"/>'),
+        half: makeSvg(20, 18, '0 0 24 22', '<ellipse cx="10" cy="16" rx="5.2" ry="3.6" transform="rotate(-18 10 16)"/><line x1="14.6" y1="15" x2="14.6" y2="3"/>'),
+        quarter: makeSvg(20, 18, '0 0 24 22', '<ellipse cx="10" cy="16" rx="5.2" ry="3.6" fill="currentColor" stroke="none" transform="rotate(-18 10 16)"/><line x1="14.6" y1="15" x2="14.6" y2="3"/>'),
+        eighth: makeSvg(20, 18, '0 0 24 22', '<ellipse cx="9" cy="16" rx="5" ry="3.5" fill="currentColor" stroke="none" transform="rotate(-18 9 16)"/><line x1="13.5" y1="15" x2="13.5" y2="3"/><path d="M13.5 3 C18 5 19 9 17 12" stroke-linecap="round"/>'),
+        sixteenth: makeSvg(20, 18, '0 0 24 22', '<ellipse cx="9" cy="16" rx="5" ry="3.5" fill="currentColor" stroke="none" transform="rotate(-18 9 16)"/><line x1="13.5" y1="15" x2="13.5" y2="3"/><path d="M13.5 3 C18 5 19 8 17 10.5 M13.5 7 C18 9 19 12 17 14.5" stroke-width="1.9" stroke-linecap="round"/>'),
+        dot: makeSvg(16, 16, '0 0 20 20', '<circle cx="10" cy="10" r="2.8"/>', true),
+        triplet: makeSvg(24, 18, '0 0 28 20', '<path d="M4 7V4H10M18 4H24V7" stroke-width="1.7"/><text x="14" y="14" text-anchor="middle" font-size="11" font-weight="900" font-style="italic" fill="currentColor" stroke="none">3</text>'),
+        pitchDown: makeSvg(16, 16, '0 0 24 24', '<polyline points="6 9 12 15 18 9"/>'),
+        pitchUp: makeSvg(16, 16, '0 0 24 24', '<polyline points="18 15 12 9 6 15"/>'),
         accidental: '<span class="text-xs font-black tracking-tighter">♯/♮</span>',
-        rest: '<svg width="16" height="18" viewBox="0 0 20 22"><path d="M8 3 L13 8 L8 12 L13 16 C10 16 8 18 10 20" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-        insertAfter: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
-        delete: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>',
-        playMeasure: '<svg width="18" height="16" viewBox="0 0 24 20"><line x1="3" y1="4" x2="3" y2="16" stroke="currentColor" stroke-width="2"/><polygon points="8,5 17,10 8,15" fill="currentColor"/><line x1="21" y1="4" x2="21" y2="16" stroke="currentColor" stroke-width="2"/></svg>',
-        playFromHere: '<svg width="18" height="16" viewBox="0 0 24 20"><polygon points="5,5 15,10 5,15" fill="currentColor"/><line x1="19" y1="4" x2="19" y2="16" stroke="currentColor" stroke-width="2"/></svg>',
-        repeatStart: '<svg width="18" height="16" viewBox="0 0 24 20"><line x1="5" y1="3" x2="5" y2="17" stroke="currentColor" stroke-width="2.6"/><line x1="9" y1="3" x2="9" y2="17" stroke="currentColor" stroke-width="1.3"/><circle cx="13.5" cy="8" r="1.5" fill="currentColor"/><circle cx="13.5" cy="12" r="1.5" fill="currentColor"/></svg>',
-        repeatEnd: '<svg width="18" height="16" viewBox="0 0 24 20"><circle cx="10.5" cy="8" r="1.5" fill="currentColor"/><circle cx="10.5" cy="12" r="1.5" fill="currentColor"/><line x1="15" y1="3" x2="15" y2="17" stroke="currentColor" stroke-width="1.3"/><line x1="19" y1="3" x2="19" y2="17" stroke="currentColor" stroke-width="2.6"/></svg>'
+        rest: makeSvg(16, 18, '0 0 20 22', '<path d="M8 3 L13 8 L8 12 L13 16 C10 16 8 18 10 20" stroke-linecap="round" stroke-linejoin="round"/>'),
+        insertAfter: makeSvg(16, 16, '0 0 24 24', '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>'),
+        delete: makeSvg(15, 15, '0 0 24 24', '<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>'),
+        playMeasure: makeSvg(18, 16, '0 0 24 20', '<line x1="3" y1="4" x2="3" y2="16"/><polygon points="8,5 17,10 8,15" fill="currentColor" stroke="none"/><line x1="21" y1="4" x2="21" y2="16"/>'),
+        playFromHere: makeSvg(18, 16, '0 0 24 20', '<polygon points="5,5 15,10 5,15" fill="currentColor" stroke="none"/><line x1="19" y1="4" x2="19" y2="16"/>'),
+        repeatStart: makeSvg(18, 16, '0 0 24 20', '<line x1="5" y1="3" x2="5" y2="17" stroke-width="2.6"/><line x1="9" y1="3" x2="9" y2="17" stroke-width="1.3"/><circle cx="13.5" cy="8" r="1.5" fill="currentColor" stroke="none"/><circle cx="13.5" cy="12" r="1.5" fill="currentColor" stroke="none"/>'),
+        repeatEnd: makeSvg(18, 16, '0 0 24 20', '<circle cx="10.5" cy="8" r="1.5" fill="currentColor" stroke="none"/><circle cx="10.5" cy="12" r="1.5" fill="currentColor" stroke="none"/><line x1="15" y1="3" x2="15" y2="17" stroke-width="1.3"/><line x1="19" y1="3" x2="19" y2="17" stroke-width="2.6"/>')
       };
 
       const I18N_COMMON = {
         defaultSongTitle: 'Untitled 01',
+        rec: 'REC', stop: 'STOP', test: 'TEST', play: 'PLAY', save: 'SAVE', newBtn: 'NEW',
         solfegeLatin: ['Do', 'Do♯', 'Re', 'Re♯', 'Mi', 'Fa', 'Fa♯', 'Sol', 'Sol♯', 'La', 'La♯', 'Si'],
         solfegeFlatLatin: ['Do', 'Re♭', 'Re', 'Mi♭', 'Mi', 'Fa', 'Sol♭', 'Sol', 'La♭', 'La', 'Si♭', 'Si'],
         glyphLabels: {
@@ -751,15 +856,26 @@
       const I18N = {
         ko: {
           tabDetector: '채보', tabScores: '보관함', tabTuner: '튜너', tabMetronome: '메트로놈',
-          rec: 'REC', stop: 'STOP', test: 'TEST', play: 'PLAY', save: 'SAVE', newBtn: 'NEW', open: '열기', rename: '이름', del: '삭제',
-          solfegeOn: '도레미', solfegeOff: 'CDE',
+          open: '열기', rename: '이름', del: '삭제', solfegeOn: '도레미', solfegeOff: 'CDE',
           emptyLibrary: '저장된 악보가 없습니다.',
           confirmDiscardUnsaved: '저장하지 않은 악보가 있습니다. 계속할까요?',
           renamePrompt: '새 악보 제목을 입력하세요:',
           toastSaved: '악보가 보관함에 저장되었습니다.',
           toastRenamed: '악보 제목이 변경되었습니다.',
+          toastUndo: '이전 상태로 되돌렸습니다 (Undo)',
+          toastRedo: '작업을 다시 실행했습니다 (Redo)',
+          toastMidiExported: 'MIDI (.mid) 파일이 저장되었습니다.',
+          toastXmlExported: 'MusicXML (.musicxml) 파일이 저장되었습니다.',
           toastCalibrated: (db) => `노이즈 게이트 자동 보정 완료 (${db} dB)`,
           toastNoNotes: '재생할 음표가 없습니다.',
+          toastAudioDecoding: '오디오 파일 분석 중...',
+          toastAudioImported: (n) => `오디오 채보 완료 (${n}개 음표 추출)`,
+          toastAudioError: '오디오 파일을 분석할 수 없습니다.',
+          toastAutoKey: (k) => `추천 조표 적용 완료: ${k} Major`,
+          toastCleanupDone: (n) => `잔음표 ${n}개를 깔끔하게 정리했습니다.`,
+          toastCleanupNone: '정리할 잔음표가 없습니다.',
+          toastChordUpdated: (c) => c ? `코드 적용: ${c}` : '코드가 삭제되었습니다.',
+          toastLyricUpdated: (l) => l ? `가사 적용: ${l}` : '가사가 삭제되었습니다.',
           solfege: ['도', '도♯', '레', '레♯', '미', '파', '파♯', '솔', '솔♯', '라', '라♯', '시'],
           solfegeFlat: ['도', '레♭', '레', '미♭', '미', '파', '솔♭', '솔', '라♭', '라', '시♭', '시'],
           glyphLabels: {
@@ -771,15 +887,98 @@
         },
         en: {
           tabDetector: 'Transcribe', tabScores: 'Library', tabTuner: 'Tuner', tabMetronome: 'Metronome',
-          rec: 'REC', stop: 'STOP', test: 'TEST', play: 'PLAY', save: 'SAVE', newBtn: 'NEW', open: 'Open', rename: 'Rename', del: 'Del',
-          solfegeOn: 'Do-Re-Mi', solfegeOff: 'C-D-E',
+          open: 'Open', rename: 'Rename', del: 'Del', solfegeOn: 'Do-Re-Mi', solfegeOff: 'C-D-E',
           emptyLibrary: 'No saved scores yet.',
           confirmDiscardUnsaved: 'Discard unsaved score changes?',
           renamePrompt: 'Enter a new score title:',
           toastSaved: 'Score saved to library.',
           toastRenamed: 'Score renamed.',
+          toastUndo: 'Reverted last edit (Undo)',
+          toastRedo: 'Reapplied edit (Redo)',
+          toastMidiExported: 'MIDI (.mid) file exported.',
+          toastXmlExported: 'MusicXML (.musicxml) file exported.',
           toastCalibrated: (db) => `Noise gate calibrated (${db} dB)`,
           toastNoNotes: 'No notes to play.',
+          toastAudioDecoding: 'Analyzing audio file...',
+          toastAudioImported: (n) => `Audio transcribed (${n} notes)`,
+          toastAudioError: 'Could not decode audio file.',
+          toastAutoKey: (k) => `Detected key applied: ${k} Major`,
+          toastCleanupDone: (n) => `Cleaned up ${n} ghost notes.`,
+          toastCleanupNone: 'No ghost notes to clean up.',
+          toastChordUpdated: (c) => c ? `Chord set: ${c}` : 'Chord cleared.',
+          toastLyricUpdated: (l) => l ? `Lyric set: ${l}` : 'Lyric cleared.',
+          solfege: I18N_COMMON.solfegeLatin,
+          solfegeFlat: I18N_COMMON.solfegeFlatLatin,
+          glyphLabels: I18N_COMMON.glyphLabels
+        },
+        es: {
+          tabDetector: 'Transcribir', tabScores: 'Biblioteca', tabTuner: 'Afinador', tabMetronome: 'Metrónomo',
+          open: 'Abrir', rename: 'Nombre', del: 'Borrar', solfegeOn: 'Do-Re-Mi', solfegeOff: 'C-D-E',
+          emptyLibrary: 'No hay partituras guardadas.',
+          confirmDiscardUnsaved: '¿Descartar cambios no guardados?',
+          renamePrompt: 'Nuevo título de la partitura:',
+          toastSaved: 'Partitura guardada.',
+          toastRenamed: 'Título actualizado.',
+          toastUndo: 'Cambio deshecho (Undo)',
+          toastRedo: 'Cambio rehecho (Redo)',
+          toastMidiExported: 'Archivo MIDI (.mid) exportado.',
+          toastXmlExported: 'Archivo MusicXML (.musicxml) exportado.',
+          toastCalibrated: (db) => `Puerta de ruido calibrada (${db} dB)`,
+          toastNoNotes: 'No hay notas para reproducir.',
+          solfege: I18N_COMMON.solfegeLatin,
+          solfegeFlat: I18N_COMMON.solfegeFlatLatin,
+          glyphLabels: I18N_COMMON.glyphLabels
+        },
+        ja: {
+          tabDetector: '採譜', tabScores: '保存箱', tabTuner: 'チューナー', tabMetronome: 'メトロノーム',
+          open: '開く', rename: '名前', del: '削除', solfegeOn: 'ドレミ', solfegeOff: 'CDE',
+          emptyLibrary: '保存された楽譜がありません。',
+          confirmDiscardUnsaved: '未保存の変更を破棄しますか？',
+          renamePrompt: '新しい曲名を入力してください:',
+          toastSaved: '楽譜を保存しました。',
+          toastRenamed: '曲名を変更しました。',
+          toastUndo: '直前の操作を取り消しました (Undo)',
+          toastRedo: '操作をやり直しました (Redo)',
+          toastMidiExported: 'MIDI (.mid) ファイルを保存しました。',
+          toastXmlExported: 'MusicXML (.musicxml) ファイルを保存しました。',
+          toastCalibrated: (db) => `ノイズゲート補正完了 (${db} dB)`,
+          toastNoNotes: '再生する音符がありません。',
+          solfege: ['ド', 'ド♯', 'レ', 'レ♯', 'ミ', 'ファ', 'ファ♯', 'ソ', 'ソ♯', 'ラ', 'ラ♯', 'シ'],
+          solfegeFlat: ['ド', 'レ♭', 'レ', 'ミ♭', 'ミ', 'ファ', 'ソ♭', 'ソ', 'ラ♭', 'ラ', 'シ♭', 'シ'],
+          glyphLabels: I18N_COMMON.glyphLabels
+        },
+        'zh-CN': {
+          tabDetector: '记谱', tabScores: '乐谱库', tabTuner: '调音器', tabMetronome: '节拍器',
+          open: '打开', rename: '重命名', del: '删除', solfegeOn: 'Do-Re-Mi', solfegeOff: 'C-D-E',
+          emptyLibrary: '暂无已保存的乐谱。',
+          confirmDiscardUnsaved: '放弃未保存的更改吗？',
+          renamePrompt: '请输入新的乐谱标题:',
+          toastSaved: '乐谱已保存到乐谱库。',
+          toastRenamed: '乐谱标题已更新。',
+          toastUndo: '已撤销上一步操作 (Undo)',
+          toastRedo: '已重做操作 (Redo)',
+          toastMidiExported: '已导出 MIDI (.mid) 文件。',
+          toastXmlExported: '已导出 MusicXML (.musicxml) 文件。',
+          toastCalibrated: (db) => `降噪阈值校准完成 (${db} dB)`,
+          toastNoNotes: '没有可播放的音符。',
+          solfege: I18N_COMMON.solfegeLatin,
+          solfegeFlat: I18N_COMMON.solfegeFlatLatin,
+          glyphLabels: I18N_COMMON.glyphLabels
+        },
+        'zh-TW': {
+          tabDetector: '記譜', tabScores: '樂譜庫', tabTuner: '調音器', tabMetronome: '節拍器',
+          open: '開啟', rename: '改名', del: '刪除', solfegeOn: 'Do-Re-Mi', solfegeOff: 'C-D-E',
+          emptyLibrary: '尚無已儲存的樂譜。',
+          confirmDiscardUnsaved: '放棄未儲存的變更嗎？',
+          renamePrompt: '請輸入新的樂譜標題:',
+          toastSaved: '樂譜已儲存至樂譜庫。',
+          toastRenamed: '樂譜標題已更新。',
+          toastUndo: '已復原上一步操作 (Undo)',
+          toastRedo: '已重做操作 (Redo)',
+          toastMidiExported: '已匯出 MIDI (.mid) 檔案。',
+          toastXmlExported: '已匯出 MusicXML (.musicxml) 檔案。',
+          toastCalibrated: (db) => `降噪門檻校準完成 (${db} dB)`,
+          toastNoNotes: '沒有可播放的音符。',
           solfege: I18N_COMMON.solfegeLatin,
           solfegeFlat: I18N_COMMON.solfegeFlatLatin,
           glyphLabels: I18N_COMMON.glyphLabels
@@ -798,6 +997,7 @@
         autoRegisterLocked: false,
         autoRestEnabled: true,
         showSolfege: true,
+        preferredBaseBeats: 1,
         noiseGateDb: -40,
         clarityThreshold: 0.80,
         isCalibrating: false,
@@ -809,6 +1009,9 @@
         lowPassNode: null,
         isMicRunning: false,
         isSimRunning: false,
+        isCountingIn: false,
+        countInTimers: [],
+        wakeLockSentinel: null,
         rafId: null,
         simTimers: [],
         candidateMidi: null,
@@ -823,7 +1026,11 @@
         settlingStartTime: 0,
         livePreviewMidi: null,
         scoreNotes: [],
+        undoStack: [],
+        redoStack: [],
         selectedNoteIndex: -1,
+        chordAccompEnabled: true,
+        activeLeadEditor: null,
         loadedSongId: null,
         isDirty: false,
         savedScores: [],
@@ -833,124 +1040,77 @@
         selectedInstrument: 'guitar',
         selectedPreset: 'standard',
         selectedStringIndex: null,
+        tunerArpTimers: [],
+        tunerLastSignalTime: 0,
+        tunerWasInTune: false,
         metroBpm: 120,
         metroBeats: 4,
         metroSubdiv: 1,
+        metroMuted: false,
         isMetroRunning: false,
         metroTimerId: null,
+        metroPulseClearTimer: null,
         metroStepIndex: 0,
         tapTimes: []
       };
 
-      const el = {
-        a4Select: document.getElementById('a4Select'),
-        langSelect: document.getElementById('langSelect'),
-        openInfoBtn: document.getElementById('openInfoBtn'),
-        statusDot: document.getElementById('statusDot'),
-        statusText: document.getElementById('statusText'),
-        micToggleBtn: document.getElementById('micToggleBtn'),
-        micBtnLabel: document.getElementById('micBtnLabel'),
-        simToggleBtn: document.getElementById('simToggleBtn'),
-        simBtnLabel: document.getElementById('simBtnLabel'),
-        tabDetectorBtn: document.getElementById('tabDetectorBtn'),
-        tabScoresBtn: document.getElementById('tabScoresBtn'),
-        tabTunerBtn: document.getElementById('tabTunerBtn'),
-        tabMetronomeBtn: document.getElementById('tabMetronomeBtn'),
-        panelDetector: document.getElementById('panelDetector'),
-        panelScores: document.getElementById('panelScores'),
-        panelTuner: document.getElementById('panelTuner'),
-        panelMetronome: document.getElementById('panelMetronome'),
-        scaleModeSelect: document.getElementById('scaleModeSelect'),
-        scoreTimeSigSelect: document.getElementById('scoreTimeSigSelect'),
-        toggleSolfegeBtn: document.getElementById('toggleSolfegeBtn'),
-        octaveShiftBtn: document.getElementById('octaveShiftBtn'),
-        transposeDownBtn: document.getElementById('transposeDownBtn'),
-        transposeUpBtn: document.getElementById('transposeUpBtn'),
-        transposeBadge: document.getElementById('transposeBadge'),
-        autoRestToggleBtn: document.getElementById('autoRestToggleBtn'),
-        scoreOctaveDownBtn: document.getElementById('scoreOctaveDownBtn'),
-        scoreOctaveUpBtn: document.getElementById('scoreOctaveUpBtn'),
-        pitchLockBadge: document.getElementById('pitchLockBadge'),
-        clarityPercentText: document.getElementById('clarityPercentText'),
-        detectedNoteMain: document.getElementById('detectedNoteMain'),
-        detectedOctave: document.getElementById('detectedOctave'),
-        detectedSolfegeBadge: document.getElementById('detectedSolfegeBadge'),
-        detectedDurBadge: document.getElementById('detectedDurBadge'),
-        detectedFreqText: document.getElementById('detectedFreqText'),
-        detectedCentsText: document.getElementById('detectedCentsText'),
-        dbValueText: document.getElementById('dbValueText'),
-        calibrateNoiseBtn: document.getElementById('calibrateNoiseBtn'),
-        volumeBar: document.getElementById('volumeBar'),
-        gateMarker: document.getElementById('gateMarker'),
-        scoreStatsBadge: document.getElementById('scoreStatsBadge'),
-        playScoreBtn: document.getElementById('playScoreBtn'),
-        playScoreBtnLabel: document.getElementById('playScoreBtnLabel'),
-        openFullscreenScoreBtn: document.getElementById('openFullscreenScoreBtn'),
-        saveScoreQuickBtn: document.getElementById('saveScoreQuickBtn'),
-        saveScoreBtnLabel: document.getElementById('saveScoreBtnLabel'),
-        clearHistoryBtn: document.getElementById('clearHistoryBtn'),
-        scoreTitleInput: document.getElementById('scoreTitleInput'),
-        scoreStaffMount: document.getElementById('scoreStaffMount'),
-        noteEditBar: document.getElementById('noteEditBar'),
-        selectedNoteTitle: document.getElementById('selectedNoteTitle'),
-        selectedNoteMetaBadge: document.getElementById('selectedNoteMetaBadge'),
-        editActionFeedbackBadge: document.getElementById('editActionFeedbackBadge'),
-        noteDotToggleBtn: document.getElementById('noteDotToggleBtn'),
-        noteTripletToggleBtn: document.getElementById('noteTripletToggleBtn'),
-        noteAccidentalBtn: document.getElementById('noteAccidentalBtn'),
-        noteRestToggleBtn: document.getElementById('noteRestToggleBtn'),
-        toggleRepeatStartBtn: document.getElementById('toggleRepeatStartBtn'),
-        toggleRepeatEndBtn: document.getElementById('toggleRepeatEndBtn'),
-        libraryNewScoreBtn: document.getElementById('libraryNewScoreBtn'),
-        librarySaveCurrentBtn: document.getElementById('librarySaveCurrentBtn'),
-        librarySaveBtnLabel: document.getElementById('librarySaveBtnLabel'),
-        libraryActiveModeBadge: document.getElementById('libraryActiveModeBadge'),
-        libraryCurrentTitleText: document.getElementById('libraryCurrentTitleText'),
-        libraryCurrentMetaText: document.getElementById('libraryCurrentMetaText'),
-        scoresPlayActiveBtn: document.getElementById('scoresPlayActiveBtn'),
-        scoresOpenA4Btn: document.getElementById('scoresOpenA4Btn'),
-        savedScoresList: document.getElementById('savedScoresList'),
-        instrumentSelect: document.getElementById('instrumentSelect'),
-        tuningPresetSelect: document.getElementById('tuningPresetSelect'),
-        tunerStatusBadge: document.getElementById('tunerStatusBadge'),
-        tunerTargetNote: document.getElementById('tunerTargetNote'),
-        tunerTargetOctave: document.getElementById('tunerTargetOctave'),
-        tunerTargetFreqText: document.getElementById('tunerTargetFreqText'),
-        tunerDetectedFreqText: document.getElementById('tunerDetectedFreqText'),
-        tunerCentsReadout: document.getElementById('tunerCentsReadout'),
-        tunerNeedle: document.getElementById('tunerNeedle'),
-        tunerDbValueText: document.getElementById('tunerDbValueText'),
-        tunerVolumeBar: document.getElementById('tunerVolumeBar'),
-        playAllStringsBtn: document.getElementById('playAllStringsBtn'),
-        stringButtonsGrid: document.getElementById('stringButtonsGrid'),
-        tempoItalianText: document.getElementById('tempoItalianText'),
-        metroBeatCounterText: document.getElementById('metroBeatCounterText'),
-        bpmMinusBtn: document.getElementById('bpmMinusBtn'),
-        bpmValueText: document.getElementById('bpmValueText'),
-        bpmPlusBtn: document.getElementById('bpmPlusBtn'),
-        bpmSlider: document.getElementById('bpmSlider'),
-        metroBeatPads: document.getElementById('metroBeatPads'),
-        metroToggleBtn: document.getElementById('metroToggleBtn'),
-        metroBtnLabel: document.getElementById('metroBtnLabel'),
-        tapTempoBtn: document.getElementById('tapTempoBtn'),
-        metroTimeSigSelect: document.getElementById('metroTimeSigSelect'),
-        subdivSelect: document.getElementById('subdivSelect'),
-        sheetFullscreenModal: document.getElementById('sheetFullscreenModal'),
-        printSheetBtn: document.getElementById('printSheetBtn'),
-        exportJpgBtn: document.getElementById('exportJpgBtn'),
-        closeModalBtn: document.getElementById('closeModalBtn'),
-        a4SheetTitle: document.getElementById('a4SheetTitle'),
-        a4SheetMeta: document.getElementById('a4SheetMeta'),
-        a4SheetStats: document.getElementById('a4SheetStats'),
-        a4StaffMount: document.getElementById('a4StaffMount'),
-        a4PrintDate: document.getElementById('a4PrintDate'),
-        infoModal: document.getElementById('infoModal'),
-        closeInfoModalBtn: document.getElementById('closeInfoModalBtn'),
-        toastBanner: document.getElementById('toastBanner')
-      };
+      const el = new Proxy({}, {
+        get(target, prop) {
+          if (!(prop in target)) target[prop] = document.getElementById(String(prop));
+          return target[prop];
+        }
+      });
+
+      function setButtonIcon(btn, iconKey) {
+        if (!btn || !SVG_ICONS[iconKey]) return;
+        const iconSlot = btn.querySelector('[data-icon]');
+        if (iconSlot) iconSlot.innerHTML = SVG_ICONS[iconKey];
+      }
+
+      function closeAllModals() {
+        if (el.sheetFullscreenModal) el.sheetFullscreenModal.classList.add('hidden');
+        if (el.infoModal) el.infoModal.classList.add('hidden');
+      }
+
+      function persistSavedScores() {
+        try {
+          localStorage.setItem(STORAGE_KEY_SCORES, JSON.stringify(state.savedScores));
+        } catch (err) {}
+      }
+
+      function triggerHaptic(ms = 8) {
+        try {
+          if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+            navigator.vibrate(ms);
+          }
+        } catch (err) {}
+      }
+
+      async function syncWakeLock() {
+        try {
+          if (typeof navigator === 'undefined' || !navigator.wakeLock) return;
+          const shouldHold = state.isMicRunning || state.isPlayingScore || state.isMetroRunning || state.isCountingIn;
+          if (shouldHold && !state.wakeLockSentinel) {
+            state.wakeLockSentinel = await navigator.wakeLock.request('screen');
+            state.wakeLockSentinel.addEventListener('release', () => {
+              state.wakeLockSentinel = null;
+            });
+          } else if (!shouldHold && state.wakeLockSentinel) {
+            const sentinel = state.wakeLockSentinel;
+            state.wakeLockSentinel = null;
+            await sentinel.release();
+          }
+        } catch (err) {}
+      }
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          syncWakeLock();
+        }
+      });
 
       function getDict() {
-        return I18N[state.lang] || I18N.ko;
+        return { ...I18N_COMMON, ...(I18N[state.lang] || I18N.ko) };
       }
 
       let toastTimer = null;
@@ -974,6 +1134,300 @@
         actionBadgeTimer = setTimeout(() => el.editActionFeedbackBadge.classList.add('hidden'), 900);
       }
 
+      function syncUndoButtonUI() {
+        if (el.undoScoreBtn) {
+          el.undoScoreBtn.disabled = state.undoStack.length === 0;
+        }
+        if (el.redoScoreBtn) {
+          el.redoScoreBtn.disabled = state.redoStack.length === 0;
+        }
+      }
+
+      function captureScoreSnapshot() {
+        return {
+          notes: state.scoreNotes.map((n) => ({ ...n })),
+          selectedNoteIndex: state.selectedNoteIndex,
+          transposeSemitones: state.transposeSemitones,
+          timeSignature: state.timeSignature,
+          title: el.scoreTitleInput ? el.scoreTitleInput.value : I18N_COMMON.defaultSongTitle
+        };
+      }
+
+      function applyHistorySnapshot(snap) {
+        state.scoreNotes = snap.notes.map((n) => ({ ...n }));
+        state.selectedNoteIndex = Math.min(snap.selectedNoteIndex, state.scoreNotes.length - 1);
+        state.transposeSemitones = snap.transposeSemitones || 0;
+        if (snap.timeSignature && TIME_SIGNATURES[snap.timeSignature]) {
+          state.timeSignature = snap.timeSignature;
+          if (el.scoreTimeSigSelect) el.scoreTimeSigSelect.value = state.timeSignature;
+          if (el.metroTimeSigSelect) el.metroTimeSigSelect.value = state.timeSignature;
+          state.metroBeats = getCurrentTimeSignature().beats;
+          renderMetroBeatPads();
+        }
+        if (typeof snap.title === 'string' && el.scoreTitleInput) {
+          el.scoreTitleInput.value = snap.title;
+        }
+        state.isDirty = true;
+        syncUndoButtonUI();
+        syncTransposeUI();
+        renderScoreStaff();
+      }
+
+      function pushUndoSnapshot() {
+        state.undoStack.push(captureScoreSnapshot());
+        if (state.undoStack.length > 20) state.undoStack.shift();
+        state.redoStack = [];
+        syncUndoButtonUI();
+      }
+
+      function undoLastAction() {
+        if (!state.undoStack.length) return;
+        state.redoStack.push(captureScoreSnapshot());
+        if (state.redoStack.length > 20) state.redoStack.shift();
+        applyHistorySnapshot(state.undoStack.pop());
+        showToast(getDict().toastUndo);
+      }
+
+      function redoLastAction() {
+        if (!state.redoStack.length) return;
+        state.undoStack.push(captureScoreSnapshot());
+        if (state.undoStack.length > 20) state.undoStack.shift();
+        applyHistorySnapshot(state.redoStack.pop());
+        showToast(getDict().toastRedo);
+      }
+
+      function saveActiveDraft() {
+        try {
+          const payload = {
+            title: el.scoreTitleInput ? el.scoreTitleInput.value : I18N_COMMON.defaultSongTitle,
+            timeSignature: state.timeSignature,
+            transposeSemitones: state.transposeSemitones,
+            octaveMode: state.octaveMode,
+            octaveShift: state.octaveShift,
+            metroBpm: state.metroBpm,
+            loadedSongId: state.loadedSongId,
+            notes: state.scoreNotes.map((n) => ({ ...n }))
+          };
+          localStorage.setItem(STORAGE_KEY_DRAFT, JSON.stringify(payload));
+        } catch (err) {}
+      }
+
+      function restoreActiveDraft() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY_DRAFT);
+          if (!raw) return;
+          const draft = JSON.parse(raw);
+          if (!draft || !Array.isArray(draft.notes)) return;
+          state.scoreNotes = draft.notes.map(normalizeNoteEvent).filter(Boolean);
+          state.selectedNoteIndex = state.scoreNotes.length > 0 ? 0 : -1;
+          state.loadedSongId = draft.loadedSongId || null;
+          if (draft.timeSignature && TIME_SIGNATURES[draft.timeSignature]) {
+            state.timeSignature = draft.timeSignature;
+            state.metroBeats = getCurrentTimeSignature().beats;
+          }
+          if (typeof draft.transposeSemitones === 'number') state.transposeSemitones = draft.transposeSemitones;
+          if (draft.octaveMode) state.octaveMode = draft.octaveMode;
+          if (typeof draft.octaveShift === 'number') state.octaveShift = draft.octaveShift;
+          if (typeof draft.metroBpm === 'number') setMetroBpm(draft.metroBpm);
+          if (typeof draft.title === 'string' && el.scoreTitleInput) {
+            el.scoreTitleInput.value = draft.title;
+          }
+        } catch (err) {}
+      }
+
+      // Unified AudioContext & ADSR Synth Engine
+      function ensureAudioContext() {
+        if (!state.audioCtx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          state.audioCtx = new AudioCtx();
+        }
+        if (state.audioCtx.state === 'suspended') {
+          state.audioCtx.resume();
+        }
+        return state.audioCtx;
+      }
+
+      function playSynthVoice({ freq, duration = 0.28, type = 'triangle', peakGain = 0.22, attack = 0.02, sustainRatio = 0.72 }) {
+        try {
+          const ctx = ensureAudioContext();
+          const now = ctx.currentTime;
+          const dur = Math.max(0.05, duration);
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, now);
+
+          const atkEnd = now + Math.min(attack, dur * 0.3);
+          const susEnd = now + Math.max(atkEnd - now + 0.01, dur * 0.82);
+          gain.gain.setValueAtTime(0.0001, now);
+          gain.gain.exponentialRampToValueAtTime(peakGain, atkEnd);
+          gain.gain.exponentialRampToValueAtTime(Math.max(0.0001, peakGain * sustainRatio), susEnd);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + dur + 0.02);
+        } catch (err) {}
+      }
+
+      function playReferenceTone(freq, duration = 0.35) {
+        playSynthVoice({ freq, duration, type: 'triangle', peakGain: 0.24, attack: 0.025, sustainRatio: 0.68 });
+      }
+
+      function playClickSound(isAccent = false, isSub = false) {
+        playSynthVoice({
+          freq: isAccent ? 1320 : (isSub ? 660 : 880),
+          duration: 0.06,
+          type: 'sine',
+          peakGain: isAccent ? 0.28 : (isSub ? 0.1 : 0.18),
+          attack: 0.004,
+          sustainRatio: 0.25
+        });
+      }
+
+      // Core Music Theory, Note Event & Triplet Helpers
+      function midiToFreq(midi) {
+        return state.a4Freq * Math.pow(2, (midi - 69) / 12);
+      }
+
+      function freqToMidiFloat(freq) {
+        return 69 + 12 * Math.log2(freq / state.a4Freq);
+      }
+
+      function getCurrentTimeSignature() {
+        return TIME_SIGNATURES[state.timeSignature] || TIME_SIGNATURES['4/4'];
+      }
+
+      function getCurrentKeySignature() {
+        const pc = ((state.transposeSemitones % 12) + 12) % 12;
+        return KEY_SIGNATURES[pc] || KEY_SIGNATURES[0];
+      }
+
+      function snapMidiToScale(midi) {
+        const clamped = Math.max(48, Math.min(84, Math.round(midi)));
+        if (state.scaleMode === 'chromatic') return clamped;
+        const rootPc = ((state.transposeSemitones % 12) + 12) % 12;
+        const majorOffsets = [0, 2, 4, 5, 7, 9, 11];
+        const scalePcs = majorOffsets.map((o) => (rootPc + o) % 12);
+        const pc = ((clamped % 12) + 12) % 12;
+        if (scalePcs.includes(pc)) return clamped;
+        for (let d = 1; d <= 2; d += 1) {
+          if (clamped - d >= 48 && scalePcs.includes(((clamped - d) % 12 + 12) % 12)) return clamped - d;
+          if (clamped + d <= 84 && scalePcs.includes(((clamped + d) % 12 + 12) % 12)) return clamped + d;
+        }
+        return clamped;
+      }
+
+      function formatNoteDisplay(midi, preferFlat = false) {
+        const rounded = Math.round(midi);
+        const octave = Math.floor(rounded / 12) - 1;
+        const pc = ((rounded % 12) + 12) % 12;
+        const d = getDict();
+        const names = preferFlat ? NOTE_NAMES_FLAT : NOTE_NAMES_SHARP;
+        const solArr = preferFlat ? (d.solfegeFlat || I18N_COMMON.solfegeFlatLatin) : (d.solfege || I18N_COMMON.solfegeLatin);
+        return { name: names[pc], octave, solfege: solArr[pc] };
+      }
+
+      function createNoteEvent(midi, baseBeats = 1, opts = {}) {
+        const validBase = [4, 2, 1, 0.5, 0.25].includes(baseBeats) ? baseBeats : 1;
+        return {
+          id: opts.id || `n_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+          midi: Math.max(48, Math.min(84, Math.round(midi))),
+          baseBeats: validBase,
+          dotted: Boolean(opts.dotted) && !opts.triplet && validBase !== 4 && validBase !== 0.25,
+          triplet: Boolean(opts.triplet),
+          tripletGroupId: opts.triplet ? (opts.tripletGroupId || null) : null,
+          isRest: Boolean(opts.isRest),
+          preferFlat: Boolean(opts.preferFlat),
+          repeatStart: Boolean(opts.repeatStart),
+          repeatEnd: Boolean(opts.repeatEnd),
+          chord: typeof opts.chord === 'string' ? opts.chord.trim().slice(0, 12) : '',
+          lyric: typeof opts.lyric === 'string' ? opts.lyric.trim().slice(0, 12) : ''
+        };
+      }
+
+      function normalizeNoteEvent(raw) {
+        if (!raw || typeof raw !== 'object') return null;
+        return createNoteEvent(typeof raw.midi === 'number' ? raw.midi : 60, raw.baseBeats || raw.beats || 1, raw);
+      }
+
+      function noteToTicks(note) {
+        if (!note) return TICKS_PER_QUARTER;
+        const rawTicks = Math.round((note.baseBeats || 1) * TICKS_PER_QUARTER);
+        if (note.triplet) return Math.max(4, Math.round((rawTicks * 2) / 3));
+        if (note.dotted) return Math.round(rawTicks * 1.5);
+        return rawTicks;
+      }
+
+      function ticksToGlyphSpec(ticks, isTriplet = false) {
+        if (isTriplet) {
+          if (ticks >= 14) return { hollow: false, stem: true, flags: 0, dotted: false };
+          if (ticks >= 7) return { hollow: false, stem: true, flags: 1, dotted: false };
+          return { hollow: false, stem: true, flags: 2, dotted: false };
+        }
+        if (ticks >= 96) return { hollow: true, stem: false, flags: 0, dotted: false };
+        if (ticks >= 72) return { hollow: true, stem: true, flags: 0, dotted: true };
+        if (ticks >= 48) return { hollow: true, stem: true, flags: 0, dotted: false };
+        if (ticks >= 36) return { hollow: false, stem: true, flags: 0, dotted: true };
+        if (ticks >= 24) return { hollow: false, stem: true, flags: 0, dotted: false };
+        if (ticks >= 18) return { hollow: false, stem: true, flags: 1, dotted: true };
+        if (ticks >= 12) return { hollow: false, stem: true, flags: 1, dotted: false };
+        if (ticks >= 9) return { hollow: false, stem: true, flags: 2, dotted: true };
+        return { hollow: false, stem: true, flags: 2, dotted: false };
+      }
+
+      function canSubdivideNoteToTriplet(note) {
+        return Boolean(
+          note &&
+          !note.triplet &&
+          !note.dotted &&
+          !note.isRest &&
+          (note.baseBeats === 2 || note.baseBeats === 1 || note.baseBeats === 0.5)
+        );
+      }
+
+      function toggleTripletOnNote(idx) {
+        const note = state.scoreNotes[idx];
+        if (!note) return false;
+        if (note.triplet) {
+          pushUndoSnapshot();
+          let start = idx;
+          let end = idx;
+          if (note.tripletGroupId) {
+            while (start > 0 && state.scoreNotes[start - 1].tripletGroupId === note.tripletGroupId) start -= 1;
+            while (end < state.scoreNotes.length - 1 && state.scoreNotes[end + 1].tripletGroupId === note.tripletGroupId) end += 1;
+          } else {
+            while (start > 0 && idx - start < 2 && state.scoreNotes[start - 1].triplet && state.scoreNotes[start - 1].baseBeats === note.baseBeats) start -= 1;
+            while (end < state.scoreNotes.length - 1 && end - start < 2 && state.scoreNotes[end + 1].triplet && state.scoreNotes[end + 1].baseBeats === note.baseBeats) end += 1;
+          }
+          const first = state.scoreNotes[start];
+          const restoredBeats = Math.min(2, (first.baseBeats || 0.5) * 2);
+          const merged = createNoteEvent(first.midi, restoredBeats, {
+            preferFlat: first.preferFlat,
+            repeatStart: first.repeatStart,
+            repeatEnd: state.scoreNotes[end].repeatEnd
+          });
+          state.scoreNotes.splice(start, end - start + 1, merged);
+          state.selectedNoteIndex = start;
+          return true;
+        }
+        if (!canSubdivideNoteToTriplet(note)) return false;
+        pushUndoSnapshot();
+        const childBeats = note.baseBeats / 2;
+        const gid = `tri_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+        const trio = [0, 1, 2].map((k) => createNoteEvent(note.midi, childBeats, {
+          triplet: true,
+          tripletGroupId: gid,
+          preferFlat: note.preferFlat,
+          repeatStart: k === 0 && note.repeatStart,
+          repeatEnd: k === 2 && note.repeatEnd
+        }));
+        state.scoreNotes.splice(idx, 1, ...trio);
+        state.selectedNoteIndex = idx;
+        return true;
+      }
+
       function clearTimerList(timers) {
         if (!Array.isArray(timers)) return;
         timers.forEach((id) => clearTimeout(id));
@@ -991,13 +1445,8 @@
         state.lastStableFreq = -1;
         state.settlingMidi = null;
         state.settlingStartTime = 0;
-        if (state.livePreviewMidi !== null) {
-          state.livePreviewMidi = null;
-          if (el.scoreStaffMount) renderScoreStaff();
-        }
-        if (resetRegister) {
-          state.autoRegisterLocked = false;
-        }
+        state.livePreviewMidi = null;
+        if (resetRegister) state.autoRegisterLocked = false;
       }
 
       function updateGateMarkerUI() {
@@ -1008,12 +1457,10 @@
       }
 
       function populateTimeSignatureSelects() {
-        const optionsHtml = Object.entries(TIME_SIGNATURES)
-          .map(([key, cfg]) => {
-            const label = (cfg.symbol === 'C' || cfg.symbol === '₵') ? `${key} (${cfg.symbol})` : key;
-            return `<option value="${key}">${label}</option>`;
-          })
-          .join('');
+        const optionsHtml = Object.entries(TIME_SIGNATURES).map(([key, cfg]) => {
+          const label = (cfg.symbol === 'C' || cfg.symbol === '₵') ? `${key} (${cfg.symbol})` : key;
+          return `<option value="${key}">${label}</option>`;
+        }).join('');
         if (el.scoreTimeSigSelect) {
           el.scoreTimeSigSelect.innerHTML = optionsHtml;
           el.scoreTimeSigSelect.value = state.timeSignature;
@@ -1021,335 +1468,6 @@
         if (el.metroTimeSigSelect) {
           el.metroTimeSigSelect.innerHTML = optionsHtml;
           el.metroTimeSigSelect.value = state.timeSignature;
-        }
-      }
-
-      function getCurrentTimeSignature() {
-        return TIME_SIGNATURES[state.timeSignature] || TIME_SIGNATURES['4/4'];
-      }
-
-      function getCurrentKeySignature() {
-        const semi = ((state.transposeSemitones % 12) + 12) % 12;
-        return KEY_SIGNATURES[semi] || KEY_SIGNATURES[0];
-      }
-
-      function midiToFreq(midi) {
-        return state.a4Freq * Math.pow(2, (midi - 69) / 12);
-      }
-
-      function freqToMidiFloat(freq) {
-        return 69 + 12 * Math.log2(freq / state.a4Freq);
-      }
-
-      function getDiatonicPitchClasses() {
-        const root = ((state.transposeSemitones % 12) + 12) % 12;
-        const intervals = [0, 2, 4, 5, 7, 9, 11];
-        return intervals.map((iv) => (root + iv) % 12);
-      }
-
-      function snapMidiToScale(rawMidi) {
-        if (state.scaleMode === 'chromatic') return rawMidi;
-        const allowed = getDiatonicPitchClasses();
-        let best = rawMidi;
-        let bestDist = 99;
-        for (let d = -2; d <= 2; d += 1) {
-          const cand = rawMidi + d;
-          const pc = ((cand % 12) + 12) % 12;
-          if (allowed.includes(pc) && Math.abs(d) < bestDist) {
-            bestDist = Math.abs(d);
-            best = cand;
-          }
-        }
-        return best;
-      }
-
-      function formatNoteDisplay(midi, preferFlat = false) {
-        const pc = ((midi % 12) + 12) % 12;
-        const octave = Math.floor(midi / 12) - 1;
-        const d = getDict();
-        const name = preferFlat ? NOTE_NAMES_FLAT[pc] : NOTE_NAMES_SHARP[pc];
-        const solfege = preferFlat ? d.solfegeFlat[pc] : d.solfege[pc];
-        return { name, octave, solfege };
-      }
-
-      function createNoteEvent(midi, baseBeats = 1, options = {}) {
-        const clampedMidi = Math.max(48, Math.min(84, Math.round(midi)));
-        const validBase = [4, 2, 1, 0.5, 0.25].includes(baseBeats) ? baseBeats : 1;
-        const canDot = (validBase === 2 || validBase === 1 || validBase === 0.5) && !options.triplet;
-        return {
-          id: options.id || `n_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
-          midi: clampedMidi,
-          baseBeats: validBase,
-          dotted: canDot ? Boolean(options.dotted) : false,
-          triplet: Boolean(options.triplet),
-          tripletGroupId: options.tripletGroupId || null,
-          isRest: Boolean(options.isRest),
-          preferFlat: Boolean(options.preferFlat),
-          repeatStart: Boolean(options.repeatStart),
-          repeatEnd: Boolean(options.repeatEnd)
-        };
-      }
-
-      function normalizeNoteEvent(raw) {
-        if (!raw) return null;
-        if (typeof raw === 'number') return createNoteEvent(raw, 1);
-        const midi = typeof raw.midi === 'number' ? raw.midi : 60;
-        if (typeof raw.baseBeats === 'number') {
-          return createNoteEvent(midi, raw.baseBeats, {
-            dotted: raw.dotted,
-            triplet: raw.triplet,
-            tripletGroupId: raw.tripletGroupId,
-            isRest: raw.isRest,
-            preferFlat: raw.preferFlat,
-            repeatStart: raw.repeatStart,
-            repeatEnd: raw.repeatEnd
-          });
-        }
-        const legacyBeats = typeof raw.beats === 'number' ? raw.beats : 1;
-        if (legacyBeats === 3) return createNoteEvent(midi, 2, { dotted: true, isRest: raw.isRest, preferFlat: raw.preferFlat });
-        if (legacyBeats === 1.5) return createNoteEvent(midi, 1, { dotted: true, isRest: raw.isRest, preferFlat: raw.preferFlat });
-        if (legacyBeats === 0.75) return createNoteEvent(midi, 0.5, { dotted: true, isRest: raw.isRest, preferFlat: raw.preferFlat });
-        return createNoteEvent(midi, legacyBeats, { isRest: raw.isRest, preferFlat: raw.preferFlat });
-      }
-
-      function noteToTicks(noteObj) {
-        if (!noteObj) return TICKS_PER_QUARTER;
-        const base = noteObj.baseBeats || 1;
-        const baseTicks = Math.max(6, Math.round(base * TICKS_PER_QUARTER));
-        if (noteObj.triplet) return Math.max(4, Math.round((baseTicks * 2) / 3));
-        if (noteObj.dotted) return Math.round(baseTicks * 1.5);
-        return baseTicks;
-      }
-
-      function ticksToGlyphSpec(ticks, isTriplet = false) {
-        if (isTriplet) {
-          if (ticks >= 14) return { hollow: false, stem: true, flags: 0, dotted: false };
-          if (ticks >= 7) return { hollow: false, stem: true, flags: 1, dotted: false };
-          return { hollow: false, stem: true, flags: 2, dotted: false };
-        }
-        if (ticks >= 84) return { hollow: true, stem: false, flags: 0, dotted: false };
-        if (ticks >= 60) return { hollow: true, stem: true, flags: 0, dotted: true };
-        if (ticks >= 42) return { hollow: true, stem: true, flags: 0, dotted: false };
-        if (ticks >= 30) return { hollow: false, stem: true, flags: 0, dotted: true };
-        if (ticks >= 21) return { hollow: false, stem: true, flags: 0, dotted: false };
-        if (ticks >= 15) return { hollow: false, stem: true, flags: 1, dotted: true };
-        if (ticks >= 10) return { hollow: false, stem: true, flags: 1, dotted: false };
-        return { hollow: false, stem: true, flags: 2, dotted: false };
-      }
-
-      function getTripletGroupRange(notes, index) {
-        if (index < 0 || index >= notes.length) return null;
-        const target = notes[index];
-        if (!target || !target.triplet) return null;
-        if (target.tripletGroupId) {
-          let start = index;
-          let end = index;
-          while (start > 0 && notes[start - 1].triplet && notes[start - 1].tripletGroupId === target.tripletGroupId) start -= 1;
-          while (end < notes.length - 1 && notes[end + 1].triplet && notes[end + 1].tripletGroupId === target.tripletGroupId) end += 1;
-          return { start, end, count: end - start + 1 };
-        }
-        let runStart = index;
-        while (runStart > 0 && notes[runStart - 1].triplet && !notes[runStart - 1].tripletGroupId && notes[runStart - 1].baseBeats === target.baseBeats) {
-          runStart -= 1;
-        }
-        const offsetInRun = (index - runStart) % 3;
-        const start = index - offsetInRun;
-        const end = Math.min(notes.length - 1, start + 2);
-        return { start, end, count: end - start + 1 };
-      }
-
-      function canSubdivideNoteToTriplet(noteObj) {
-        if (!noteObj || noteObj.triplet || noteObj.dotted) return false;
-        const b = noteObj.baseBeats;
-        return b === 2 || b === 1 || b === 0.5;
-      }
-
-      function toggleTripletOnNote(index) {
-        if (index < 0 || index >= state.scoreNotes.length) return false;
-        const target = state.scoreNotes[index];
-        if (target.triplet) {
-          const range = getTripletGroupRange(state.scoreNotes, index);
-          if (!range) return false;
-          const parentBaseBeats = Math.min(2, target.baseBeats * 2);
-          const restored = createNoteEvent(target.midi, parentBaseBeats, {
-            isRest: target.isRest,
-            preferFlat: target.preferFlat,
-            repeatStart: state.scoreNotes[range.start].repeatStart,
-            repeatEnd: state.scoreNotes[range.end].repeatEnd
-          });
-          state.scoreNotes.splice(range.start, range.count, restored);
-          state.selectedNoteIndex = range.start;
-          return true;
-        }
-        if (!canSubdivideNoteToTriplet(target)) return false;
-        const childBaseBeats = target.baseBeats / 2;
-        const groupId = `trip_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
-        const trio = [0, 1, 2].map((idx) =>
-          createNoteEvent(target.midi, childBaseBeats, {
-            triplet: true,
-            tripletGroupId: groupId,
-            isRest: target.isRest,
-            preferFlat: target.preferFlat,
-            repeatStart: idx === 0 ? target.repeatStart : false,
-            repeatEnd: idx === 2 ? target.repeatEnd : false
-          })
-        );
-        state.scoreNotes.splice(index, 1, ...trio);
-        state.selectedNoteIndex = index;
-        return true;
-      }
-
-      function ensureAudioContext() {
-        if (!state.audioCtx) {
-          const AudioCtx = window.AudioContext || window.webkitAudioContext;
-          state.audioCtx = new AudioCtx();
-        }
-        if (state.audioCtx.state === 'suspended') {
-          state.audioCtx.resume();
-        }
-        return state.audioCtx;
-      }
-
-      function playReferenceTone(freq, duration = 0.45) {
-        try {
-          const ctx = ensureAudioContext();
-          const now = ctx.currentTime;
-          const safeDur = Math.max(0.12, duration);
-          const osc = ctx.createOscillator();
-          const oscHarm = ctx.createOscillator();
-          const gain = ctx.createGain();
-          const harmGain = ctx.createGain();
-
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(freq, now);
-          oscHarm.type = 'sine';
-          oscHarm.frequency.setValueAtTime(freq * 2, now);
-          harmGain.gain.setValueAtTime(0.05, now);
-
-          const sustainEnd = now + Math.max(0.05, safeDur * 0.82);
-          gain.gain.setValueAtTime(0.0001, now);
-          gain.gain.exponentialRampToValueAtTime(0.24, now + 0.025);
-          gain.gain.linearRampToValueAtTime(0.16, sustainEnd);
-          gain.gain.exponentialRampToValueAtTime(0.0001, now + safeDur);
-
-          osc.connect(gain);
-          oscHarm.connect(harmGain);
-          harmGain.connect(gain);
-          gain.connect(ctx.destination);
-
-          osc.start(now);
-          oscHarm.start(now);
-          osc.stop(now + safeDur + 0.02);
-          oscHarm.stop(now + safeDur + 0.02);
-        } catch (err) {}
-      }
-
-      function playClickSound(isAccent = false, isSub = false) {
-        try {
-          const ctx = ensureAudioContext();
-          const now = ctx.currentTime;
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(isAccent ? 1320 : (isSub ? 660 : 880), now);
-          gain.gain.setValueAtTime(0.0001, now);
-          gain.gain.exponentialRampToValueAtTime(isAccent ? 0.28 : (isSub ? 0.1 : 0.18), now + 0.005);
-          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.055);
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          osc.start(now);
-          osc.stop(now + 0.065);
-        } catch (err) {}
-      }
-
-      function detectPitchYIN(buffer, sampleRate, prevFreq = -1) {
-        const size = buffer.length;
-        let rms = 0;
-        for (let i = 0; i < size; i += 1) {
-          rms += buffer[i] * buffer[i];
-        }
-        rms = Math.sqrt(rms / size);
-        const db = rms > 0 ? 20 * Math.log10(rms) : -100;
-        if (db < state.noiseGateDb || rms < 0.004) {
-          return { freq: -1, clarity: 0, db, rms };
-        }
-
-        const halfSize = Math.floor(size / 2);
-        const minFreq = state.activeTab === 'tuner' ? 35 : 75;
-        const maxFreq = state.activeTab === 'tuner' ? 1100 : 680;
-        const minTau = Math.max(4, Math.floor(sampleRate / maxFreq));
-        const maxTau = Math.min(halfSize - 2, Math.floor(sampleRate / minFreq));
-
-        const yinBuffer = new Float32Array(maxTau + 1);
-        let runningSum = 0;
-        yinBuffer[0] = 1;
-
-        for (let tau = 1; tau <= maxTau; tau += 1) {
-          let diff = 0;
-          for (let i = 0; i < halfSize; i += 1) {
-            const delta = buffer[i] - buffer[i + tau];
-            diff += delta * delta;
-          }
-          runningSum += diff;
-          yinBuffer[tau] = runningSum > 0 ? (diff * tau) / runningSum : 1;
-        }
-
-        const candidates = [];
-        for (let tau = minTau + 1; tau < maxTau - 1; tau += 1) {
-          if (yinBuffer[tau] < 0.24 && yinBuffer[tau] <= yinBuffer[tau - 1] && yinBuffer[tau] < yinBuffer[tau + 1]) {
-            const s0 = yinBuffer[tau - 1];
-            const s1 = yinBuffer[tau];
-            const s2 = yinBuffer[tau + 1];
-            const denom = 2 * (2 * s1 - s2 - s0);
-            const refinedTau = Math.abs(denom) > 1e-6 ? tau + (s2 - s0) / denom : tau;
-            candidates.push({ tau: refinedTau, cmnd: s1, freq: sampleRate / refinedTau });
-          }
-        }
-
-        if (candidates.length === 0) {
-          return { freq: -1, clarity: 0, db, rms };
-        }
-
-        let bestCand = candidates[0];
-        if (prevFreq > 0 && candidates.length > 1) {
-          let bestScore = Infinity;
-          candidates.forEach((c) => {
-            const semiDist = Math.abs(12 * Math.log2(c.freq / prevFreq));
-            const continuityPenalty = semiDist > 7 ? Math.min(0.18, (semiDist - 7) * 0.015) : 0;
-            const score = c.cmnd + continuityPenalty;
-            if (score < bestScore) {
-              bestScore = score;
-              bestCand = c;
-            }
-          });
-        }
-
-        const clarity = Math.max(0, Math.min(1, 1 - bestCand.cmnd));
-        if (clarity < state.clarityThreshold) {
-          return { freq: -1, clarity, db, rms };
-        }
-
-        return { freq: bestCand.freq, clarity, db, rms };
-      }
-
-      function getMedianValue(arr) {
-        if (!arr.length) return -1;
-        const sorted = [...arr].sort((a, b) => a - b);
-        const mid = Math.floor(sorted.length / 2);
-        return sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
-      }
-
-      function updatePitchLockBadge(mode) {
-        if (!el.pitchLockBadge) return;
-        if (mode === 'locked') {
-          el.pitchLockBadge.textContent = 'LOCKED';
-          el.pitchLockBadge.className = 'badge-pill bg-emerald-500/20 border border-emerald-500/50 text-emerald-300';
-        } else if (mode === 'settling') {
-          el.pitchLockBadge.textContent = 'SETTLING';
-          el.pitchLockBadge.className = 'badge-pill bg-amber-500/20 border border-amber-500/50 text-amber-300';
-        } else {
-          el.pitchLockBadge.textContent = 'WAIT';
-          el.pitchLockBadge.className = 'badge-pill bg-slate-900 border border-slate-800 text-slate-400';
         }
       }
 
@@ -1369,6 +1487,7 @@
         if (state.candidateMidi === null) return;
         const durMs = nowMs - state.candidateStartTime;
         if (durMs >= 110) {
+          pushUndoSnapshot();
           const spec = quantizeDurationToNoteSpec(durMs);
           const ks = getCurrentKeySignature();
           const ev = createNoteEvent(state.candidateMidi, spec.baseBeats, {
@@ -1397,6 +1516,7 @@
         const beatMs = state.isMetroRunning ? (60000 / state.metroBpm) : 625;
         if (silentMs < beatMs * 0.85) return;
 
+        pushUndoSnapshot();
         const maxSilentMs = Math.min(silentMs, beatMs * 4.2);
         const spec = quantizeDurationToNoteSpec(maxSilentMs);
         const restNote = createNoteEvent(60, spec.baseBeats, {
@@ -1422,7 +1542,7 @@
         }
 
         if (state.activeTab === 'tuner') {
-          updateTunerDisplay(res);
+          updateTunerDisplay(res, nowMs);
           return;
         }
 
@@ -1534,6 +1654,7 @@
       }
 
       async function startMicrophone() {
+        cancelCountIn();
         if (state.isSimRunning) stopSimulation();
         resetPitchTrackerState(true);
         try {
@@ -1566,12 +1687,18 @@
           state.isMicRunning = true;
 
           updateMasterStatusUI();
+          syncWakeLock();
           const buf = new Float32Array(analyser.fftSize);
-          const loop = () => {
+          let lastAnalyzeTime = 0;
+          const loop = (now) => {
             if (!state.isMicRunning) return;
-            analyser.getFloatTimeDomainData(buf);
-            const res = detectPitchYIN(buf, ctx.sampleRate, state.lastStableFreq);
-            handleDetectedFrame(res, performance.now());
+            // Pace pitch analysis to ~30Hz (32ms) to cut mobile CPU/battery load without losing vocal precision
+            if (now - lastAnalyzeTime >= 32) {
+              lastAnalyzeTime = now;
+              analyser.getFloatTimeDomainData(buf);
+              const res = detectPitchYIN(buf, ctx.sampleRate, state.lastStableFreq);
+              handleDetectedFrame(res, now);
+            }
             state.rafId = requestAnimationFrame(loop);
           };
           state.rafId = requestAnimationFrame(loop);
@@ -1581,6 +1708,7 @@
       }
 
       function stopMicrophone() {
+        cancelCountIn();
         if (state.candidateMidi !== null) commitVocalCandidate(performance.now());
         resetPitchTrackerState(false);
         state.isMicRunning = false;
@@ -1592,6 +1720,63 @@
         }
         updatePitchLockBadge('wait');
         updateMasterStatusUI();
+        syncWakeLock();
+      }
+
+      function cancelCountIn() {
+        if (!state.isCountingIn && !state.countInTimers.length) return;
+        state.isCountingIn = false;
+        clearTimerList(state.countInTimers);
+        updateMasterStatusUI();
+        syncWakeLock();
+      }
+
+      function startMicWithOptionalCountIn() {
+        if (state.isCountingIn) {
+          cancelCountIn();
+          return;
+        }
+        if (!state.isMetroRunning || state.activeTab !== 'detector') {
+          startMicrophone();
+          return;
+        }
+        if (state.isSimRunning) stopSimulation();
+        // Pause existing metronome timer so count-in and post-count-in beat 1 share exact 0ms phase
+        stopMetronome();
+        const ts = getCurrentTimeSignature();
+        const unitScale = ts.beatUnit === 8 ? 0.5 : (ts.beatUnit === 2 ? 2 : 1);
+        const beatMs = (60000 / state.metroBpm) * unitScale;
+
+        state.isCountingIn = true;
+        clearTimerList(state.countInTimers);
+        updateMasterStatusUI();
+        syncWakeLock();
+
+        for (let b = 0; b < ts.beats; b += 1) {
+          const tid = setTimeout(() => {
+            if (!state.isCountingIn) return;
+            const isAccent = b === 0;
+            if (!state.metroMuted) playClickSound(isAccent, false);
+            if (isAccent) triggerHaptic(10);
+            triggerVisualBeatPulse(b, ts.beats, isAccent);
+            if (el.statusText) el.statusText.textContent = `COUNT-IN ${b + 1}/${ts.beats}`;
+            if (el.detectedNoteMain) {
+              el.detectedNoteMain.textContent = String(b + 1);
+              el.detectedNoteMain.className = 'text-5xl sm:text-6xl font-black text-amber-400 tracking-tight tabular-nums';
+            }
+            if (el.detectedOctave) el.detectedOctave.textContent = '';
+          }, Math.round(b * beatMs));
+          state.countInTimers.push(tid);
+        }
+
+        const goTid = setTimeout(() => {
+          if (!state.isCountingIn) return;
+          state.isCountingIn = false;
+          state.countInTimers.length = 0;
+          startMetronome();
+          startMicrophone();
+        }, Math.round(ts.beats * beatMs));
+        state.countInTimers.push(goTid);
       }
 
       function startSimulation() {
@@ -1658,22 +1843,429 @@
         updateMasterStatusUI();
       }
 
+      // Pillar 1-A: Offline Audio File (.mp3 / .wav / .m4a) High-Speed Transcription
+      async function transcribeAudioFile(file) {
+        if (!file) return;
+        const d = getDict();
+        showToast(d.toastAudioDecoding || 'Analyzing audio file...');
+        if (state.isMicRunning) stopMicrophone();
+        if (state.isSimRunning) stopSimulation();
+        stopScorePlayback();
+
+        try {
+          const arrayBuf = await file.arrayBuffer();
+          const ctx = ensureAudioContext();
+          const audioBuf = await ctx.decodeAudioData(arrayBuf.slice(0));
+          const sr = audioBuf.sampleRate;
+          const totalSamples = audioBuf.length;
+          const mono = new Float32Array(totalSamples);
+          const chCount = audioBuf.numberOfChannels;
+          for (let c = 0; c < chCount; c += 1) {
+            const chData = audioBuf.getChannelData(c);
+            for (let i = 0; i < totalSamples; i += 1) {
+              mono[i] += chData[i] / chCount;
+            }
+          }
+
+          const frameSize = 2048;
+          const hopSize = Math.max(256, Math.round(sr * 0.032));
+          const hopMs = (hopSize / sr) * 1000;
+          const ks = getCurrentKeySignature();
+          const extracted = [];
+          const pitchBuf = [];
+          let lastFreq = -1;
+          let autoOctShift = state.octaveShift;
+          let octLocked = state.octaveMode !== 'auto';
+          let candMidi = null;
+          let candStartMs = 0;
+          let settleMidi = null;
+          let settleStartMs = 0;
+          let lastVoiceMs = 0;
+          let silenceStartMs = 0;
+
+          const pushCand = (endMs) => {
+            if (candMidi === null) return;
+            const dur = endMs - candStartMs;
+            if (dur >= 100) {
+              const spec = quantizeDurationToNoteSpec(dur);
+              extracted.push(createNoteEvent(candMidi, spec.baseBeats, {
+                dotted: spec.dotted,
+                preferFlat: ks.type === 'flat'
+              }));
+            }
+            candMidi = null;
+            candStartMs = 0;
+            silenceStartMs = endMs;
+          };
+
+          const beatMs = 60000 / state.metroBpm;
+          for (let offset = 0; offset + frameSize <= totalSamples; offset += hopSize) {
+            const nowMs = (offset / sr) * 1000;
+            const slice = mono.subarray(offset, offset + frameSize);
+            const res = detectPitchYIN(slice, sr, lastFreq);
+
+            if (res.freq <= 0) {
+              pitchBuf.length = 0;
+              settleMidi = null;
+              if (candMidi !== null && nowMs - lastVoiceMs > 120) {
+                pushCand(nowMs);
+                lastFreq = -1;
+              }
+              continue;
+            }
+
+            lastVoiceMs = nowMs;
+            pitchBuf.push(res.freq);
+            if (pitchBuf.length > 5) pitchBuf.shift();
+            const medFreq = getMedianValue(pitchBuf);
+            lastFreq = medFreq;
+
+            if (!octLocked && pitchBuf.length >= 3) {
+              autoOctShift = medFreq < 235 ? 1 : 0;
+              octLocked = true;
+            }
+
+            const rawFloat = freqToMidiFloat(medFreq);
+            const nearest = Math.round(rawFloat);
+            const cents = Math.abs((rawFloat - nearest) * 100);
+            if (cents > 42) continue;
+
+            const snapped = snapMidiToScale(nearest + autoOctShift * 12);
+            if (candMidi === snapped) continue;
+
+            if (settleMidi !== snapped) {
+              settleMidi = snapped;
+              settleStartMs = nowMs;
+            } else if (nowMs - settleStartMs >= Math.max(95, hopMs * 3)) {
+              if (candMidi !== null) {
+                pushCand(settleStartMs);
+              } else if (state.autoRestEnabled && extracted.length > 0 && silenceStartMs > 0) {
+                const silMs = settleStartMs - silenceStartMs;
+                if (silMs >= beatMs * 0.85) {
+                  const rSpec = quantizeDurationToNoteSpec(Math.min(silMs, beatMs * 4.2));
+                  extracted.push(createNoteEvent(60, rSpec.baseBeats, { dotted: rSpec.dotted, isRest: true }));
+                }
+              }
+              silenceStartMs = 0;
+              candMidi = snapped;
+              candStartMs = settleStartMs;
+            }
+          }
+          pushCand((totalSamples / sr) * 1000);
+
+          if (extracted.length === 0) {
+            showToast(d.toastAudioError || 'Could not detect melody.');
+            return;
+          }
+
+          pushUndoSnapshot();
+          state.scoreNotes = extracted;
+          state.selectedNoteIndex = 0;
+          state.isDirty = true;
+          const cleanName = file.name.replace(/\.[^/.]+$/, '').slice(0, 36);
+          if (cleanName && el.scoreTitleInput) el.scoreTitleInput.value = cleanName;
+          renderScoreStaff();
+          showToast(d.toastAudioImported ? d.toastAudioImported(extracted.length) : `Transcribed ${extracted.length} notes`);
+        } catch (err) {
+          showToast(d.toastAudioError || 'Audio decode error');
+        }
+      }
+
+      // Pillar 1-B: Krumhansl-Schmuckler Major Key Signature Auto-Detection
+      function detectKeySignatureKrumhansl() {
+        const pitched = state.scoreNotes.filter((n) => !n.isRest);
+        if (pitched.length < 3) {
+          showToast(getDict().toastNoNotes);
+          return;
+        }
+        const majorProfile = [6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88];
+        const hist = new Array(12).fill(0);
+        pitched.forEach((n) => {
+          const pc = ((n.midi % 12) + 12) % 12;
+          hist[pc] += noteToTicks(n);
+        });
+
+        const meanH = hist.reduce((a, b) => a + b, 0) / 12;
+        const meanP = majorProfile.reduce((a, b) => a + b, 0) / 12;
+        let bestKey = 0;
+        let bestCorr = -Infinity;
+
+        for (let key = 0; key < 12; key += 1) {
+          let num = 0;
+          let denH = 0;
+          let denP = 0;
+          for (let i = 0; i < 12; i += 1) {
+            const hDiff = hist[(key + i) % 12] - meanH;
+            const pDiff = majorProfile[i] - meanP;
+            num += hDiff * pDiff;
+            denH += hDiff * hDiff;
+            denP += pDiff * pDiff;
+          }
+          const corr = (denH > 0 && denP > 0) ? (num / Math.sqrt(denH * denP)) : -1;
+          if (corr > bestCorr) {
+            bestCorr = corr;
+            bestKey = key;
+          }
+        }
+
+        pushUndoSnapshot();
+        state.transposeSemitones = bestKey > 6 ? bestKey - 12 : bestKey;
+        const ks = getCurrentKeySignature();
+        state.scoreNotes.forEach((n) => {
+          if (!n.isRest) n.preferFlat = ks.type === 'flat';
+        });
+        state.isDirty = true;
+        syncTransposeUI();
+        renderScoreStaff();
+        const d = getDict();
+        showToast(d.toastAutoKey ? d.toastAutoKey(ks.label) : `Key: ${ks.label}`);
+      }
+
+      // Pillar 1-C: Post-Record Ghost Passing Note Cleanup
+      function cleanupScoreNotes() {
+        if (state.scoreNotes.length < 2) {
+          showToast(getDict().toastCleanupNone || 'Nothing to clean.');
+          return;
+        }
+        const cleaned = [];
+        let removedCount = 0;
+
+        for (let i = 0; i < state.scoreNotes.length; i += 1) {
+          const cur = state.scoreNotes[i];
+          const prev = cleaned.length > 0 ? cleaned[cleaned.length - 1] : null;
+          const next = i + 1 < state.scoreNotes.length ? state.scoreNotes[i + 1] : null;
+
+          const isMicroGhost = !cur.isRest && !cur.triplet && !cur.dotted && cur.baseBeats <= 0.25;
+          if (isMicroGhost && prev && !prev.isRest && !prev.triplet) {
+            const sandwiched = next && !next.isRest && prev.midi === next.midi && Math.abs(cur.midi - prev.midi) <= 3;
+            const samePitchGlitch = prev.midi === cur.midi;
+            if (sandwiched || samePitchGlitch) {
+              removedCount += 1;
+              continue;
+            }
+          }
+          cleaned.push({ ...cur });
+        }
+
+        const d = getDict();
+        if (removedCount === 0) {
+          showToast(d.toastCleanupNone || 'No ghost notes found.');
+          return;
+        }
+        pushUndoSnapshot();
+        state.scoreNotes = cleaned;
+        state.selectedNoteIndex = Math.min(state.selectedNoteIndex, state.scoreNotes.length - 1);
+        state.isDirty = true;
+        renderScoreStaff();
+        showToast(d.toastCleanupDone ? d.toastCleanupDone(removedCount) : `Cleaned ${removedCount} notes`);
+      }
+
+      // Core DSP Helpers & Master Status UI (Restored for 100% Runtime Integrity)
+      function getMedianValue(arr) {
+        if (!arr || !arr.length) return -1;
+        const sorted = [...arr].sort((a, b) => a - b);
+        const mid = Math.floor(sorted.length / 2);
+        return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+      }
+
+      function detectPitchYIN(buf, sampleRate, prevFreq = -1) {
+        const len = buf.length;
+        let sumSq = 0;
+        for (let i = 0; i < len; i += 1) sumSq += buf[i] * buf[i];
+        const rms = Math.sqrt(sumSq / len);
+        const db = rms > 1e-6 ? 20 * Math.log10(rms) : -100;
+        if (db < state.noiseGateDb) return { freq: -1, clarity: 0, db, rms };
+
+        const isTuner = state.activeTab === 'tuner';
+        const minFreq = isTuner ? 35 : 75;
+        const maxFreq = isTuner ? 1200 : 680;
+        const minTau = Math.max(2, Math.floor(sampleRate / maxFreq));
+        const maxTau = Math.min(Math.floor(len / 2) - 1, Math.ceil(sampleRate / minFreq));
+        const windowSize = Math.min(1024, len - maxTau);
+        if (windowSize <= 64 || maxTau <= minTau) return { freq: -1, clarity: 0, db, rms };
+
+        const diff = new Float32Array(maxTau + 1);
+        const cmndf = new Float32Array(maxTau + 1);
+        cmndf[0] = 1;
+        let runningSum = 0;
+
+        for (let tau = 1; tau <= maxTau; tau += 1) {
+          let sum = 0;
+          for (let j = 0; j < windowSize; j += 1) {
+            const d = buf[j] - buf[j + tau];
+            sum += d * d;
+          }
+          diff[tau] = sum;
+          runningSum += sum;
+          cmndf[tau] = runningSum > 0 ? (sum * tau) / runningSum : 1;
+        }
+
+        const candidates = [];
+        for (let tau = minTau + 1; tau < maxTau; tau += 1) {
+          if (cmndf[tau] < 0.24 && cmndf[tau] <= cmndf[tau - 1] && cmndf[tau] <= cmndf[tau + 1]) {
+            candidates.push({ tau, val: cmndf[tau] });
+          }
+        }
+
+        if (!candidates.length) {
+          let bestTau = -1;
+          let bestVal = 1;
+          for (let tau = minTau; tau <= maxTau; tau += 1) {
+            if (cmndf[tau] < bestVal) {
+              bestVal = cmndf[tau];
+              bestTau = tau;
+            }
+          }
+          if (bestTau === -1 || 1 - bestVal < state.clarityThreshold) {
+            return { freq: -1, clarity: Math.max(0, 1 - bestVal), db, rms };
+          }
+          candidates.push({ tau: bestTau, val: bestVal });
+        }
+
+        let chosen = candidates[0];
+        if (prevFreq > 0 && candidates.length > 1) {
+          let bestScore = Infinity;
+          candidates.forEach((c) => {
+            const f = sampleRate / c.tau;
+            const semiDist = Math.abs(12 * Math.log2(f / prevFreq));
+            const penalty = semiDist > 7 ? 0.14 : (semiDist * 0.012);
+            const score = c.val + penalty;
+            if (score < bestScore) {
+              bestScore = score;
+              chosen = c;
+            }
+          });
+        } else {
+          chosen = candidates.reduce((a, b) => (b.val < a.val ? b : a), candidates[0]);
+        }
+
+        const clarity = Math.max(0, Math.min(1, 1 - chosen.val));
+        if (clarity < state.clarityThreshold) return { freq: -1, clarity, db, rms };
+
+        const t = chosen.tau;
+        let betterTau = t;
+        if (t > 1 && t < maxTau) {
+          const s0 = cmndf[t - 1];
+          const s1 = cmndf[t];
+          const s2 = cmndf[t + 1];
+          const denom = 2 * (2 * s1 - s2 - s0);
+          if (Math.abs(denom) > 1e-6) betterTau = t + (s2 - s0) / denom;
+        }
+        return { freq: sampleRate / betterTau, clarity, db, rms };
+      }
+
+      function updatePitchLockBadge(mode) {
+        if (!el.pitchLockBadge) return;
+        if (mode === 'locked') {
+          el.pitchLockBadge.textContent = 'LOCKED';
+          el.pitchLockBadge.className = 'badge-pill bg-emerald-500/20 border border-emerald-500/50 text-emerald-300';
+        } else if (mode === 'settling') {
+          el.pitchLockBadge.textContent = 'SETTLING';
+          el.pitchLockBadge.className = 'badge-pill bg-amber-500/20 border border-amber-500/50 text-amber-300';
+        } else {
+          el.pitchLockBadge.textContent = 'WAIT';
+          el.pitchLockBadge.className = 'badge-pill bg-slate-900 border border-slate-800 text-slate-400';
+        }
+      }
+
       function updateMasterStatusUI() {
         const d = getDict();
-        if (state.isMicRunning) {
-          if (el.statusDot) el.statusDot.className = 'w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse-dot shrink-0';
-          if (el.statusText) el.statusText.textContent = 'MIC LIVE';
-          if (el.micBtnLabel) el.micBtnLabel.textContent = d.stop;
-          if (el.micToggleBtn) el.micToggleBtn.className = 'studio-btn-rose min-h-[36px] px-3 text-xs font-extrabold inline-flex items-center gap-1.5';
-        } else {
-          if (el.statusDot) el.statusDot.className = state.isSimRunning
+        if (el.statusDot) {
+          el.statusDot.className = state.isCountingIn
             ? 'w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse-dot shrink-0'
-            : 'w-2.5 h-2.5 rounded-full bg-slate-500 shrink-0';
-          if (el.statusText) el.statusText.textContent = state.isSimRunning ? 'TEST SIGNAL' : 'READY';
-          if (el.micBtnLabel) el.micBtnLabel.textContent = d.rec;
-          if (el.micToggleBtn) el.micToggleBtn.className = 'studio-btn-primary min-h-[36px] px-3 text-xs font-extrabold inline-flex items-center gap-1.5';
+            : (state.isMicRunning
+              ? 'w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse-dot shrink-0'
+              : (state.isSimRunning
+                ? 'w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse-dot shrink-0'
+                : 'w-2.5 h-2.5 rounded-full bg-slate-500 shrink-0'));
+        }
+        if (el.statusText) {
+          el.statusText.textContent = state.isCountingIn
+            ? 'COUNT-IN'
+            : (state.isMicRunning ? 'MIC LIVE' : (state.isSimRunning ? 'TEST SIGNAL' : 'READY'));
+        }
+        if (el.micBtnLabel) {
+          el.micBtnLabel.textContent = (state.isMicRunning || state.isCountingIn) ? d.stop : d.rec;
+        }
+        if (el.micToggleBtn) {
+          el.micToggleBtn.className = (state.isMicRunning || state.isCountingIn)
+            ? 'studio-btn-rose min-h-[36px] px-3 text-xs font-extrabold inline-flex items-center gap-1.5'
+            : 'studio-btn-primary min-h-[36px] px-3 text-xs font-extrabold inline-flex items-center gap-1.5';
         }
         if (el.simBtnLabel) el.simBtnLabel.textContent = state.isSimRunning ? d.stop : d.test;
+      }
+
+      // Pillar 2-B: Chord Symbol Parser & Auto Accompaniment Voicing Engine
+      function parseChordSymbolToMidis(symbol) {
+        if (!symbol || typeof symbol !== 'string') return null;
+        const clean = symbol.trim().replace(/♯/g, '#').replace(/♭/g, 'b');
+        const match = clean.match(/^([A-Ga-g])([#b]?)(.*?)(?:\/([A-Ga-g][#b]?))?$/);
+        if (!match) return null;
+
+        const pcMap = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+        const letter = match[1].toUpperCase();
+        let rootPc = pcMap[letter];
+        if (match[2] === '#') rootPc = (rootPc + 1) % 12;
+        else if (match[2] === 'b') rootPc = (rootPc + 11) % 12;
+
+        const qual = (match[3] || '').trim();
+        const isMaj7 = /maj7|M7|Δ7/.test(qual);
+        const isMinor = !isMaj7 && (/^m(?!aj)|min|-/.test(qual));
+        const isDim = /dim|°/.test(qual);
+        const isAug = /aug|\+/.test(qual);
+        const isSus2 = /sus2/.test(qual);
+        const isSus4 = /sus4|sus(?!2)/.test(qual);
+
+        let intervals = [0, 4, 7];
+        if (isDim) intervals = [0, 3, 6];
+        else if (isAug) intervals = [0, 4, 8];
+        else if (isSus2) intervals = [0, 2, 7];
+        else if (isSus4) intervals = [0, 5, 7];
+        else if (isMinor) intervals = [0, 3, 7];
+        else if (qual === '5') intervals = [0, 7];
+
+        if (isMaj7) intervals.push(11);
+        else if (/7/.test(qual)) intervals.push(isDim ? 9 : 10);
+        else if (/6/.test(qual)) intervals.push(9);
+        if (/add9|9/.test(qual)) intervals.push(14);
+
+        const baseRootMidi = 48 + rootPc; // C3 ~ B3 warm accompaniment register
+        const midis = intervals.map((iv) => baseRootMidi + iv);
+
+        if (match[4]) {
+          const bLetter = match[4][0].toUpperCase();
+          let bPc = pcMap[bLetter];
+          if (match[4][1] === '#') bPc = (bPc + 1) % 12;
+          else if (match[4][1] === 'b') bPc = (bPc + 11) % 12;
+          const bassMidi = 36 + bPc;
+          if (!midis.includes(bassMidi)) midis.unshift(bassMidi);
+        }
+        return midis;
+      }
+
+      function playChordAccompaniment(chordSymbol, durationSec = 1.2) {
+        const midis = parseChordSymbolToMidis(chordSymbol);
+        if (!midis || !midis.length) return;
+        const perNoteGain = Math.min(0.085, 0.24 / midis.length);
+        midis.forEach((m) => {
+          playSynthVoice({
+            freq: midiToFreq(m),
+            duration: Math.max(0.25, durationSec),
+            type: 'triangle',
+            peakGain: perNoteGain,
+            attack: 0.035,
+            sustainRatio: 0.62
+          });
+        });
+      }
+
+      function getDiatonicChordPresetsForCurrentKey() {
+        const ks = getCurrentKeySignature();
+        const names = ks.type === 'flat' ? NOTE_NAMES_FLAT : NOTE_NAMES_SHARP;
+        const rootPc = ((state.transposeSemitones % 12) + 12) % 12;
+        const degOffsets = [0, 2, 4, 5, 7, 9, 7];
+        const suffixes = ['', 'm', 'm', '', '', 'm', '7'];
+        return degOffsets.map((off, idx) => `${names[(rootPc + off) % 12]}${suffixes[idx]}`);
       }
 
       function midiToStaffStep(midi, preferFlat = false) {
@@ -1693,17 +2285,58 @@
         return Math.max(48, Math.min(84, midi));
       }
 
-      function getAccidentalForNote(midi, preferFlat = false) {
-        const pc = ((midi % 12) + 12) % 12;
-        const ks = getCurrentKeySignature();
-        const isBlack = [1, 3, 6, 8, 10].includes(pc);
-        if (ks.alteredPcs.includes(pc)) return null;
-        if (isBlack) return preferFlat ? '♭' : '♯';
-        if (ks.type !== 'none') {
-          const naturalToAltered = { 5: 6, 0: 1, 7: 8, 2: 3, 9: 10, 4: 5, 11: 10 };
-          if (ks.alteredPcs.includes(naturalToAltered[pc])) return '♮';
+      function getKeySignatureAlterationForStep(staffStep, ks) {
+        const naturalMidi = staffStepToDiatonicMidi(staffStep);
+        const natPc = ((naturalMidi % 12) + 12) % 12;
+        if (ks.type === 'sharp' && ks.alteredPcs.includes((natPc + 1) % 12)) return 1;
+        if (ks.type === 'flat' && ks.alteredPcs.includes((natPc + 11) % 12)) return -1;
+        return 0;
+      }
+
+      function staffStepToKeyMidi(step, ks = getCurrentKeySignature()) {
+        const nat = staffStepToDiatonicMidi(step);
+        const alt = getKeySignatureAlterationForStep(step, ks);
+        return Math.max(48, Math.min(84, nat + alt));
+      }
+
+      function resolveMeasureAccidental(midi, staffStep, ks, barAccidentalMap) {
+        const naturalMidi = staffStepToDiatonicMidi(staffStep);
+        const desiredAlt = midi - naturalMidi;
+        const currentAlt = barAccidentalMap.has(staffStep)
+          ? barAccidentalMap.get(staffStep)
+          : getKeySignatureAlterationForStep(staffStep, ks);
+        if (desiredAlt === currentAlt) return null;
+        barAccidentalMap.set(staffStep, desiredAlt);
+        if (desiredAlt > 0) return '♯';
+        if (desiredAlt < 0) return '♭';
+        return '♮';
+      }
+
+      function getMeasureNoteRange(noteIdx) {
+        const ts = getCurrentTimeSignature();
+        let acc = 0;
+        let targetBar = 0;
+        for (let i = 0; i < state.scoreNotes.length; i += 1) {
+          const t = noteToTicks(state.scoreNotes[i]);
+          if (i === noteIdx) {
+            targetBar = Math.floor(acc / ts.ticksPerBar);
+            break;
+          }
+          acc += t;
         }
-        return null;
+        let cur = 0;
+        let startIdx = -1;
+        let endIdx = -1;
+        for (let i = 0; i < state.scoreNotes.length; i += 1) {
+          const t = noteToTicks(state.scoreNotes[i]);
+          const bar = Math.floor(cur / ts.ticksPerBar);
+          if (bar === targetBar) {
+            if (startIdx === -1) startIdx = i;
+            endIdx = i;
+          }
+          cur += t;
+        }
+        return { bar: targetBar, startIdx, endIdx };
       }
 
       function renderTrebleClefSVG(cx, g4LineY, S = 10, color = '#0f172a') {
@@ -1909,6 +2542,100 @@
         return brackets;
       }
 
+      function renderSingleStemAndFlags(noteX, noteY, stemUp, flags, ink) {
+        const stemX = stemUp ? noteX + 4.8 : noteX - 4.8;
+        const stemEndY = stemUp ? noteY - 28 : noteY + 28;
+        const dir = stemUp ? 1 : -1;
+        let out = `<line x1="${stemX}" y1="${noteY}" x2="${stemX}" y2="${stemEndY}" stroke="${ink}" stroke-width="1.65"/>`;
+        for (let f = 0; f < Math.min(2, flags); f += 1) {
+          const fy = stemEndY + f * 5 * dir;
+          out += `<path d="M ${stemX} ${fy} C ${stemX + 6} ${fy + 4 * dir} ${stemX + 8} ${fy + 10 * dir} ${stemX + 4} ${fy + 15 * dir}" fill="none" stroke="${ink}" stroke-width="1.8" stroke-linecap="round"/>`;
+        }
+        return out;
+      }
+
+      function decomposeTicksToStandardDurations(ticks) {
+        const standards = [96, 72, 48, 36, 24, 18, 12, 9, 6];
+        if (standards.includes(ticks) || ticks < 6) return [ticks];
+        const parts = [];
+        let rem = ticks;
+        for (const std of standards) {
+          while (rem >= std) {
+            parts.push(std);
+            rem -= std;
+          }
+        }
+        if (rem > 0) parts.push(rem);
+        return parts;
+      }
+
+      function renderBarlineAndRepeatsSVG(barStartX, barEndX, topLineY, bottomLineY, b4LineY, bOff, hasRepStart, hasRepEnd, isFinalBar) {
+        let out = '';
+        if (bOff > 0) {
+          out += `<line x1="${barStartX}" y1="${topLineY}" x2="${barStartX}" y2="${bottomLineY}" stroke="#334155" stroke-width="1.2"/>`;
+        }
+        if (hasRepStart) {
+          out += `<line x1="${barStartX + 3}" y1="${topLineY}" x2="${barStartX + 3}" y2="${bottomLineY}" stroke="#0f172a" stroke-width="2.6"/>`;
+          out += `<line x1="${barStartX + 6.5}" y1="${topLineY}" x2="${barStartX + 6.5}" y2="${bottomLineY}" stroke="#0f172a" stroke-width="1.1"/>`;
+          out += `<circle cx="${barStartX + 10.5}" cy="${b4LineY - 5}" r="1.6" fill="#0f172a"/>`;
+          out += `<circle cx="${barStartX + 10.5}" cy="${b4LineY + 5}" r="1.6" fill="#0f172a"/>`;
+        }
+        if (hasRepEnd) {
+          out += `<circle cx="${barEndX - 10.5}" cy="${b4LineY - 5}" r="1.6" fill="#0f172a"/>`;
+          out += `<circle cx="${barEndX - 10.5}" cy="${b4LineY + 5}" r="1.6" fill="#0f172a"/>`;
+          out += `<line x1="${barEndX - 6.5}" y1="${topLineY}" x2="${barEndX - 6.5}" y2="${bottomLineY}" stroke="#0f172a" stroke-width="1.1"/>`;
+          out += `<line x1="${barEndX - 3}" y1="${topLineY}" x2="${barEndX - 3}" y2="${bottomLineY}" stroke="#0f172a" stroke-width="2.6"/>`;
+        } else if (isFinalBar) {
+          out += `<line x1="${barEndX - 5.5}" y1="${topLineY}" x2="${barEndX - 5.5}" y2="${bottomLineY}" stroke="#0f172a" stroke-width="1.2"/>`;
+          out += `<line x1="${barEndX - 2}" y1="${topLineY}" x2="${barEndX - 2}" y2="${bottomLineY}" stroke="#0f172a" stroke-width="3"/>`;
+        } else {
+          out += `<line x1="${barEndX}" y1="${topLineY}" x2="${barEndX}" y2="${bottomLineY}" stroke="#334155" stroke-width="1.2"/>`;
+        }
+        return out;
+      }
+
+      function renderTripletBracketSVG(br) {
+        const first = br.members[0];
+        const last = br.members[br.members.length - 1];
+        const x1 = first.noteX - 6;
+        const x2 = last.noteX + 6;
+        const midX = (x1 + x2) / 2;
+        const spanX = Math.max(1, x2 - x1);
+        const rawSlope = (last.noteY - first.noteY) / spanX;
+        const slope = Math.max(-0.22, Math.min(0.22, rawSlope));
+        const baseOffset = br.stemUp ? -33 : 33;
+        let y1 = first.noteY + baseOffset;
+        let y2 = y1 + slope * spanX;
+        br.members.forEach((m) => {
+          const lineYAtM = y1 + slope * (m.noteX - x1);
+          if (br.stemUp) {
+            const maxAllowed = m.noteY - 28;
+            if (lineYAtM > maxAllowed) {
+              const shift = lineYAtM - maxAllowed;
+              y1 -= shift;
+              y2 -= shift;
+            }
+          } else {
+            const minAllowed = m.noteY + 28;
+            if (lineYAtM < minAllowed) {
+              const shift = minAllowed - lineYAtM;
+              y1 += shift;
+              y2 += shift;
+            }
+          }
+        });
+        const midY = (y1 + y2) / 2;
+        const hookDir = br.stemUp ? 5 : -5;
+        const leftGapX = midX - 8;
+        const rightGapX = midX + 8;
+        const leftGapY = y1 + slope * (leftGapX - x1);
+        const rightGapY = y1 + slope * (rightGapX - x1);
+        return (
+          `<path d="M ${x1} ${y1 + hookDir} L ${x1} ${y1} L ${leftGapX} ${leftGapY} M ${rightGapX} ${rightGapY} L ${x2} ${y2} L ${x2} ${y2 + hookDir}" fill="none" stroke="#0f172a" stroke-width="1.25"/>` +
+          `<text x="${midX}" y="${midY + 3.5}" text-anchor="middle" font-size="10.5" font-weight="900" font-style="italic" fill="#0f172a">3</text>`
+        );
+      }
+
       function buildStaffSvgMarkup(isPrint = false) {
         const ts = getCurrentTimeSignature();
         const ks = getCurrentKeySignature();
@@ -1916,8 +2643,10 @@
         const svgWidth = 640;
         const marginLeft = 18;
         const marginRight = 16;
-        const systemGap = 118;
-        const topOffset = 48;
+        const hasChords = state.scoreNotes.some((n) => n.chord);
+        const hasLyrics = state.scoreNotes.some((n) => n.lyric);
+        const systemGap = 118 + (hasChords ? 16 : 0) + (hasLyrics ? 16 : 0);
+        const topOffset = hasChords ? 58 : 48;
 
         const slices = [];
         let curBar = 0;
@@ -1928,19 +2657,23 @@
           while (remTicks > 0) {
             const spaceInBar = ts.ticksPerBar - tickInBar;
             const chunk = Math.min(remTicks, spaceInBar);
-            slices.push({
-              sliceId: `sl_${noteIdx}_${part}`,
-              noteIdx,
-              note,
-              bar: curBar,
-              tickInBar,
-              ticks: chunk,
-              isTieStart: remTicks > chunk,
-              isTieCont: part > 0
+            const subParts = note.triplet ? [chunk] : decomposeTicksToStandardDurations(chunk);
+            subParts.forEach((subTick, spIdx) => {
+              const hasMoreAfterThis = remTicks > chunk || spIdx < subParts.length - 1;
+              slices.push({
+                sliceId: `sl_${noteIdx}_${part}`,
+                noteIdx,
+                note,
+                bar: curBar,
+                tickInBar,
+                ticks: subTick,
+                isTieStart: hasMoreAfterThis,
+                isTieCont: part > 0
+              });
+              tickInBar += subTick;
+              part += 1;
             });
             remTicks -= chunk;
-            tickInBar += chunk;
-            part += 1;
             if (tickInBar >= ts.ticksPerBar) {
               curBar += 1;
               tickInBar = 0;
@@ -1949,7 +2682,10 @@
         });
 
         const totalNotes = state.scoreNotes.length;
-        const maxBar = slices.length > 0 ? Math.max(3, slices[slices.length - 1].bar) : 3;
+        let maxBar = slices.length > 0 ? Math.max(3, slices[slices.length - 1].bar) : 3;
+        if (!isPrint && state.livePreviewMidi !== null) {
+          maxBar = Math.max(maxBar, curBar);
+        }
         const totalBars = maxBar + 1;
 
         const barsSlicesMap = Array.from({ length: totalBars }, () => []);
@@ -2009,32 +2745,11 @@
             const barEndX = barStartX + barW;
             const barSlices = barsSlicesMap[barIdx];
 
-            const hasRepStart = barSlices.length > 0 && barSlices[0].note.repeatStart && !barSlices[0].isTieCont;
-            const hasRepEnd = barSlices.length > 0 && barSlices[barSlices.length - 1].note.repeatEnd && !barSlices[barSlices.length - 1].isTieStart;
+            const hasRepStart = barSlices.some((sl) => sl.note.repeatStart && !sl.isTieCont);
+            const hasRepEnd = barSlices.some((sl) => sl.note.repeatEnd && !sl.isTieStart);
             const isFinalBar = barIdx === totalBars - 1 && totalNotes > 0;
 
-            if (bOff > 0) {
-              svgBody += `<line x1="${barStartX}" y1="${topLineY}" x2="${barStartX}" y2="${bottomLineY}" stroke="#334155" stroke-width="1.2"/>`;
-            }
-
-            if (hasRepStart) {
-              svgBody += `<line x1="${barStartX + 3}" y1="${topLineY}" x2="${barStartX + 3}" y2="${bottomLineY}" stroke="#0f172a" stroke-width="2.6"/>`;
-              svgBody += `<line x1="${barStartX + 6.5}" y1="${topLineY}" x2="${barStartX + 6.5}" y2="${bottomLineY}" stroke="#0f172a" stroke-width="1.1"/>`;
-              svgBody += `<circle cx="${barStartX + 10.5}" cy="${b4LineY - 5}" r="1.6" fill="#0f172a"/>`;
-              svgBody += `<circle cx="${barStartX + 10.5}" cy="${b4LineY + 5}" r="1.6" fill="#0f172a"/>`;
-            }
-
-            if (hasRepEnd) {
-              svgBody += `<circle cx="${barEndX - 10.5}" cy="${b4LineY - 5}" r="1.6" fill="#0f172a"/>`;
-              svgBody += `<circle cx="${barEndX - 10.5}" cy="${b4LineY + 5}" r="1.6" fill="#0f172a"/>`;
-              svgBody += `<line x1="${barEndX - 6.5}" y1="${topLineY}" x2="${barEndX - 6.5}" y2="${bottomLineY}" stroke="#0f172a" stroke-width="1.1"/>`;
-              svgBody += `<line x1="${barEndX - 3}" y1="${topLineY}" x2="${barEndX - 3}" y2="${bottomLineY}" stroke="#0f172a" stroke-width="2.6"/>`;
-            } else if (isFinalBar) {
-              svgBody += `<line x1="${barEndX - 5.5}" y1="${topLineY}" x2="${barEndX - 5.5}" y2="${bottomLineY}" stroke="#0f172a" stroke-width="1.2"/>`;
-              svgBody += `<line x1="${barEndX - 2}" y1="${topLineY}" x2="${barEndX - 2}" y2="${bottomLineY}" stroke="#0f172a" stroke-width="3"/>`;
-            } else {
-              svgBody += `<line x1="${barEndX}" y1="${topLineY}" x2="${barEndX}" y2="${bottomLineY}" stroke="#334155" stroke-width="1.2"/>`;
-            }
+            svgBody += renderBarlineAndRepeatsSVG(barStartX, barEndX, topLineY, bottomLineY, b4LineY, bOff, hasRepStart, hasRepEnd, isFinalBar);
 
             const padL = hasRepStart ? 26 : 16;
             const padR = hasRepEnd ? 20 : 12;
@@ -2055,45 +2770,10 @@
             const beamMap = computeAutoBeamGroups(barSlices, ts);
             const brackets = computeTripletBracketGroups(barSlices);
             const renderedBeamGroups = new Set();
+            const barAccidentalMap = new Map();
 
             brackets.forEach((br) => {
-              const first = br.members[0];
-              const last = br.members[br.members.length - 1];
-              const x1 = first.noteX - 6;
-              const x2 = last.noteX + 6;
-              const midX = (x1 + x2) / 2;
-              const spanX = Math.max(1, x2 - x1);
-              const rawSlope = (last.noteY - first.noteY) / spanX;
-              const slope = Math.max(-0.22, Math.min(0.22, rawSlope));
-              const baseOffset = br.stemUp ? -33 : 33;
-              let y1 = first.noteY + baseOffset;
-              let y2 = y1 + slope * spanX;
-              br.members.forEach((m) => {
-                const lineYAtM = y1 + slope * (m.noteX - x1);
-                if (br.stemUp) {
-                  const maxAllowed = m.noteY - 28;
-                  if (lineYAtM > maxAllowed) {
-                    const shift = lineYAtM - maxAllowed;
-                    y1 -= shift;
-                    y2 -= shift;
-                  }
-                } else {
-                  const minAllowed = m.noteY + 28;
-                  if (lineYAtM < minAllowed) {
-                    const shift = minAllowed - lineYAtM;
-                    y1 += shift;
-                    y2 += shift;
-                  }
-                }
-              });
-              const midY = (y1 + y2) / 2;
-              const hookDir = br.stemUp ? 5 : -5;
-              const leftGapX = midX - 8;
-              const rightGapX = midX + 8;
-              const leftGapY = y1 + slope * (leftGapX - x1);
-              const rightGapY = y1 + slope * (rightGapX - x1);
-              svgBody += `<path d="M ${x1} ${y1 + hookDir} L ${x1} ${y1} L ${leftGapX} ${leftGapY} M ${rightGapX} ${rightGapY} L ${x2} ${y2} L ${x2} ${y2 + hookDir}" fill="none" stroke="#0f172a" stroke-width="1.25"/>`;
-              svgBody += `<text x="${midX}" y="${midY + 3.5}" text-anchor="middle" font-size="10.5" font-weight="900" font-style="italic" fill="#0f172a">3</text>`;
+              svgBody += renderTripletBracketSVG(br);
             });
 
             barSlices.forEach((sl, sIdx) => {
@@ -2126,7 +2806,7 @@
                 }
 
                 if (!sl.isTieCont) {
-                  const acc = getAccidentalForNote(sl.note.midi, sl.note.preferFlat);
+                  const acc = resolveMeasureAccidental(sl.note.midi, sl.staffStep, ks, barAccidentalMap);
                   if (acc) {
                     svgBody += `<text x="${sl.noteX - 11.5}" y="${sl.noteY + 4}" font-size="13" font-weight="900" fill="${ink}">${acc}</text>`;
                   }
@@ -2174,19 +2854,7 @@
                       }
                     }
                   } else {
-                    const stemUp = sl.staffStep < 6;
-                    const stemX = stemUp ? sl.noteX + 4.8 : sl.noteX - 4.8;
-                    const stemEndY = stemUp ? sl.noteY - 28 : sl.noteY + 28;
-                    svgBody += `<line x1="${stemX}" y1="${sl.noteY}" x2="${stemX}" y2="${stemEndY}" stroke="${ink}" stroke-width="1.65"/>`;
-
-                    if (glyph.flags >= 1) {
-                      const dir = stemUp ? 1 : -1;
-                      svgBody += `<path d="M ${stemX} ${stemEndY} C ${stemX + 6} ${stemEndY + 4 * dir} ${stemX + 8} ${stemEndY + 10 * dir} ${stemX + 4} ${stemEndY + 15 * dir}" fill="none" stroke="${ink}" stroke-width="1.8" stroke-linecap="round"/>`;
-                    }
-                    if (glyph.flags >= 2) {
-                      const dir = stemUp ? 1 : -1;
-                      svgBody += `<path d="M ${stemX} ${stemEndY + 5 * dir} C ${stemX + 6} ${stemEndY + 9 * dir} ${stemX + 8} ${stemEndY + 15 * dir} ${stemX + 4} ${stemEndY + 20 * dir}" fill="none" stroke="${ink}" stroke-width="1.8" stroke-linecap="round"/>`;
-                    }
+                    svgBody += renderSingleStemAndFlags(sl.noteX, sl.noteY, sl.staffStep < 6, glyph.flags, ink);
                   }
                 }
 
@@ -2202,7 +2870,15 @@
                   const labelText = state.showSolfege ? disp.solfege : disp.name;
                   const textY = Math.max(bottomLineY + 16, sl.noteY + 19);
                   svgBody += `<text x="${sl.noteX}" y="${textY}" text-anchor="middle" font-size="9.5" font-weight="800" fill="#334155" style="paint-order:stroke;stroke:#ffffff;stroke-width:3px;">${labelText}</text>`;
+                  if (sl.note.lyric) {
+                    svgBody += `<text x="${sl.noteX}" y="${textY + 14}" text-anchor="middle" font-size="10.5" font-weight="800" fill="#0f172a" style="paint-order:stroke;stroke:#ffffff;stroke-width:3px;">${sl.note.lyric}</text>`;
+                  }
                 }
+              }
+
+              if (!sl.isTieCont && sl.note.chord) {
+                const chordInk = isPrint ? '#0f172a' : '#0369a1';
+                svgBody += `<text x="${sl.noteX}" y="${topLineY - 16}" text-anchor="middle" font-size="12" font-weight="900" fill="${chordInk}">${sl.note.chord}</text>`;
               }
 
               svgBody += '</g>';
@@ -2242,8 +2918,10 @@
         if (el.libraryCurrentTitleText) el.libraryCurrentTitleText.textContent = el.scoreTitleInput.value.trim() || I18N_COMMON.defaultSongTitle;
         if (el.libraryActiveModeBadge) el.libraryActiveModeBadge.textContent = state.loadedSongId ? 'SAVED' : 'DRAFT';
 
+        syncUndoButtonUI();
         updateNoteEditBar();
         bindStaffInteractions();
+        saveActiveDraft();
 
         if (state.isPlayingScore && state.playingNoteIdx >= 0) {
           const activeGroup = el.scoreStaffMount.querySelector(`.score-note-group[data-note-idx="${state.playingNoteIdx}"]`);
@@ -2261,16 +2939,19 @@
         const scaleY = viewBox.height / Math.max(1, rect.height);
         const svgY = (clientY - rect.top) * scaleY;
         const step = Math.round(2 + (bottomY - svgY) / 5);
-        return staffStepToDiatonicMidi(step);
+        return staffStepToKeyMidi(step);
       }
 
       function bindStaffInteractions() {
         el.scoreStaffMount.querySelectorAll('.staff-tap-canvas').forEach((zone) => {
           zone.addEventListener('click', (e) => {
+            pushUndoSnapshot();
             const bottomY = parseFloat(zone.getAttribute('data-bottom-y')) || 88;
             const midi = clientYToMidi(e.clientY, bottomY);
             const ks = getCurrentKeySignature();
-            const newNote = createNoteEvent(midi, 1, { preferFlat: ks.type === 'flat' });
+            const selNote = state.selectedNoteIndex >= 0 ? state.scoreNotes[state.selectedNoteIndex] : null;
+            const tapBeats = (selNote && !selNote.triplet) ? selNote.baseBeats : (state.preferredBaseBeats || 1);
+            const newNote = createNoteEvent(midi, tapBeats, { preferFlat: ks.type === 'flat' });
             state.scoreNotes.push(newNote);
             state.selectedNoteIndex = state.scoreNotes.length - 1;
             state.isDirty = true;
@@ -2295,15 +2976,21 @@
             const bottomY = parseFloat(group.getAttribute('data-bottom-y')) || 88;
             const startY = e.clientY;
             let lastMidi = targetNote.midi;
+            let pushedDragUndo = false;
             document.body.style.touchAction = 'none';
 
             const onMove = (ev) => {
               if (Math.abs(ev.clientY - startY) < 4) return;
               const nextMidi = clientYToMidi(ev.clientY, bottomY);
               if (nextMidi !== lastMidi) {
+                if (!pushedDragUndo) {
+                  pushUndoSnapshot();
+                  pushedDragUndo = true;
+                }
                 lastMidi = nextMidi;
                 targetNote.midi = nextMidi;
                 state.isDirty = true;
+                triggerHaptic(8);
                 playReferenceTone(midiToFreq(nextMidi), 0.16);
                 renderScoreStaff();
               }
@@ -2346,8 +3033,8 @@
 
         document.querySelectorAll('.note-base-btn').forEach((btn) => {
           const bVal = parseFloat(btn.getAttribute('data-base-beats'));
-          btn.disabled = !note || isTripletLocked;
-          btn.classList.toggle('active-emerald', Boolean(note && !isTripletLocked && note.baseBeats === bVal));
+          btn.disabled = isTripletLocked;
+          btn.classList.toggle('active-emerald', Boolean(note ? (!isTripletLocked && note.baseBeats === bVal) : (state.preferredBaseBeats === bVal)));
         });
 
         el.noteDotToggleBtn.disabled = !note || isTripletLocked || note.baseBeats === 4 || note.baseBeats === 0.25;
@@ -2357,13 +3044,16 @@
         el.noteTripletToggleBtn.classList.toggle('active-emerald', isTripletLocked);
 
         const lockableIds = [
-          'noteRestToggleBtn', 'insertNoteAfterBtn', 'deleteSelectedNoteBtn',
+          'noteRestToggleBtn', 'deleteSelectedNoteBtn',
           'toggleRepeatStartBtn', 'toggleRepeatEndBtn'
         ];
         lockableIds.forEach((id) => {
           const btn = document.getElementById(id);
           if (btn) btn.disabled = !note || isTripletLocked;
         });
+
+        const insertBtn = document.getElementById('insertNoteAfterBtn');
+        if (insertBtn) insertBtn.disabled = isTripletLocked;
 
         const pitchBtns = ['notePitchDownBtn', 'notePitchUpBtn', 'noteAccidentalBtn'];
         pitchBtns.forEach((id) => {
@@ -2377,108 +3067,62 @@
           if (btn) btn.disabled = !note;
         });
 
+        const mRange = note ? getMeasureNoteRange(idx) : null;
+        const measureNotes = mRange && mRange.startIdx >= 0 ? state.scoreNotes.slice(mRange.startIdx, mRange.endIdx + 1) : [];
         el.noteRestToggleBtn.classList.toggle('active-amber', Boolean(note && note.isRest));
-        el.toggleRepeatStartBtn.classList.toggle('active-amber', Boolean(note && note.repeatStart));
-        el.toggleRepeatEndBtn.classList.toggle('active-amber', Boolean(note && note.repeatEnd));
-        const hasAcc = note && !note.isRest && Boolean(getAccidentalForNote(note.midi, note.preferFlat));
-        el.noteAccidentalBtn.classList.toggle('active-amber', Boolean(hasAcc));
-      }
+        el.toggleRepeatStartBtn.classList.toggle('active-amber', measureNotes.some((n) => n.repeatStart));
+        el.toggleRepeatEndBtn.classList.toggle('active-amber', measureNotes.some((n) => n.repeatEnd));
+        const hasAcc = Boolean(note && !note.isRest && note.midi !== staffStepToKeyMidi(midiToStaffStep(note.midi, note.preferFlat), ks));
+        el.noteAccidentalBtn.classList.toggle('active-amber', hasAcc);
 
-      function expandPlaybackSequence(startNoteIdx = 0, singleMeasureOnly = false) {
-        const ts = getCurrentTimeSignature();
-        const notes = state.scoreNotes;
-        if (!notes.length) return [];
-
-        if (singleMeasureOnly) {
-          let acc = 0;
-          let targetBar = 0;
-          for (let i = 0; i < startNoteIdx; i += 1) acc += noteToTicks(notes[i]);
-          targetBar = Math.floor(acc / ts.ticksPerBar);
-          let cur = 0;
-          const seq = [];
-          notes.forEach((n, idx) => {
-            const t = noteToTicks(n);
-            const bar = Math.floor(cur / ts.ticksPerBar);
-            if (bar === targetBar) seq.push({ noteIdx: idx, note: n, ticks: t });
-            cur += t;
-          });
-          return seq;
+        if (el.toggleChordEditorBtn) {
+          el.toggleChordEditorBtn.disabled = !note;
+          el.toggleChordEditorBtn.textContent = (note && note.chord) ? `CHORD: ${note.chord}` : 'CHORD';
+          el.toggleChordEditorBtn.classList.toggle('active-emerald', state.activeLeadEditor === 'chord');
+        }
+        if (el.toggleLyricEditorBtn) {
+          el.toggleLyricEditorBtn.disabled = !note || note.isRest;
+          el.toggleLyricEditorBtn.textContent = (note && note.lyric) ? `LYRIC: ${note.lyric}` : 'LYRIC';
+          el.toggleLyricEditorBtn.classList.toggle('active-emerald', state.activeLeadEditor === 'lyric');
+        }
+        if (el.toggleChordAccompBtn) {
+          el.toggleChordAccompBtn.textContent = state.chordAccompEnabled ? 'ACCOMP: ON' : 'ACCOMP: OFF';
+          el.toggleChordAccompBtn.classList.toggle('active-amber', state.chordAccompEnabled);
         }
 
-        const seq = [];
-        let i = Math.max(0, startNoteIdx);
-        let repeatAnchor = 0;
-        const visitedRepeats = new Set();
-
-        while (i < notes.length) {
-          if (notes[i].repeatStart) repeatAnchor = i;
-          seq.push({ noteIdx: i, note: notes[i], ticks: noteToTicks(notes[i]) });
-          if (notes[i].repeatEnd && !visitedRepeats.has(i)) {
-            visitedRepeats.add(i);
-            i = repeatAnchor;
-            continue;
-          }
-          i += 1;
-        }
-        return seq;
+        syncLeadSheetEditorUI();
       }
 
-      function startScorePlayback(startIdx = 0, singleMeasureOnly = false) {
-        if (!state.scoreNotes.length) {
-          showToast(getDict().toastNoNotes);
+      function syncLeadSheetEditorUI() {
+        if (!el.leadSheetEditorBox) return;
+        const note = state.selectedNoteIndex >= 0 ? state.scoreNotes[state.selectedNoteIndex] : null;
+        if (!note || !state.activeLeadEditor || (state.activeLeadEditor === 'lyric' && note.isRest)) {
+          el.leadSheetEditorBox.classList.add('hidden');
           return;
         }
-        stopScorePlayback();
-        const seq = expandPlaybackSequence(startIdx, singleMeasureOnly);
-        if (!seq.length) return;
-
-        state.isPlayingScore = true;
-        syncPlaybackButtonsUI();
-        const beatSec = 60 / state.metroBpm;
-        const tickSec = beatSec / TICKS_PER_QUARTER;
-        let cumTicks = 0;
-
-        seq.forEach((item) => {
-          const startMs = Math.round(cumTicks * tickSec * 1000);
-          const durSec = Math.max(0.1, item.ticks * tickSec * 0.9);
-          const tid = setTimeout(() => {
-            if (!state.isPlayingScore) return;
-            state.playingNoteIdx = item.noteIdx;
-            if (!item.note.isRest) {
-              playReferenceTone(midiToFreq(item.note.midi), durSec);
-            }
-            renderScoreStaff();
-          }, startMs);
-          state.playbackTimers.push(tid);
-          cumTicks += item.ticks;
-        });
-
-        const totalMs = Math.round(cumTicks * tickSec * 1000);
-        const endTid = setTimeout(() => stopScorePlayback(), totalMs + 120);
-        state.playbackTimers.push(endTid);
-      }
-
-      function stopScorePlayback() {
-        state.isPlayingScore = false;
-        state.playingNoteIdx = -1;
-        clearTimerList(state.playbackTimers);
-        syncPlaybackButtonsUI();
-        renderScoreStaff();
-      }
-
-      function syncPlaybackButtonsUI() {
-        const d = getDict();
-        if (el.playScoreBtnLabel) el.playScoreBtnLabel.textContent = state.isPlayingScore ? d.stop : d.play;
-        if (el.playScoreBtn) {
-          el.playScoreBtn.className = state.isPlayingScore
-            ? 'studio-btn-amber min-h-[38px] px-3 text-xs font-extrabold inline-flex items-center gap-1'
-            : 'studio-btn-primary min-h-[38px] px-3 text-xs font-extrabold inline-flex items-center gap-1';
+        el.leadSheetEditorBox.classList.remove('hidden');
+        const isChord = state.activeLeadEditor === 'chord';
+        if (el.leadEditorModeLabel) {
+          el.leadEditorModeLabel.textContent = isChord ? 'CHORD' : 'LYRIC';
+          el.leadEditorModeLabel.className = isChord
+            ? 'text-[10px] font-black text-sky-300 uppercase px-1 shrink-0'
+            : 'text-[10px] font-black text-emerald-300 uppercase px-1 shrink-0';
         }
-        if (el.scoresPlayActiveBtn) {
-          el.scoresPlayActiveBtn.textContent = state.isPlayingScore ? d.stop : d.play;
-          el.scoresPlayActiveBtn.className = state.isPlayingScore
-            ? 'studio-btn-amber min-h-[38px] px-3 text-xs font-extrabold'
-            : 'studio-btn-primary min-h-[38px] px-3 text-xs font-extrabold';
+        if (el.leadSheetInput && document.activeElement !== el.leadSheetInput) {
+          el.leadSheetInput.value = isChord ? (note.chord || '') : (note.lyric || '');
+          el.leadSheetInput.placeholder = isChord ? 'C, Am7, F, G7...' : '가사 1~2글자 (예: 학교)';
+        }
+        if (el.leadSheetNextBtn) {
+          el.leadSheetNextBtn.classList.toggle('hidden', isChord);
+        }
+        if (el.chordQuickChips) {
+          el.chordQuickChips.classList.toggle('hidden', !isChord);
+          if (isChord) {
+            const presets = getDiatonicChordPresetsForCurrentKey();
+            el.chordQuickChips.innerHTML = presets.map((c) =>
+              `<button type="button" data-quick-chord="${c}" class="px-2 py-1 rounded-lg text-[11px] font-black border ${note.chord === c ? 'bg-sky-500/25 border-sky-400 text-sky-200' : 'bg-slate-950 border-slate-800 text-slate-300 hover:border-sky-500/50'}">${c}</button>`
+            ).join('');
+          }
         }
       }
 
@@ -2520,9 +3164,7 @@
         }
         state.loadedSongId = payload.id;
         state.isDirty = false;
-        try {
-          localStorage.setItem(STORAGE_KEY_SCORES, JSON.stringify(state.savedScores));
-        } catch (err) {}
+        persistSavedScores();
         renderSavedScoresList();
         renderScoreStaff();
         showToast(getDict().toastSaved);
@@ -2573,15 +3215,17 @@
             state.selectedNoteIndex = state.scoreNotes.length > 0 ? 0 : -1;
             state.loadedSongId = song.id;
             state.isDirty = false;
-            state.timeSignature = song.timeSignature || '4/4';
-            state.transposeSemitones = song.transposeSemitones || 0;
+            state.undoStack = [];
+            state.redoStack = [];
+            state.timeSignature = TIME_SIGNATURES[song.timeSignature] ? song.timeSignature : '4/4';
+            state.transposeSemitones = typeof song.transposeSemitones === 'number' ? song.transposeSemitones : 0;
             state.octaveMode = song.octaveMode || 'auto';
             state.octaveShift = typeof song.octaveShift === 'number' ? song.octaveShift : 1;
-            el.scoreTimeSigSelect.value = state.timeSignature;
-            el.metroTimeSigSelect.value = state.timeSignature;
             state.metroBeats = getCurrentTimeSignature().beats;
+            if (el.scoreTimeSigSelect) el.scoreTimeSigSelect.value = state.timeSignature;
+            if (el.metroTimeSigSelect) el.metroTimeSigSelect.value = state.timeSignature;
+            if (el.scoreTitleInput) el.scoreTitleInput.value = song.title || I18N_COMMON.defaultSongTitle;
             renderMetroBeatPads();
-            el.scoreTitleInput.value = song.title || I18N_COMMON.defaultSongTitle;
             syncTransposeUI();
             renderScoreStaff();
             switchTab('detector');
@@ -2601,9 +3245,7 @@
             if (state.loadedSongId === song.id && el.scoreTitleInput) {
               el.scoreTitleInput.value = song.title;
             }
-            try {
-              localStorage.setItem(STORAGE_KEY_SCORES, JSON.stringify(state.savedScores));
-            } catch (err) {}
+            persistSavedScores();
             renderSavedScoresList();
             renderScoreStaff();
             showToast(d.toastRenamed);
@@ -2615,13 +3257,148 @@
             const id = btn.getAttribute('data-lib-del');
             state.savedScores = state.savedScores.filter((s) => s.id !== id);
             if (state.loadedSongId === id) state.loadedSongId = null;
-            try {
-              localStorage.setItem(STORAGE_KEY_SCORES, JSON.stringify(state.savedScores));
-            } catch (err) {}
+            persistSavedScores();
             renderSavedScoresList();
             renderScoreStaff();
           });
         });
+      }
+
+      function syncPlaybackButtonsUI() {
+        const d = getDict();
+        const label = state.isPlayingScore ? d.stop : d.play;
+        const iconKey = state.isPlayingScore ? 'stop' : 'play';
+        if (el.playScoreBtnLabel) el.playScoreBtnLabel.textContent = label;
+        if (el.playScoreBtn) {
+          el.playScoreBtn.className = state.isPlayingScore
+            ? 'studio-btn-rose min-h-[38px] px-3 text-xs font-extrabold inline-flex items-center gap-1'
+            : 'studio-btn-primary min-h-[38px] px-3 text-xs font-extrabold inline-flex items-center gap-1';
+          setButtonIcon(el.playScoreBtn, iconKey);
+        }
+        if (el.scoresPlayActiveBtn) {
+          el.scoresPlayActiveBtn.textContent = label;
+          el.scoresPlayActiveBtn.className = state.isPlayingScore
+            ? 'studio-btn-rose min-h-[38px] px-3 text-xs font-extrabold'
+            : 'studio-btn-primary min-h-[38px] px-3 text-xs font-extrabold';
+        }
+      }
+
+      function stopScorePlayback() {
+        state.isPlayingScore = false;
+        state.playingNoteIdx = -1;
+        clearTimerList(state.playbackTimers);
+        syncPlaybackButtonsUI();
+        syncWakeLock();
+        renderScoreStaff();
+      }
+
+      function expandPlaybackSequence(startNoteIdx = 0, singleMeasureOnly = false) {
+        if (!state.scoreNotes.length) return [];
+        const notes = state.scoreNotes;
+
+        if (singleMeasureOnly) {
+          const mRange = getMeasureNoteRange(startNoteIdx);
+          if (mRange.startIdx < 0) return [];
+          const out = [];
+          for (let i = mRange.startIdx; i <= mRange.endIdx; i += 1) {
+            out.push({ noteIdx: i, note: notes[i], ticks: noteToTicks(notes[i]) });
+          }
+          return out;
+        }
+
+        const ts = getCurrentTimeSignature();
+        const barRanges = new Map();
+        let acc = 0;
+        notes.forEach((n, idx) => {
+          const b = Math.floor(acc / ts.ticksPerBar);
+          if (!barRanges.has(b)) barRanges.set(b, { start: idx, end: idx, hasStart: false, hasEnd: false });
+          const r = barRanges.get(b);
+          r.end = idx;
+          if (n.repeatStart) r.hasStart = true;
+          if (n.repeatEnd) r.hasEnd = true;
+          acc += noteToTicks(n);
+        });
+
+        const barStartIdxSet = new Set();
+        const barEndIdxSet = new Set();
+        barRanges.forEach((r) => {
+          if (r.hasStart) barStartIdxSet.add(r.start);
+          if (r.hasEnd) barEndIdxSet.add(r.end);
+        });
+
+        let repeatAnchor = 0;
+        for (let k = 0; k <= startNoteIdx; k += 1) {
+          if (barStartIdxSet.has(k)) repeatAnchor = k;
+        }
+
+        const seq = [];
+        const visitedEnds = new Set();
+        let i = Math.max(0, startNoteIdx);
+        let guard = 0;
+
+        while (i < notes.length && guard < 2000) {
+          guard += 1;
+          if (barStartIdxSet.has(i)) repeatAnchor = i;
+          seq.push({ noteIdx: i, note: notes[i], ticks: noteToTicks(notes[i]) });
+          if (barEndIdxSet.has(i) && !visitedEnds.has(i)) {
+            visitedEnds.add(i);
+            i = repeatAnchor;
+            continue;
+          }
+          i += 1;
+        }
+        return seq;
+      }
+
+      function startScorePlayback(startNoteIdx = 0, singleMeasureOnly = false) {
+        if (!state.scoreNotes.length) {
+          showToast(getDict().toastNoNotes);
+          return;
+        }
+        stopScorePlayback();
+        const seq = expandPlaybackSequence(startNoteIdx, singleMeasureOnly);
+        if (!seq.length) return;
+
+        state.isPlayingScore = true;
+        syncPlaybackButtonsUI();
+        syncWakeLock();
+
+        const beatSec = 60 / state.metroBpm;
+        const tickSec = beatSec / TICKS_PER_QUARTER;
+        let cumTicks = 0;
+
+        seq.forEach((item, seqIdx) => {
+          const startMs = Math.round(cumTicks * tickSec * 1000);
+          const durSec = Math.max(0.1, item.ticks * tickSec * 0.9);
+          let chordHoldTicks = item.ticks;
+          if (state.chordAccompEnabled && item.note.chord) {
+            for (let k = seqIdx + 1; k < seq.length; k += 1) {
+              if (seq[k].note.chord) break;
+              chordHoldTicks += seq[k].ticks;
+              if (chordHoldTicks >= getCurrentTimeSignature().ticksPerBar) break;
+            }
+          }
+          const chordDurSec = Math.min(4.0, Math.max(0.35, chordHoldTicks * tickSec * 0.92));
+
+          const tid = setTimeout(() => {
+            if (!state.isPlayingScore) return;
+            state.playingNoteIdx = item.noteIdx;
+            if (state.chordAccompEnabled && item.note.chord) {
+              playChordAccompaniment(item.note.chord, chordDurSec);
+            }
+            if (!item.note.isRest) {
+              playReferenceTone(midiToFreq(item.note.midi), durSec);
+            }
+            renderScoreStaff();
+          }, startMs);
+          state.playbackTimers.push(tid);
+          cumTicks += item.ticks;
+        });
+
+        const endTid = setTimeout(() => {
+          if (state.isPlayingScore) stopScorePlayback();
+        }, Math.round(cumTicks * tickSec * 1000) + 120);
+        state.playbackTimers.push(endTid);
       }
 
       function getTunerStrings() {
@@ -2654,18 +3431,34 @@
           btn.addEventListener('click', () => {
             const idx = parseInt(btn.getAttribute('data-str-idx'), 10);
             state.selectedStringIndex = state.selectedStringIndex === idx ? null : idx;
-            const target = strings[idx];
-            if (target) playReferenceTone(target.freq, 0.9);
+            const picked = strings[idx];
+            if (picked) {
+              playReferenceTone(picked.freq, 0.75);
+              el.tunerTargetNote.textContent = formatNoteDisplay(picked.midi, false).name;
+              el.tunerTargetOctave.textContent = String(formatNoteDisplay(picked.midi, false).octave);
+              el.tunerTargetFreqText.textContent = `Target: ${picked.freq.toFixed(1)} Hz`;
+            }
+            el.tunerStatusBadge.textContent = state.selectedStringIndex === null ? 'AUTO' : 'LOCK';
             renderTunerUI();
           });
         });
-
-        el.tunerStatusBadge.textContent = state.selectedStringIndex === null ? 'AUTO' : 'LOCK';
       }
 
-      function updateTunerDisplay(res) {
+      function updateTunerDisplay(res, nowMs = performance.now()) {
         const strings = getTunerStrings();
-        if (res.freq <= 0) return;
+        if (res.freq <= 0) {
+          if (state.tunerLastSignalTime > 0 && nowMs - state.tunerLastSignalTime > 800) {
+            state.tunerLastSignalTime = 0;
+            state.tunerWasInTune = false;
+            el.tunerNeedle.style.left = '50%';
+            el.tunerNeedle.className = 'absolute top-0 bottom-0 w-1.5 -translate-x-1/2 rounded-full bg-slate-500 transition-all duration-150';
+            el.tunerCentsReadout.textContent = '0 cents';
+            el.tunerDetectedFreqText.textContent = 'Input: -- Hz';
+            el.tunerTargetNote.className = 'text-5xl sm:text-6xl font-black text-slate-400 tracking-tight';
+          }
+          return;
+        }
+        state.tunerLastSignalTime = nowMs;
 
         let target = strings[0];
         if (state.selectedStringIndex !== null && strings[state.selectedStringIndex]) {
@@ -2694,6 +3487,10 @@
         const pct = 50 + clampedCents;
         el.tunerNeedle.style.left = `${pct}%`;
         const inTune = Math.abs(cents) <= 5;
+        if (inTune && !state.tunerWasInTune) {
+          triggerHaptic(10);
+        }
+        state.tunerWasInTune = inTune;
         el.tunerNeedle.className = `absolute top-0 bottom-0 w-1.5 -translate-x-1/2 rounded-full transition-all duration-75 ${inTune ? 'bg-emerald-400' : 'bg-amber-400'}`;
         el.tunerTargetNote.className = `text-5xl sm:text-6xl font-black tracking-tight ${inTune ? 'text-emerald-400' : 'text-white'}`;
       }
@@ -2731,12 +3528,40 @@
         el.metroBeatCounterText.textContent = `1 / ${count}`;
       }
 
+      function syncMetroMuteUI() {
+        if (!el.metroMuteBtn) return;
+        el.metroMuteBtn.textContent = state.metroMuted ? 'VISUAL ONLY' : 'SOUND: ON';
+        el.metroMuteBtn.className = state.metroMuted
+          ? 'studio-btn-muted min-h-[30px] px-2.5 text-[11px] font-extrabold text-amber-300 border-amber-500/40'
+          : 'studio-btn-muted min-h-[30px] px-2.5 text-[11px] font-extrabold text-emerald-300 border-emerald-500/40';
+      }
+
+      function triggerVisualBeatPulse(beatIdx, totalBeats, isAccent) {
+        if (el.detectorBeatPulseBadge) {
+          el.detectorBeatPulseBadge.textContent = `● ${beatIdx + 1}/${totalBeats}`;
+          el.detectorBeatPulseBadge.classList.remove('hidden');
+          el.detectorBeatPulseBadge.className = isAccent
+            ? 'badge-pill bg-amber-500/20 border border-amber-500/50 text-amber-300 tabular-nums'
+            : 'badge-pill bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 tabular-nums';
+        }
+        if (el.detectorHeroCard) {
+          el.detectorHeroCard.classList.remove('beat-pulse-accent', 'beat-pulse-normal');
+          el.detectorHeroCard.classList.add(isAccent ? 'beat-pulse-accent' : 'beat-pulse-normal');
+          if (state.metroPulseClearTimer) clearTimeout(state.metroPulseClearTimer);
+          state.metroPulseClearTimer = setTimeout(() => {
+            if (el.detectorHeroCard) el.detectorHeroCard.classList.remove('beat-pulse-accent', 'beat-pulse-normal');
+          }, 130);
+        }
+      }
+
       function startMetronome() {
         stopMetronome();
         state.isMetroRunning = true;
         state.metroStepIndex = 0;
         el.metroBtnLabel.textContent = getDict().stop;
         el.metroToggleBtn.className = 'studio-btn-rose min-h-[42px] text-sm font-black inline-flex items-center justify-center gap-1.5';
+        setButtonIcon(el.metroToggleBtn, 'stop');
+        syncWakeLock();
 
         const tick = () => {
           if (!state.isMetroRunning) return;
@@ -2744,24 +3569,27 @@
           const subdiv = state.metroSubdiv;
           const beatIdx = Math.floor(state.metroStepIndex / subdiv) % ts.beats;
           const isSub = state.metroStepIndex % subdiv !== 0;
+          const isAccent = (ts.accentMask[beatIdx] || 0) >= 0.9;
 
-          if (!state.isCalibrating) {
-            const accentVal = ts.accentMask[beatIdx] || 0;
-            playClickSound(!isSub && accentVal >= 0.9, isSub || accentVal < 0.9);
+          if (!state.isCalibrating && !state.metroMuted && !state.isCountingIn) {
+            playClickSound(!isSub && isAccent, isSub || !isAccent);
           }
 
           if (!isSub) {
+            if (isAccent && !state.isCountingIn) triggerHaptic(8);
             el.metroBeatCounterText.textContent = `${beatIdx + 1} / ${ts.beats}`;
             el.metroBeatPads.querySelectorAll('.metro-pad').forEach((pad, idx) => {
               pad.classList.remove('active-accent', 'active-normal');
               if (idx === beatIdx) {
-                pad.classList.add((ts.accentMask[beatIdx] || 0) >= 0.9 ? 'active-accent' : 'active-normal');
+                pad.classList.add(isAccent ? 'active-accent' : 'active-normal');
               }
             });
+            triggerVisualBeatPulse(beatIdx, ts.beats, isAccent);
           }
 
           state.metroStepIndex += 1;
-          const intervalMs = (60000 / state.metroBpm) / subdiv;
+          const unitScale = ts.beatUnit === 8 ? 0.5 : (ts.beatUnit === 2 ? 2 : 1);
+          const intervalMs = ((60000 / state.metroBpm) * unitScale) / subdiv;
           state.metroTimerId = setTimeout(tick, intervalMs);
         };
         tick();
@@ -2771,9 +3599,15 @@
         state.isMetroRunning = false;
         if (state.metroTimerId) clearTimeout(state.metroTimerId);
         state.metroTimerId = null;
+        if (state.metroPulseClearTimer) clearTimeout(state.metroPulseClearTimer);
+        state.metroPulseClearTimer = null;
+        if (el.detectorHeroCard) el.detectorHeroCard.classList.remove('beat-pulse-accent', 'beat-pulse-normal');
+        if (el.detectorBeatPulseBadge) el.detectorBeatPulseBadge.classList.add('hidden');
         el.metroBtnLabel.textContent = 'START';
         el.metroToggleBtn.className = 'studio-btn-primary min-h-[42px] text-sm font-black inline-flex items-center justify-center gap-1.5';
+        setButtonIcon(el.metroToggleBtn, 'play');
         el.metroBeatPads.querySelectorAll('.metro-pad').forEach((pad) => pad.classList.remove('active-accent', 'active-normal'));
+        syncWakeLock();
       }
 
       function syncTransposeUI() {
@@ -2799,6 +3633,7 @@
         if (state.activeTab === 'detector' && state.candidateMidi !== null) {
           commitVocalCandidate(performance.now());
         }
+        clearTimerList(state.tunerArpTimers);
         resetPitchTrackerState(false);
         state.activeTab = tabName;
 
@@ -2835,7 +3670,10 @@
         document.querySelectorAll('[data-tip]').forEach((btn) => {
           const key = btn.getAttribute('data-tip');
           const label = (d.glyphLabels && d.glyphLabels[key]) || I18N_COMMON.glyphLabels[key];
-          if (label) btn.setAttribute('title', label);
+          if (label) {
+            btn.setAttribute('title', label);
+            btn.setAttribute('aria-label', label);
+          }
         });
 
         updateMasterStatusUI();
@@ -2844,11 +3682,21 @@
         renderSavedScoresList();
       }
 
+      function getScoreHeaderMeta() {
+        const ks = getCurrentKeySignature();
+        const title = el.scoreTitleInput.value.trim() || I18N_COMMON.defaultSongTitle;
+        const safeFileName = title.replace(/\s+/g, '_');
+        const tempoText = `♩ = ${state.metroBpm} (${getTempoItalianName(state.metroBpm)})`;
+        const subtitle = `HumNote · ${state.timeSignature} · Key ${ks.label} · A4 = ${state.a4Freq}Hz`;
+        return { title, safeFileName, tempoText, subtitle };
+      }
+
       function openA4Modal() {
         const res = buildStaffSvgMarkup(true);
-        const ks = getCurrentKeySignature();
-        el.a4SheetTitle.textContent = el.scoreTitleInput.value.trim() || I18N_COMMON.defaultSongTitle;
-        el.a4SheetMeta.textContent = `HumNote · ${state.timeSignature} · Key ${ks.label} · A4 = ${state.a4Freq}Hz`;
+        const meta = getScoreHeaderMeta();
+        el.a4SheetTitle.textContent = meta.title;
+        el.a4SheetMeta.textContent = meta.subtitle;
+        if (el.a4SheetTempo) el.a4SheetTempo.textContent = meta.tempoText;
         el.a4SheetStats.textContent = `${res.totalBars}M · ${state.scoreNotes.length}N`;
         el.a4StaffMount.innerHTML = res.svg;
         el.a4PrintDate.textContent = new Date().toLocaleDateString();
@@ -2858,6 +3706,7 @@
       function exportA4SheetAsJpg() {
         const svgEl = el.a4StaffMount.querySelector('svg');
         if (!svgEl) return;
+        const meta = getScoreHeaderMeta();
         const serializer = new XMLSerializer();
         const svgStr = serializer.serializeToString(svgEl);
         const svgBlob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
@@ -2866,19 +3715,27 @@
 
         img.onload = () => {
           const canvas = document.createElement('canvas');
+          const drawW = 1080;
+          const drawH = (img.height / Math.max(1, img.width)) * drawW;
           canvas.width = 1240;
-          canvas.height = 1754;
+          canvas.height = Math.max(1754, Math.ceil(210 + drawH + 90));
           const ctx = canvas.getContext('2d');
           ctx.fillStyle = '#ffffff';
           ctx.fillRect(0, 0, canvas.width, canvas.height);
 
           ctx.fillStyle = '#0f172a';
           ctx.font = 'bold 42px Inter, sans-serif';
-          ctx.fillText(el.a4SheetTitle.textContent, 80, 110);
+          ctx.fillText(meta.title, 80, 110);
 
           ctx.fillStyle = '#475569';
           ctx.font = '600 22px Inter, sans-serif';
-          ctx.fillText(el.a4SheetMeta.textContent, 80, 152);
+          ctx.fillText(meta.subtitle, 80, 152);
+
+          ctx.fillStyle = '#0f172a';
+          ctx.font = 'bold 26px Inter, sans-serif';
+          ctx.textAlign = 'right';
+          ctx.fillText(meta.tempoText, 1160, 150);
+          ctx.textAlign = 'left';
 
           ctx.strokeStyle = '#0f172a';
           ctx.lineWidth = 3;
@@ -2887,17 +3744,320 @@
           ctx.lineTo(1160, 175);
           ctx.stroke();
 
-          const drawW = 1080;
-          const drawH = (img.height / Math.max(1, img.width)) * drawW;
           ctx.drawImage(img, 80, 210, drawW, drawH);
 
           URL.revokeObjectURL(url);
           const link = document.createElement('a');
-          link.download = `${(el.a4SheetTitle.textContent || 'humnote').replace(/\s+/g, '_')}.jpg`;
+          link.download = `${meta.safeFileName}.jpg`;
           link.href = canvas.toDataURL('image/jpeg', 0.94);
           link.click();
         };
         img.src = url;
+      }
+
+      function exportScoreAsMidi() {
+        if (!state.scoreNotes.length) {
+          showToast(getDict().toastNoNotes);
+          return;
+        }
+        const meta = getScoreHeaderMeta();
+        const seq = expandPlaybackSequence(0, false);
+        const ts = getCurrentTimeSignature();
+        const ppq = 480;
+        const tickScale = ppq / TICKS_PER_QUARTER;
+
+        const encodeVarLen = (val) => {
+          let v = Math.max(0, Math.round(val));
+          const bytes = [v & 0x7f];
+          while ((v >>= 7) > 0) bytes.unshift((v & 0x7f) | 0x80);
+          return bytes;
+        };
+
+        const track = [];
+        const usPerQuarter = Math.round(60000000 / state.metroBpm);
+        track.push(0x00, 0xff, 0x51, 0x03, (usPerQuarter >> 16) & 0xff, (usPerQuarter >> 8) & 0xff, usPerQuarter & 0xff);
+        const denomPow = Math.round(Math.log2(ts.bottom || 4));
+        track.push(0x00, 0xff, 0x58, 0x04, ts.top & 0xff, denomPow & 0xff, 24, 8);
+        track.push(0x00, 0xc0, 0x00);
+
+        let pendingDelta = 0;
+        seq.forEach((item) => {
+          const durTicks = Math.max(1, Math.round(item.ticks * tickScale));
+          if (item.note.isRest) {
+            pendingDelta += durTicks;
+            return;
+          }
+          const midiNum = Math.max(0, Math.min(127, Math.round(item.note.midi)));
+          track.push(...encodeVarLen(pendingDelta), 0x90, midiNum, 0x5a);
+          track.push(...encodeVarLen(durTicks), 0x80, midiNum, 0x00);
+          pendingDelta = 0;
+        });
+
+        track.push(...encodeVarLen(pendingDelta), 0xff, 0x2f, 0x00);
+
+        const header = [
+          0x4d, 0x54, 0x68, 0x64, 0x00, 0x00, 0x00, 0x06,
+          0x00, 0x00, 0x00, 0x01, (ppq >> 8) & 0xff, ppq & 0xff
+        ];
+        const tLen = track.length;
+        const mtrk = [
+          0x4d, 0x54, 0x72, 0x6b,
+          (tLen >> 24) & 0xff, (tLen >> 16) & 0xff, (tLen >> 8) & 0xff, tLen & 0xff
+        ];
+
+        const midiBytes = new Uint8Array([...header, ...mtrk, ...track]);
+        const blob = new Blob([midiBytes], { type: 'audio/midi' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.download = `${meta.safeFileName}.mid`;
+        link.href = url;
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        showToast(getDict().toastMidiExported);
+      }
+
+      // Pillar 3: Standard MusicXML 3.1 (.musicxml) Exporter (MuseScore · Dorico · Flat.io Compatible)
+      function exportScoreAsMusicXml() {
+        if (!state.scoreNotes.length) {
+          showToast(getDict().toastNoNotes);
+          return;
+        }
+        const meta = getScoreHeaderMeta();
+        const ts = getCurrentTimeSignature();
+        const ks = getCurrentKeySignature();
+        const fifths = ks.type === 'flat' ? -ks.count : (ks.type === 'sharp' ? ks.count : 0);
+
+        const escapeXml = (str) => String(str || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&apos;');
+
+        const midiToXmlPitch = (midi, preferFlat) => {
+          const sharpMap = [['C', 0], ['C', 1], ['D', 0], ['D', 1], ['E', 0], ['F', 0], ['F', 1], ['G', 0], ['G', 1], ['A', 0], ['A', 1], ['B', 0]];
+          const flatMap  = [['C', 0], ['D', -1], ['D', 0], ['E', -1], ['E', 0], ['F', 0], ['G', -1], ['G', 0], ['A', -1], ['A', 0], ['B', -1], ['B', 0]];
+          const pc = ((midi % 12) + 12) % 12;
+          const [step, alter] = (preferFlat ? flatMap : sharpMap)[pc];
+          const octave = Math.floor(midi / 12) - 1;
+          return { step, alter, octave };
+        };
+
+        const ticksToXmlType = (ticks, isTriplet) => {
+          if (isTriplet) {
+            if (ticks >= 14) return { type: 'quarter', dotted: false };
+            if (ticks >= 7) return { type: 'eighth', dotted: false };
+            return { type: '16th', dotted: false };
+          }
+          if (ticks >= 96) return { type: 'whole', dotted: false };
+          if (ticks >= 72) return { type: 'half', dotted: true };
+          if (ticks >= 48) return { type: 'half', dotted: false };
+          if (ticks >= 36) return { type: 'quarter', dotted: true };
+          if (ticks >= 24) return { type: 'quarter', dotted: false };
+          if (ticks >= 18) return { type: 'eighth', dotted: true };
+          if (ticks >= 12) return { type: 'eighth', dotted: false };
+          if (ticks >= 9) return { type: '16th', dotted: true };
+          return { type: '16th', dotted: false };
+        };
+
+        const buildHarmonyXml = (symbol) => {
+          if (!symbol) return '';
+          const clean = symbol.trim().replace(/♯/g, '#').replace(/♭/g, 'b');
+          const m = clean.match(/^([A-Ga-g])([#b]?)(.*?)(?:\/([A-Ga-g])([#b]?))?$/);
+          if (!m) return '';
+          const rootStep = m[1].toUpperCase();
+          const rootAlter = m[2] === '#' ? 1 : (m[2] === 'b' ? -1 : 0);
+          const qual = (m[3] || '').trim();
+
+          let kind = 'major';
+          if (/maj7|M7|Δ7/.test(qual)) kind = 'major-seventh';
+          else if (/dim7|°7/.test(qual)) kind = 'diminished-seventh';
+          else if (/dim|°/.test(qual)) kind = 'diminished';
+          else if (/aug|\+/.test(qual)) kind = 'augmented';
+          else if (/sus2/.test(qual)) kind = 'suspended-second';
+          else if (/sus4|sus/.test(qual)) kind = 'suspended-fourth';
+          else if (/^m7|min7|-7/.test(qual)) kind = 'minor-seventh';
+          else if (/^m6|min6|-6/.test(qual)) kind = 'minor-sixth';
+          else if (/^m(?!aj)|min|-/.test(qual)) kind = 'minor';
+          else if (/7/.test(qual)) kind = 'dominant';
+          else if (/6/.test(qual)) kind = 'major-sixth';
+          else if (qual === '5') kind = 'power';
+
+          let bassXml = '';
+          if (m[4]) {
+            const bStep = m[4].toUpperCase();
+            const bAlter = m[5] === '#' ? 1 : (m[5] === 'b' ? -1 : 0);
+            bassXml = `\n        <bass><bass-step>${bStep}</bass-step>${bAlter ? `<bass-alter>${bAlter}</bass-alter>` : ''}</bass>`;
+          }
+          return `      <harmony>\n        <root><root-step>${rootStep}</root-step>${rootAlter ? `<root-alter>${rootAlter}</root-alter>` : ''}</root>\n        <kind text="${escapeXml(qual)}">${kind}</kind>${bassXml}\n      </harmony>`;
+        };
+
+        // Slice notes across bars using the same 24-tick engine as SVG engraving
+        const bars = [];
+        let curBar = 0;
+        let tickInBar = 0;
+        state.scoreNotes.forEach((note, noteIdx) => {
+          let rem = noteToTicks(note);
+          let part = 0;
+          while (rem > 0) {
+            if (!bars[curBar]) bars[curBar] = [];
+            const space = ts.ticksPerBar - tickInBar;
+            const chunk = Math.min(rem, space);
+            const subParts = note.triplet ? [chunk] : decomposeTicksToStandardDurations(chunk);
+            subParts.forEach((subTick, spIdx) => {
+              const hasMore = rem > chunk || spIdx < subParts.length - 1;
+              bars[curBar].push({
+                noteIdx,
+                note,
+                ticks: subTick,
+                isTieStart: hasMore,
+                isTieCont: part > 0
+              });
+              tickInBar += subTick;
+              part += 1;
+            });
+            rem -= chunk;
+            if (tickInBar >= ts.ticksPerBar) {
+              curBar += 1;
+              tickInBar = 0;
+            }
+          }
+        });
+
+        if (!bars.length) return;
+        const xmlMeasures = bars.map((barSlices, bIdx) => {
+          const lines = [`    <measure number="${bIdx + 1}">`];
+          const hasRepStart = barSlices.some((sl) => sl.note.repeatStart && !sl.isTieCont);
+          const hasRepEnd = barSlices.some((sl) => sl.note.repeatEnd && !sl.isTieStart);
+          const isFinalBar = bIdx === bars.length - 1;
+
+          if (hasRepStart) {
+            lines.push('      <barline location="left"><bar-style>heavy-light</bar-style><repeat direction="forward"/></barline>');
+          }
+
+          if (bIdx === 0) {
+            lines.push(
+              '      <attributes>',
+              `        <divisions>${TICKS_PER_QUARTER}</divisions>`,
+              `        <key><fifths>${fifths}</fifths><mode>major</mode></key>`,
+              `        <time><beats>${ts.top}</beats><beat-type>${ts.bottom}</beat-type></time>`,
+              '        <clef><sign>G</sign><line>2</line></clef>',
+              '      </attributes>',
+              '      <direction placement="above">',
+              '        <direction-type><metronome><beat-unit>quarter</beat-unit><per-minute>' + state.metroBpm + '</per-minute></metronome></direction-type>',
+              `        <sound tempo="${state.metroBpm}"/>`,
+              '      </direction>'
+            );
+          }
+
+          // Track triplet group start/stop boundaries inside this measure
+          const tripletBoundaryMap = new Map();
+          for (let i = 0; i < barSlices.length; i += 1) {
+            const tRun = collectTripletSliceRun(barSlices, i);
+            if (tRun) {
+              tripletBoundaryMap.set(i, 'start');
+              tripletBoundaryMap.set(tRun.nextIdx - 1, 'stop');
+              i = tRun.nextIdx - 1;
+            }
+          }
+
+          let barTicksUsed = 0;
+          barSlices.forEach((sl, sIdx) => {
+            barTicksUsed += sl.ticks;
+            if (!sl.isTieCont && sl.note.chord) {
+              const hXml = buildHarmonyXml(sl.note.chord);
+              if (hXml) lines.push(hXml);
+            }
+
+            const spec = ticksToXmlType(sl.ticks, sl.note.triplet);
+            const noteLines = ['      <note>'];
+            if (sl.note.isRest) {
+              noteLines.push('        <rest/>');
+            } else {
+              const p = midiToXmlPitch(sl.note.midi, sl.note.preferFlat);
+              noteLines.push(`        <pitch><step>${p.step}</step>${p.alter ? `<alter>${p.alter}</alter>` : ''}<octave>${p.octave}</octave></pitch>`);
+            }
+            noteLines.push(`        <duration>${sl.ticks}</duration>`);
+            if (!sl.note.isRest && sl.isTieCont) noteLines.push('        <tie type="stop"/>');
+            if (!sl.note.isRest && sl.isTieStart) noteLines.push('        <tie type="start"/>');
+            noteLines.push(`        <type>${spec.type}</type>`);
+            if (spec.dotted) noteLines.push('        <dot/>');
+            if (sl.note.triplet) {
+              noteLines.push('        <time-modification><actual-notes>3</actual-notes><normal-notes>2</normal-notes></time-modification>');
+            }
+
+            const notations = [];
+            if (!sl.note.isRest && sl.isTieCont) notations.push('<tied type="stop"/>');
+            if (!sl.note.isRest && sl.isTieStart) notations.push('<tied type="start"/>');
+            const tBound = tripletBoundaryMap.get(sIdx);
+            if (tBound === 'start') notations.push('<tuplet type="start" bracket="yes"/>');
+            else if (tBound === 'stop') notations.push('<tuplet type="stop"/>');
+            if (notations.length) {
+              noteLines.push(`        <notations>${notations.join('')}</notations>`);
+            }
+
+            if (!sl.note.isRest && !sl.isTieCont && sl.note.lyric) {
+              noteLines.push(`        <lyric number="1"><syllabic>single</syllabic><text>${escapeXml(sl.note.lyric)}</text></lyric>`);
+            }
+            noteLines.push('      </note>');
+            lines.push(noteLines.join('\n'));
+          });
+
+          // Pad incomplete final measure with standard rests for strict MusicXML compliance
+          const missingTicks = ts.ticksPerBar - barTicksUsed;
+          if (missingTicks > 0) {
+            decomposeTicksToStandardDurations(missingTicks).forEach((rTick) => {
+              const rSpec = ticksToXmlType(rTick, false);
+              lines.push(
+                '      <note>',
+                '        <rest/>',
+                `        <duration>${rTick}</duration>`,
+                `        <type>${rSpec.type}</type>`,
+                ...(rSpec.dotted ? ['        <dot/>'] : []),
+                '      </note>'
+              );
+            });
+          }
+
+          if (hasRepEnd) {
+            lines.push('      <barline location="right"><bar-style>light-heavy</bar-style><repeat direction="backward"/></barline>');
+          } else if (isFinalBar) {
+            lines.push('      <barline location="right"><bar-style>light-heavy</bar-style></barline>');
+          }
+
+          lines.push('    </measure>');
+          return lines.join('\n');
+        });
+
+        const xmlDoc = [
+          '<?xml version="1.0" encoding="UTF-8"?>',
+          '<!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 3.1 Partwise//EN" "http://www.musicxml.org/dtds/partwise.dtd">',
+          '<score-partwise version="3.1">',
+          `  <work><work-title>${escapeXml(meta.title)}</work-title></work>`,
+          '  <identification>',
+          '    <encoding>',
+          '      <software>HumNote Studio Edition</software>',
+          `      <encoding-date>${new Date().toISOString().slice(0, 10)}</encoding-date>`,
+          '    </encoding>',
+          '  </identification>',
+          '  <part-list>',
+          '    <score-part id="P1"><part-name>Melody</part-name></score-part>',
+          '  </part-list>',
+          '  <part id="P1">',
+          ...xmlMeasures,
+          '  </part>',
+          '</score-partwise>'
+        ].join('\n');
+
+        const blob = new Blob([xmlDoc], { type: 'application/vnd.recordare.musicxml+xml;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.download = `${meta.safeFileName}.musicxml`;
+        link.href = url;
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        const d = getDict();
+        showToast(d.toastXmlExported || 'MusicXML (.musicxml) exported.');
       }
 
       function bindEvents() {
@@ -2913,16 +4073,71 @@
         });
 
         el.openInfoBtn.addEventListener('click', () => el.infoModal.classList.remove('hidden'));
-        el.closeInfoModalBtn.addEventListener('click', () => el.infoModal.classList.add('hidden'));
+        el.closeInfoModalBtn.addEventListener('click', closeAllModals);
+        el.infoModal.addEventListener('click', (e) => {
+          if (e.target === el.infoModal) closeAllModals();
+        });
 
         el.micToggleBtn.addEventListener('click', () => {
-          if (state.isMicRunning) stopMicrophone();
-          else startMicrophone();
+          if (state.isCountingIn) cancelCountIn();
+          else if (state.isMicRunning) stopMicrophone();
+          else startMicWithOptionalCountIn();
         });
 
         el.simToggleBtn.addEventListener('click', () => {
           if (state.isSimRunning) stopSimulation();
           else startSimulation();
+        });
+
+        if (el.importAudioBtn && el.audioFileInput) {
+          el.importAudioBtn.addEventListener('click', () => {
+            el.audioFileInput.value = '';
+            el.audioFileInput.click();
+          });
+          el.audioFileInput.addEventListener('change', (e) => {
+            const file = e.target.files && e.target.files[0];
+            if (file) transcribeAudioFile(file);
+          });
+        }
+
+        if (el.autoKeyDetectBtn) {
+          el.autoKeyDetectBtn.addEventListener('click', detectKeySignatureKrumhansl);
+        }
+        if (el.cleanupScoreBtn) {
+          el.cleanupScoreBtn.addEventListener('click', cleanupScoreNotes);
+        }
+
+        if (el.calibrateNoiseBtn) {
+          el.calibrateNoiseBtn.addEventListener('click', async () => {
+            if (state.isCalibrating) return;
+            if (state.isSimRunning) stopSimulation();
+            if (!state.isMicRunning) {
+              await startMicrophone();
+              if (!state.isMicRunning) return;
+            }
+            state.isCalibrating = true;
+            state.calibrationSamples = [];
+            el.calibrateNoiseBtn.textContent = '...';
+            setTimeout(() => {
+              state.isCalibrating = false;
+              el.calibrateNoiseBtn.textContent = 'GATE';
+              if (state.calibrationSamples.length > 0) {
+                const avg = state.calibrationSamples.reduce((a, b) => a + b, 0) / state.calibrationSamples.length;
+                const newGate = Math.max(-62, Math.min(-18, Math.round(avg + 6)));
+                state.noiseGateDb = newGate;
+                updateGateMarkerUI();
+                showToast(getDict().toastCalibrated(newGate));
+              }
+            }, 1100);
+          });
+        }
+
+        el.scoreTitleInput.addEventListener('input', () => {
+          if (el.libraryCurrentTitleText) {
+            el.libraryCurrentTitleText.textContent = el.scoreTitleInput.value.trim() || I18N_COMMON.defaultSongTitle;
+          }
+          state.isDirty = true;
+          saveActiveDraft();
         });
 
         el.tabDetectorBtn.addEventListener('click', () => switchTab('detector'));
@@ -2934,13 +4149,13 @@
           state.scaleMode = e.target.value;
         });
 
-        const handleTimeSigChange = (val) => {
+        const handleTimeSigChange = (val, skipRender = false) => {
           state.timeSignature = val;
           el.scoreTimeSigSelect.value = val;
           el.metroTimeSigSelect.value = val;
           state.metroBeats = getCurrentTimeSignature().beats;
           renderMetroBeatPads();
-          renderScoreStaff();
+          if (!skipRender) renderScoreStaff();
         };
 
         el.scoreTimeSigSelect.addEventListener('change', (e) => handleTimeSigChange(e.target.value));
@@ -2966,6 +4181,7 @@
         });
 
         const applyTransposeDelta = (delta) => {
+          if (state.scoreNotes.length > 0) pushUndoSnapshot();
           state.transposeSemitones = Math.max(-12, Math.min(12, state.transposeSemitones + delta));
           const ks = getCurrentKeySignature();
           state.scoreNotes.forEach((n) => {
@@ -2994,6 +4210,7 @@
             showToast('오선지 음역 한계(C3~C6)에 도달했습니다.');
             return;
           }
+          pushUndoSnapshot();
           state.scoreNotes.forEach((n) => {
             if (!n.isRest) n.midi += semitoneDelta;
           });
@@ -3003,16 +4220,25 @@
 
         el.scoreOctaveDownBtn.addEventListener('click', () => shiftEntireScoreOctave(-12));
         el.scoreOctaveUpBtn.addEventListener('click', () => shiftEntireScoreOctave(12));
-        el.scoresPlayActiveBtn.addEventListener('click', () => {
+
+        const togglePlayScore = () => {
           if (state.isPlayingScore) stopScorePlayback();
           else startScorePlayback(0, false);
-        });
-
+        };
+        el.playScoreBtn.addEventListener('click', togglePlayScore);
+        el.scoresPlayActiveBtn.addEventListener('click', togglePlayScore);
+        if (el.undoScoreBtn) el.undoScoreBtn.addEventListener('click', undoLastAction);
+        if (el.redoScoreBtn) el.redoScoreBtn.addEventListener('click', redoLastAction);
         el.openFullscreenScoreBtn.addEventListener('click', openA4Modal);
         el.scoresOpenA4Btn.addEventListener('click', openA4Modal);
-        el.closeModalBtn.addEventListener('click', () => el.sheetFullscreenModal.classList.add('hidden'));
+        el.closeModalBtn.addEventListener('click', closeAllModals);
+        el.sheetFullscreenModal.addEventListener('click', (e) => {
+          if (e.target === el.sheetFullscreenModal) closeAllModals();
+        });
         el.printSheetBtn.addEventListener('click', () => window.print());
         el.exportJpgBtn.addEventListener('click', exportA4SheetAsJpg);
+        if (el.exportMidiBtn) el.exportMidiBtn.addEventListener('click', exportScoreAsMidi);
+        if (el.exportMusicXmlBtn) el.exportMusicXmlBtn.addEventListener('click', exportScoreAsMusicXml);
 
         el.saveScoreQuickBtn.addEventListener('click', saveCurrentScoreToStorage);
         el.librarySaveCurrentBtn.addEventListener('click', saveCurrentScoreToStorage);
@@ -3021,17 +4247,14 @@
           if (state.isDirty && state.scoreNotes.length > 0 && !window.confirm(getDict().confirmDiscardUnsaved)) {
             return;
           }
+          if (state.scoreNotes.length > 0) pushUndoSnapshot();
           stopScorePlayback();
           state.scoreNotes = [];
           state.selectedNoteIndex = -1;
           state.loadedSongId = null;
           state.isDirty = false;
           state.transposeSemitones = 0;
-          state.timeSignature = '4/4';
-          el.scoreTimeSigSelect.value = '4/4';
-          el.metroTimeSigSelect.value = '4/4';
-          state.metroBeats = 4;
-          renderMetroBeatPads();
+          handleTimeSigChange('4/4', true);
           el.scoreTitleInput.value = I18N_COMMON.defaultSongTitle;
           syncTransposeUI();
           renderScoreStaff();
@@ -3040,39 +4263,16 @@
         el.clearHistoryBtn.addEventListener('click', resetWorkspace);
         el.libraryNewScoreBtn.addEventListener('click', resetWorkspace);
 
-        el.noteEditBar.addEventListener('click', (e) => {
-          const btn = e.target.closest('button');
-          if (!btn || btn.disabled) return;
-
-          const baseAttr = btn.getAttribute('data-base-beats');
-          const action = btn.getAttribute('data-action');
-          const tipKey = btn.getAttribute('data-tip');
-          if (tipKey) showEditMicroFeedback(tipKey);
-
+        function executeNoteAction(action) {
           const idx = state.selectedNoteIndex;
           const note = idx >= 0 && idx < state.scoreNotes.length ? state.scoreNotes[idx] : null;
 
-          if (baseAttr) {
-            const newBase = parseFloat(baseAttr);
-            if (!note) {
-              const ks = getCurrentKeySignature();
-              state.scoreNotes.push(createNoteEvent(60, newBase, { preferFlat: ks.type === 'flat' }));
-              state.selectedNoteIndex = 0;
-            } else if (!note.triplet) {
-              note.baseBeats = newBase;
-              if (newBase === 4 || newBase === 0.25) note.dotted = false;
-            }
-            state.isDirty = true;
-            renderScoreStaff();
-            return;
-          }
-
-          if (!action) return;
-
           if (action === 'insertAfter') {
+            if (note && note.triplet) return;
+            pushUndoSnapshot();
             const ks = getCurrentKeySignature();
             const refMidi = note ? note.midi : 60;
-            const newNote = createNoteEvent(refMidi, 1, { preferFlat: ks.type === 'flat' });
+            const newNote = createNoteEvent(refMidi, state.preferredBaseBeats || 1, { preferFlat: ks.type === 'flat' });
             const insertPos = note ? idx + 1 : 0;
             state.scoreNotes.splice(insertPos, 0, newNote);
             state.selectedNoteIndex = insertPos;
@@ -3091,37 +4291,71 @@
             }
           } else if (action === 'dot' && !note.triplet) {
             if (note.baseBeats === 2 || note.baseBeats === 1 || note.baseBeats === 0.5) {
+              pushUndoSnapshot();
               note.dotted = !note.dotted;
               state.isDirty = true;
               renderScoreStaff();
             }
           } else if (action === 'pitchUp' && !note.isRest) {
+            pushUndoSnapshot();
             note.midi = Math.min(84, note.midi + 1);
             state.isDirty = true;
             playReferenceTone(midiToFreq(note.midi), 0.2);
             renderScoreStaff();
           } else if (action === 'pitchDown' && !note.isRest) {
+            pushUndoSnapshot();
             note.midi = Math.max(48, note.midi - 1);
             state.isDirty = true;
             playReferenceTone(midiToFreq(note.midi), 0.2);
             renderScoreStaff();
           } else if (action === 'accidental' && !note.isRest) {
-            note.preferFlat = !note.preferFlat;
+            pushUndoSnapshot();
+            const ks = getCurrentKeySignature();
+            const step = midiToStaffStep(note.midi, note.preferFlat);
+            const natMidi = staffStepToDiatonicMidi(step);
+            const keyAlt = getKeySignatureAlterationForStep(step, ks);
+            const curAlt = note.midi - natMidi;
+            const pc = ((natMidi % 12) + 12) % 12;
+
+            if (curAlt !== keyAlt) {
+              // Restore back to current key signature pitch
+              note.midi = Math.max(48, Math.min(84, natMidi + keyAlt));
+              note.preferFlat = ks.type === 'flat';
+            } else if (keyAlt !== 0) {
+              // Naturalize a key-signature altered note (e.g. F# -> F♮, B♭ -> B♮)
+              note.midi = natMidi;
+            } else if (ks.type === 'flat' || pc === 4 || pc === 11) {
+              // Apply flat for flat keys or E/B naturals (E♭ / B♭)
+              note.midi = Math.max(48, natMidi - 1);
+              note.preferFlat = true;
+            } else {
+              // Apply sharp for natural notes (C♯, D♯, F♯, G♯, A♯)
+              note.midi = Math.min(84, natMidi + 1);
+              note.preferFlat = false;
+            }
             state.isDirty = true;
+            playReferenceTone(midiToFreq(note.midi), 0.2);
             renderScoreStaff();
           } else if (action === 'rest' && !note.triplet) {
+            pushUndoSnapshot();
             note.isRest = !note.isRest;
             state.isDirty = true;
             renderScoreStaff();
-          } else if (action === 'repeatStart' && !note.triplet) {
-            note.repeatStart = !note.repeatStart;
-            state.isDirty = true;
-            renderScoreStaff();
-          } else if (action === 'repeatEnd' && !note.triplet) {
-            note.repeatEnd = !note.repeatEnd;
+          } else if ((action === 'repeatStart' || action === 'repeatEnd') && !note.triplet) {
+            const mRange = getMeasureNoteRange(idx);
+            if (mRange.startIdx < 0) return;
+            pushUndoSnapshot();
+            const prop = action;
+            const currentlyOn = state.scoreNotes.slice(mRange.startIdx, mRange.endIdx + 1).some((n) => n[prop]);
+            for (let i = mRange.startIdx; i <= mRange.endIdx; i += 1) {
+              state.scoreNotes[i][prop] = false;
+            }
+            const targetIdx = prop === 'repeatStart' ? mRange.startIdx : mRange.endIdx;
+            state.scoreNotes[targetIdx][prop] = !currentlyOn;
             state.isDirty = true;
             renderScoreStaff();
           } else if (action === 'delete' && !note.triplet) {
+            pushUndoSnapshot();
             state.scoreNotes.splice(idx, 1);
             state.selectedNoteIndex = Math.min(idx, state.scoreNotes.length - 1);
             state.isDirty = true;
@@ -3131,7 +4365,124 @@
           } else if (action === 'playFromHere') {
             startScorePlayback(idx, false);
           }
+        }
+
+        el.noteEditBar.addEventListener('click', (e) => {
+          const btn = e.target.closest('button');
+          if (!btn || btn.disabled) return;
+
+          const baseAttr = btn.getAttribute('data-base-beats');
+          const action = btn.getAttribute('data-action');
+          const tipKey = btn.getAttribute('data-tip');
+          if (tipKey) showEditMicroFeedback(tipKey);
+
+          const idx = state.selectedNoteIndex;
+          const note = idx >= 0 && idx < state.scoreNotes.length ? state.scoreNotes[idx] : null;
+
+          if (baseAttr) {
+            const newBase = parseFloat(baseAttr);
+            state.preferredBaseBeats = newBase;
+            pushUndoSnapshot();
+            if (!note) {
+              const ks = getCurrentKeySignature();
+              state.scoreNotes.push(createNoteEvent(60, newBase, { preferFlat: ks.type === 'flat' }));
+              state.selectedNoteIndex = 0;
+            } else if (!note.triplet) {
+              note.baseBeats = newBase;
+              if (newBase === 4 || newBase === 0.25) note.dotted = false;
+            }
+            state.isDirty = true;
+            renderScoreStaff();
+            return;
+          }
+
+          if (action) executeNoteAction(action);
         });
+
+        // Lead Sheet Chord & Lyric Inline Editor Events
+        const applyLeadSheetInputValue = (advanceToNext = false) => {
+          const idx = state.selectedNoteIndex;
+          const note = idx >= 0 ? state.scoreNotes[idx] : null;
+          if (!note || !state.activeLeadEditor) return;
+          const val = (el.leadSheetInput ? el.leadSheetInput.value : '').trim().slice(0, 12);
+          pushUndoSnapshot();
+          const d = getDict();
+          if (state.activeLeadEditor === 'chord') {
+            note.chord = val;
+            if (val && state.chordAccompEnabled) playChordAccompaniment(val, 0.7);
+            showToast(d.toastChordUpdated ? d.toastChordUpdated(val) : (val ? `Chord: ${val}` : 'Chord cleared'));
+          } else {
+            note.lyric = val;
+            showToast(d.toastLyricUpdated ? d.toastLyricUpdated(val) : (val ? `Lyric: ${val}` : 'Lyric cleared'));
+          }
+          state.isDirty = true;
+          if (advanceToNext && state.activeLeadEditor === 'lyric') {
+            let nextIdx = idx + 1;
+            while (nextIdx < state.scoreNotes.length && state.scoreNotes[nextIdx].isRest) nextIdx += 1;
+            if (nextIdx < state.scoreNotes.length) {
+              state.selectedNoteIndex = nextIdx;
+              renderScoreStaff();
+              if (el.leadSheetInput) {
+                el.leadSheetInput.value = state.scoreNotes[nextIdx].lyric || '';
+                el.leadSheetInput.focus();
+              }
+              return;
+            }
+          }
+          renderScoreStaff();
+        };
+
+        if (el.toggleChordEditorBtn) {
+          el.toggleChordEditorBtn.addEventListener('click', () => {
+            if (state.selectedNoteIndex < 0) return;
+            state.activeLeadEditor = state.activeLeadEditor === 'chord' ? null : 'chord';
+            updateNoteEditBar();
+            if (state.activeLeadEditor === 'chord' && el.leadSheetInput) el.leadSheetInput.focus();
+          });
+        }
+        if (el.toggleLyricEditorBtn) {
+          el.toggleLyricEditorBtn.addEventListener('click', () => {
+            if (state.selectedNoteIndex < 0) return;
+            state.activeLeadEditor = state.activeLeadEditor === 'lyric' ? null : 'lyric';
+            updateNoteEditBar();
+            if (state.activeLeadEditor === 'lyric' && el.leadSheetInput) el.leadSheetInput.focus();
+          });
+        }
+        if (el.toggleChordAccompBtn) {
+          el.toggleChordAccompBtn.addEventListener('click', () => {
+            state.chordAccompEnabled = !state.chordAccompEnabled;
+            updateNoteEditBar();
+          });
+        }
+        if (el.chordQuickChips) {
+          el.chordQuickChips.addEventListener('click', (e) => {
+            const btn = e.target.closest('[data-quick-chord]');
+            if (!btn) return;
+            const chordName = btn.getAttribute('data-quick-chord');
+            if (el.leadSheetInput) el.leadSheetInput.value = chordName;
+            applyLeadSheetInputValue(false);
+          });
+        }
+        if (el.leadSheetApplyBtn) {
+          el.leadSheetApplyBtn.addEventListener('click', () => applyLeadSheetInputValue(false));
+        }
+        if (el.leadSheetNextBtn) {
+          el.leadSheetNextBtn.addEventListener('click', () => applyLeadSheetInputValue(true));
+        }
+        if (el.leadSheetClearBtn) {
+          el.leadSheetClearBtn.addEventListener('click', () => {
+            if (el.leadSheetInput) el.leadSheetInput.value = '';
+            applyLeadSheetInputValue(false);
+          });
+        }
+        if (el.leadSheetInput) {
+          el.leadSheetInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              applyLeadSheetInputValue(state.activeLeadEditor === 'lyric');
+            }
+          });
+        }
 
         el.instrumentSelect.addEventListener('change', (e) => {
           state.selectedInstrument = e.target.value;
@@ -3148,11 +4499,20 @@
         });
 
         el.playAllStringsBtn.addEventListener('click', () => {
+          clearTimerList(state.tunerArpTimers);
           const strings = getTunerStrings();
           strings.forEach((s, i) => {
-            setTimeout(() => playReferenceTone(s.freq, 0.55), i * 320);
+            const tid = setTimeout(() => playReferenceTone(s.freq, 0.55), i * 320);
+            state.tunerArpTimers.push(tid);
           });
         });
+
+        if (el.metroMuteBtn) {
+          el.metroMuteBtn.addEventListener('click', () => {
+            state.metroMuted = !state.metroMuted;
+            syncMetroMuteUI();
+          });
+        }
 
         el.bpmMinusBtn.addEventListener('click', () => setMetroBpm(state.metroBpm - 1));
         el.bpmPlusBtn.addEventListener('click', () => setMetroBpm(state.metroBpm + 1));
@@ -3180,6 +4540,54 @@
         el.subdivSelect.addEventListener('change', (e) => {
           state.metroSubdiv = parseInt(e.target.value, 10) || 1;
         });
+
+        // Keyboard Shortcuts (Tablet / Desktop)
+        window.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') {
+            closeAllModals();
+            return;
+          }
+
+          const tag = document.activeElement?.tagName;
+          if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+          if (!el.sheetFullscreenModal.classList.contains('hidden') || !el.infoModal.classList.contains('hidden')) return;
+
+          if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+            e.preventDefault();
+            if (e.shiftKey) redoLastAction();
+            else undoLastAction();
+            return;
+          }
+
+          if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+            e.preventDefault();
+            redoLastAction();
+            return;
+          }
+
+          if (e.code === 'Space') {
+            e.preventDefault();
+            if (state.activeTab === 'metronome') {
+              if (state.isMetroRunning) stopMetronome();
+              else startMetronome();
+            } else if (state.activeTab === 'detector' || state.activeTab === 'scores') {
+              togglePlayScore();
+            }
+            return;
+          }
+
+          if (state.activeTab !== 'detector') return;
+          if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            executeNoteAction('pitchUp');
+          } else if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            executeNoteAction('pitchDown');
+          } else if (e.key === 'Delete' || e.key === 'Backspace') {
+            e.preventDefault();
+            executeNoteAction('delete');
+          }
+        });
       }
 
       function init() {
@@ -3193,9 +4601,11 @@
         });
 
         setMetroBpm(120);
+        restoreActiveDraft();
         populateTimeSignatureSelects();
         updateGateMarkerUI();
         renderMetroBeatPads();
+        syncMetroMuteUI();
         syncTransposeUI();
         loadSavedScoresFromStorage();
         applyLanguage();
