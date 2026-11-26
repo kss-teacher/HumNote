@@ -1342,18 +1342,18 @@
         stemFlipStep: 6
       };
 
-      const TICKS_PER_QUARTER = 12;
+      const TICKS_PER_QUARTER = 24;
 
       const TIME_SIGNATURES_SPEC = {
-        '4/4':  { top: '4', bottom: '4', commonSymbol: 'C', ticksPerBar: 48, metroBeats: 4, metroSubdiv: 1, beamUnitTicks: 24, beamSubTicks: 12, accents: [2, 0, 1, 0] },
-        '3/4':  { top: '3', bottom: '4', commonSymbol: null, ticksPerBar: 36, metroBeats: 3, metroSubdiv: 1, beamUnitTicks: 12, beamSubTicks: 12, accents: [2, 0, 0] },
-        '2/4':  { top: '2', bottom: '4', commonSymbol: null, ticksPerBar: 24, metroBeats: 2, metroSubdiv: 1, beamUnitTicks: 12, beamSubTicks: 12, accents: [2, 0] },
-        '2/2':  { top: '2', bottom: '2', commonSymbol: '₵', ticksPerBar: 48, metroBeats: 2, metroSubdiv: 1, beamUnitTicks: 24, beamSubTicks: 12, accents: [2, 0] },
-        '6/8':  { top: '6', bottom: '8', commonSymbol: null, ticksPerBar: 36, metroBeats: 2, metroSubdiv: 3, beamUnitTicks: 18, beamSubTicks: 18, accents: [2, 1] },
-        '9/8':  { top: '9', bottom: '8', commonSymbol: null, ticksPerBar: 54, metroBeats: 3, metroSubdiv: 3, beamUnitTicks: 18, beamSubTicks: 18, accents: [2, 1, 1] },
-        '12/8': { top: '12', bottom: '8', commonSymbol: null, ticksPerBar: 72, metroBeats: 4, metroSubdiv: 3, beamUnitTicks: 18, beamSubTicks: 18, accents: [2, 0, 1, 0] },
-        '5/4':  { top: '5', bottom: '4', commonSymbol: null, ticksPerBar: 60, metroBeats: 5, metroSubdiv: 1, beamBoundaries: [0, 36, 60], accents: [2, 0, 0, 1, 0] },
-        '7/8':  { top: '7', bottom: '8', commonSymbol: null, ticksPerBar: 42, metroBeats: 7, metroSubdiv: 1, beamBoundaries: [0, 12, 24, 42], accents: [2, 0, 1, 0, 1, 0, 0] }
+        '4/4':  { top: '4', bottom: '4', commonSymbol: 'C', ticksPerBar: 96, metroBeats: 4, metroSubdiv: 1, beamUnitTicks: 48, beamSubTicks: 24, accents: [2, 0, 1, 0] },
+        '3/4':  { top: '3', bottom: '4', commonSymbol: null, ticksPerBar: 72, metroBeats: 3, metroSubdiv: 1, beamUnitTicks: 24, beamSubTicks: 24, accents: [2, 0, 0] },
+        '2/4':  { top: '2', bottom: '4', commonSymbol: null, ticksPerBar: 48, metroBeats: 2, metroSubdiv: 1, beamUnitTicks: 24, beamSubTicks: 24, accents: [2, 0] },
+        '2/2':  { top: '2', bottom: '2', commonSymbol: '₵', ticksPerBar: 96, metroBeats: 2, metroSubdiv: 1, beamUnitTicks: 48, beamSubTicks: 24, accents: [2, 0] },
+        '6/8':  { top: '6', bottom: '8', commonSymbol: null, ticksPerBar: 72, metroBeats: 2, metroSubdiv: 3, beamUnitTicks: 36, beamSubTicks: 36, accents: [2, 1] },
+        '9/8':  { top: '9', bottom: '8', commonSymbol: null, ticksPerBar: 108, metroBeats: 3, metroSubdiv: 3, beamUnitTicks: 36, beamSubTicks: 36, accents: [2, 1, 1] },
+        '12/8': { top: '12', bottom: '8', commonSymbol: null, ticksPerBar: 144, metroBeats: 4, metroSubdiv: 3, beamUnitTicks: 36, beamSubTicks: 36, accents: [2, 0, 1, 0] },
+        '5/4':  { top: '5', bottom: '4', commonSymbol: null, ticksPerBar: 120, metroBeats: 5, metroSubdiv: 1, beamBoundaries: [0, 72, 120], accents: [2, 0, 0, 1, 0] },
+        '7/8':  { top: '7', bottom: '8', commonSymbol: null, ticksPerBar: 84, metroBeats: 7, metroSubdiv: 1, beamBoundaries: [0, 24, 48, 84], accents: [2, 0, 1, 0, 1, 0, 0] }
       };
 
       function getTimeSigSpec(tsKey) {
@@ -2054,7 +2054,8 @@
         const rawMidi = typeof src === 'number' ? src : (src.midi || 60);
         const rawBeats = typeof src === 'number' ? 1 : (src.beats || 1);
         const validBeats = normalizeNoteBeats(rawBeats);
-        const isDotted = Boolean(src.dotted) || validBeats === 3 || validBeats === 1.5 || validBeats === 0.75;
+        const isTriplet = Boolean(src.triplet);
+        const isDotted = !isTriplet && (Boolean(src.dotted) || validBeats === 3 || validBeats === 1.5 || validBeats === 0.75);
         const baseBeats = typeof src.baseBeats === 'number'
           ? src.baseBeats
           : (validBeats === 3 ? 2 : (validBeats === 1.5 ? 1 : (validBeats === 0.75 ? 0.5 : validBeats)));
@@ -2064,7 +2065,8 @@
           baseBeats,
           beats: validBeats,
           dotted: isDotted,
-          triplet: Boolean(src.triplet),
+          triplet: isTriplet,
+          tripletGroupId: src.tripletGroupId || null,
           isRest: Boolean(src.isRest),
           repeatStart: Boolean(src.repeatStart),
           repeatEnd: Boolean(src.repeatEnd)
@@ -2080,6 +2082,7 @@
           beats: computeEffectiveNoteBeats(n),
           dotted: Boolean(n.dotted),
           triplet: Boolean(n.triplet),
+          tripletGroupId: n.tripletGroupId || null,
           isRest: Boolean(n.isRest),
           repeatStart: Boolean(n.repeatStart),
           repeatEnd: Boolean(n.repeatEnd)
@@ -2087,46 +2090,46 @@
       }
 
       function beatsToTicks(noteObj) {
-        if (!noteObj) return 12;
+        if (!noteObj) return 24;
         const base = getNoteBaseBeats(noteObj);
-        const baseTicks = Math.max(3, Math.round(base * TICKS_PER_QUARTER));
-        if (noteObj.triplet) return Math.max(2, Math.round((baseTicks * 2) / 3));
+        const baseTicks = Math.max(6, Math.round(base * TICKS_PER_QUARTER));
+        if (noteObj.triplet) return Math.max(4, Math.round((baseTicks * 2) / 3));
         if (noteObj.dotted && base < 4 && base > 0.25) return Math.round(baseTicks * 1.5);
         return baseTicks;
       }
 
       function ticksToGlyphSpec(ticks, isTriplet = false) {
         if (isTriplet) {
-          if (ticks >= 32) return { headType: 'whole', stem: false, flags: 0, dotted: false, triplet: true };
-          if (ticks >= 16) return { headType: 'hollow', stem: true, flags: 0, dotted: false, triplet: true };
-          if (ticks >= 8)  return { headType: 'solid', stem: true, flags: 0, dotted: false, triplet: true };
-          if (ticks >= 4)  return { headType: 'solid', stem: true, flags: 1, dotted: false, triplet: true };
+          if (ticks >= 64) return { headType: 'whole', stem: false, flags: 0, dotted: false, triplet: true };
+          if (ticks >= 32) return { headType: 'hollow', stem: true, flags: 0, dotted: false, triplet: true };
+          if (ticks >= 16) return { headType: 'solid', stem: true, flags: 0, dotted: false, triplet: true };
+          if (ticks >= 8)  return { headType: 'solid', stem: true, flags: 1, dotted: false, triplet: true };
           return { headType: 'solid', stem: true, flags: 2, dotted: false, triplet: true };
         }
-        if (ticks >= 48) return { headType: 'whole',  stem: false, flags: 0, dotted: false, triplet: false };
-        if (ticks >= 36) return { headType: 'hollow', stem: true,  flags: 0, dotted: true,  triplet: false };
-        if (ticks >= 24) return { headType: 'hollow', stem: true,  flags: 0, dotted: false, triplet: false };
-        if (ticks >= 18) return { headType: 'solid',  stem: true,  flags: 0, dotted: true,  triplet: false };
-        if (ticks >= 12) return { headType: 'solid',  stem: true,  flags: 0, dotted: false, triplet: false };
-        if (ticks >= 9)  return { headType: 'solid',  stem: true,  flags: 1, dotted: true,  triplet: false };
-        if (ticks >= 6)  return { headType: 'solid',  stem: true,  flags: 1, dotted: false, triplet: false };
+        if (ticks >= 96) return { headType: 'whole',  stem: false, flags: 0, dotted: false, triplet: false };
+        if (ticks >= 72) return { headType: 'hollow', stem: true,  flags: 0, dotted: true,  triplet: false };
+        if (ticks >= 48) return { headType: 'hollow', stem: true,  flags: 0, dotted: false, triplet: false };
+        if (ticks >= 36) return { headType: 'solid',  stem: true,  flags: 0, dotted: true,  triplet: false };
+        if (ticks >= 24) return { headType: 'solid',  stem: true,  flags: 0, dotted: false, triplet: false };
+        if (ticks >= 18) return { headType: 'solid',  stem: true,  flags: 1, dotted: true,  triplet: false };
+        if (ticks >= 12) return { headType: 'solid',  stem: true,  flags: 1, dotted: false, triplet: false };
         return { headType: 'solid', stem: true, flags: 2, dotted: false, triplet: false };
       }
 
       function splitTicksIntoEngravedChunks(totalTicks, isTriplet = false) {
         if (isTriplet) return [totalTicks];
-        const standardTiers = [48, 36, 24, 18, 12, 9, 6, 3];
+        const standardTiers = [96, 72, 48, 36, 24, 18, 12, 6];
         const chunks = [];
         let rem = totalTicks;
         let guard = 0;
-        while (rem >= 3 && guard < 8) {
+        while (rem >= 6 && guard < 8) {
           const found = standardTiers.find((t) => t <= rem);
           if (!found) break;
           chunks.push(found);
           rem -= found;
           guard++;
         }
-        return chunks.length > 0 ? chunks : [Math.max(3, totalTicks)];
+        return chunks.length > 0 ? chunks : [Math.max(4, totalTicks)];
       }
 
       function layoutScoreEvents(notesArr, tsKey) {
@@ -2142,6 +2145,14 @@
           let remTicks = totalTicks;
           let sliceCountForNote = 0;
 
+          if (isTriplet) {
+            const tickInBar = cursorTicks % ticksPerBar;
+            const spaceInBar = ticksPerBar - tickInBar;
+            if (tickInBar > 0 && spaceInBar < totalTicks) {
+              cursorTicks += spaceInBar;
+            }
+          }
+
           if (noteObj.repeatStart) {
             const startBar = Math.floor(cursorTicks / ticksPerBar);
             barMeta[startBar] = Object.assign({}, barMeta[startBar], { repeatStart: true });
@@ -2151,7 +2162,7 @@
             const barIdx = Math.floor(cursorTicks / ticksPerBar);
             const tickInBar = cursorTicks % ticksPerBar;
             const spaceInBar = ticksPerBar - tickInBar;
-            const barSliceTicks = Math.min(remTicks, spaceInBar);
+            const barSliceTicks = isTriplet ? remTicks : Math.min(remTicks, spaceInBar);
             const chunks = splitTicksIntoEngravedChunks(barSliceTicks, isTriplet);
 
             chunks.forEach((chunkTicks) => {
@@ -2169,6 +2180,7 @@
                 isPrimarySlice: sliceCountForNote === 0,
                 isRest: Boolean(noteObj.isRest),
                 isTriplet,
+                tripletGroupId: noteObj.tripletGroupId || null,
                 tieToNext: !noteObj.isRest && willContinue,
                 tieFromPrev: !noteObj.isRest && sliceCountForNote > 0
               });
@@ -2190,8 +2202,109 @@
 
       function isBeamableNoteSlice(sl) {
         if (!sl || sl.isRest) return false;
-        if (sl.isTriplet) return sl.ticks <= 4;
-        return sl.ticks <= 9;
+        if (sl.isTriplet) return sl.ticks <= 8;
+        return sl.ticks <= 18;
+      }
+
+      function computeTripletTrioBrackets(slices, renderedCoords, beamGroupBySlice, lineSpacing, stepToY) {
+        const brackets = [];
+        const downBracketBottomBySlice = new Map();
+        const groupsById = new Map();
+
+        slices.forEach((sl, sIdx) => {
+          if (!sl.isTriplet || !renderedCoords[sIdx]) return;
+          const key = sl.tripletGroupId || `unlinked_${sIdx}`;
+          if (!groupsById.has(key)) groupsById.set(key, []);
+          groupsById.get(key).push(sIdx);
+        });
+
+        groupsById.forEach((memberIndices) => {
+          if (memberIndices.length < 2) return;
+          const firstIdx = memberIndices[0];
+          const lastIdx = memberIndices[memberIndices.length - 1];
+          const firstRc = renderedCoords[firstIdx];
+          const lastRc = renderedCoords[lastIdx];
+          if (!firstRc || !lastRc || firstRc.sys !== lastRc.sys) return;
+
+          const allBeamedTogether = memberIndices.every((idx) => beamGroupBySlice.has(idx)) &&
+            new Set(memberIndices.map((idx) => beamGroupBySlice.get(idx))).size === 1;
+          if (allBeamedTogether) return;
+
+          let stepSum = 0;
+          memberIndices.forEach((idx) => { stepSum += renderedCoords[idx].staffStep; });
+          const avgStep = stepSum / memberIndices.length;
+          const stemUp = avgStep < ENGRAVING_SPEC.stemFlipStep;
+          const dir = stemUp ? -1 : 1;
+          const hookDir = -dir;
+          const stemOffsetX = stemUp ? 5.2 : -5.2;
+
+          const getTipPoint = (idx) => {
+            const rc = renderedCoords[idx];
+            const sl = slices[idx];
+            const bGrp = beamGroupBySlice.get(idx);
+            if (bGrp) {
+              const sx = rc.noteX + bGrp.stemOffsetX;
+              const sy = bGrp.y1 + bGrp.slope * (sx - bGrp.x1);
+              return { x: sx, y: sy };
+            }
+            if (sl.isRest) {
+              const topLineY = 50 + rc.sys * ENGRAVING_SPEC.systemHeight;
+              return { x: rc.noteX, y: stemUp ? (topLineY + 4) : (topLineY + lineSpacing * 3.6) };
+            }
+            const sx = rc.noteX + stemOffsetX;
+            const sy = rc.noteY + dir * (lineSpacing * 2.8);
+            return { x: sx, y: sy };
+          };
+
+          const pStart = getTipPoint(firstIdx);
+          const pEnd = getTipPoint(lastIdx);
+          const x1 = pStart.x - 3.5;
+          const x2 = pEnd.x + 3.5;
+          const dx = Math.max(1, x2 - x1);
+          const slope = Math.max(-0.22, Math.min(0.22, (pEnd.y - pStart.y) / dx));
+          let y1 = pStart.y + dir * 6.5;
+
+          memberIndices.forEach((idx) => {
+            const pt = getTipPoint(idx);
+            const brkYAtX = y1 + slope * (pt.x - x1);
+            const reqY = pt.y + dir * 6.5;
+            if (stemUp && brkYAtX > reqY) {
+              y1 -= (brkYAtX - reqY);
+            } else if (!stemUp && brkYAtX < reqY) {
+              y1 += (reqY - brkYAtX);
+            }
+          });
+
+          const y2 = y1 + slope * dx;
+          const midX = (x1 + x2) / 2;
+          const midY = (y1 + y2) / 2;
+          const gapHalf = 9.5;
+          const leftBreakX = Math.max(x1 + 3, midX - gapHalf);
+          const rightBreakX = Math.min(x2 - 3, midX + gapHalf);
+          const leftBreakY = y1 + slope * (leftBreakX - x1);
+          const rightBreakY = y1 + slope * (rightBreakX - x1);
+          const hookLen = 5.2;
+
+          brackets.push({
+            x1, y1,
+            x2, y2,
+            leftBreakX, leftBreakY,
+            rightBreakX, rightBreakY,
+            midX, midY,
+            hookDir, hookLen,
+            stemUp
+          });
+
+          if (!stemUp) {
+            memberIndices.forEach((idx) => {
+              const rc = renderedCoords[idx];
+              const localBrkY = y1 + slope * (rc.noteX - x1);
+              downBracketBottomBySlice.set(idx, localBrkY + 12);
+            });
+          }
+        });
+
+        return { brackets, downBracketBottomBySlice };
       }
 
       function getBeamUnitIndex(tickInBar, ts) {
@@ -2201,7 +2314,7 @@
           }
           return ts.beamBoundaries.length - 2;
         }
-        return Math.floor(tickInBar / (ts.beamUnitTicks || 24));
+        return Math.floor(tickInBar / (ts.beamUnitTicks || 48));
       }
 
       function buildBeamGroupData(memberIndices, coordsArr, slicesArr, lineSpacing, stepToY) {
@@ -2257,8 +2370,11 @@
             let i = 0;
             while (i < run.length) {
               const rem = run.length - i;
-              const isSimpleDuple = !Array.isArray(ts.beamBoundaries) && ts.beamSubTicks === 12 && ts.beamUnitTicks === 24;
-              const chunkLen = (rem === 4 && isSimpleDuple) ? 4 : (rem >= 3 && !isSimpleDuple ? 3 : (rem >= 2 ? 2 : 1));
+              const isSimpleDuple = !Array.isArray(ts.beamBoundaries) && ts.beamSubTicks === 24 && ts.beamUnitTicks === 48;
+              const isTripletRun = slices[run[i]] && slices[run[i]].isTriplet;
+              const chunkLen = isTripletRun
+                ? (rem >= 3 ? 3 : 2)
+                : ((rem === 4 && isSimpleDuple) ? 4 : (rem >= 3 && !isSimpleDuple ? 3 : (rem >= 2 ? 2 : 1)));
               if (chunkLen >= 2) {
                 const sub = run.slice(i, i + chunkLen);
                 const grp = buildBeamGroupData(sub, renderedCoords, slices, lineSpacing, stepToY);
@@ -2288,9 +2404,11 @@
             const prevRc = renderedCoords[prevIdx];
             const sameSys = prevRc.sys === rc.sys;
             const sameBar = prevSl.barIdx === sl.barIdx;
-            const sameUnit = getBeamUnitIndex(prevSl.tickInBar, ts) === getBeamUnitIndex(sl.tickInBar, ts);
             const sameTripletMode = prevSl.isTriplet === sl.isTriplet;
-            if (sameSys && sameBar && sameUnit && sameTripletMode) {
+            const sameTripletGroup = sl.isTriplet
+              ? (prevSl.tripletGroupId && prevSl.tripletGroupId === sl.tripletGroupId)
+              : (getBeamUnitIndex(prevSl.tickInBar, ts) === getBeamUnitIndex(sl.tickInBar, ts));
+            if (sameSys && sameBar && sameTripletMode && sameTripletGroup) {
               run.push(sIdx);
             } else {
               flushRun();
@@ -2307,16 +2425,16 @@
         const parts = [];
         let dotY = topLineY + lineSpacing * 1.5;
 
-        if (ticks >= 32) {
+        if (ticks >= 64) {
           parts.push(`<rect x="${noteX - 6}" y="${topLineY + lineSpacing}" width="12" height="4.8" fill="${color}" />`);
           dotY = topLineY + lineSpacing * 1.5;
-        } else if (ticks >= 16) {
+        } else if (ticks >= 32) {
           parts.push(`<rect x="${noteX - 6}" y="${topLineY + lineSpacing * 2 - 4.8}" width="12" height="4.8" fill="${color}" />`);
           dotY = topLineY + lineSpacing * 1.5;
-        } else if (ticks >= 8) {
+        } else if (ticks >= 16) {
           parts.push(`<path d="M ${noteX - 2} ${topLineY + 7} L ${noteX + 3.2} ${topLineY + 13.5} L ${noteX - 1.8} ${topLineY + 18.5} L ${noteX + 3.4} ${topLineY + 24.5} C ${noteX + 0.5} ${topLineY + 23.8} ${noteX - 1.8} ${topLineY + 25.5} ${noteX - 0.8} ${topLineY + 28.5}" fill="none" stroke="${color}" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" />`);
           dotY = topLineY + lineSpacing * 1.5;
-        } else if (ticks >= 4) {
+        } else if (ticks >= 8) {
           parts.push(`<circle cx="${noteX - 1.5}" cy="${topLineY + 14.5}" r="2.1" fill="${color}" />`);
           parts.push(`<path d="M ${noteX - 1.2} ${topLineY + 15.8} Q ${noteX + 2.5} ${topLineY + 17.5} ${noteX + 4.2} ${topLineY + 13.5} L ${noteX - 0.5} ${topLineY + 27}" fill="none" stroke="${color}" stroke-width="1.85" stroke-linecap="round" />`);
           dotY = topLineY + lineSpacing * 1.5;
@@ -2529,10 +2647,21 @@
       }
 
       function setSelectedNoteBaseBeats(newBaseBeats) {
-        mutateSelectedNote((noteObj) => {
-          noteObj.baseBeats = newBaseBeats;
-          if (newBaseBeats >= 4 || newBaseBeats <= 0.25) noteObj.dotted = false;
-          noteObj.beats = computeEffectiveNoteBeats(noteObj);
+        mutateSelectedNote((noteObj, idx) => {
+          const safeBase = newBaseBeats >= 4 ? 2 : newBaseBeats;
+          if (noteObj.triplet && noteObj.tripletGroupId) {
+            state.scoreNotes.forEach((n) => {
+              if (n.tripletGroupId === noteObj.tripletGroupId) {
+                n.baseBeats = safeBase;
+                n.dotted = false;
+                n.beats = computeEffectiveNoteBeats(n);
+              }
+            });
+          } else {
+            noteObj.baseBeats = newBaseBeats;
+            if (newBaseBeats >= 4 || newBaseBeats <= 0.25) noteObj.dotted = false;
+            noteObj.beats = computeEffectiveNoteBeats(noteObj);
+          }
         }, true);
       }
 
@@ -2540,114 +2669,79 @@
         mutateSelectedNote((noteObj) => {
           const baseBeats = getNoteBaseBeats(noteObj);
           if (baseBeats >= 4 || baseBeats <= 0.25) return;
-          noteObj.triplet = false;
+          if (noteObj.triplet) {
+            toggleSelectedNoteTriplet();
+            return;
+          }
           noteObj.dotted = !Boolean(noteObj.dotted || noteObj.beats === 3 || noteObj.beats === 1.5 || noteObj.beats === 0.75);
           noteObj.beats = computeEffectiveNoteBeats(noteObj);
         }, false);
       }
 
       function toggleSelectedNoteTriplet() {
-        mutateSelectedNote((noteObj) => {
-          noteObj.triplet = !Boolean(noteObj.triplet);
-          if (noteObj.triplet) noteObj.dotted = false;
-          noteObj.beats = computeEffectiveNoteBeats(noteObj);
-        }, false);
-      }
-
-      function toggleSelectedNoteRest() {
-        mutateSelectedNote((noteObj) => {
-          noteObj.isRest = !Boolean(noteObj.isRest);
-        }, true);
-      }
-
-      function toggleSelectedNoteRepeatStart() {
-        mutateSelectedNote((noteObj) => {
-          noteObj.repeatStart = !Boolean(noteObj.repeatStart);
-        }, false);
-      }
-
-      function toggleSelectedNoteRepeatEnd() {
-        mutateSelectedNote((noteObj) => {
-          noteObj.repeatEnd = !Boolean(noteObj.repeatEnd);
-        }, false);
-      }
-
-      function playSelectedNoteMeasure() {
         const idx = state.selectedNoteIdx;
         if (idx < 0 || idx >= state.scoreNotes.length) return;
-        const layout = layoutScoreEvents(state.scoreNotes);
-        const primarySlice = layout.slices.find((sl) => sl.noteIdx === idx && sl.isPrimarySlice)
-          || layout.slices.find((sl) => sl.noteIdx === idx);
-        if (!primarySlice) return;
-
-        const barNoteIndices = layout.slices
-          .filter((sl) => sl.barIdx === primarySlice.barIdx)
-          .map((sl) => sl.noteIdx);
-        if (barNoteIndices.length === 0) return;
-
-        const minIdx = Math.min(...barNoteIndices);
-        const maxIdx = Math.max(...barNoteIndices);
-        state.playRangeStartIdx = minIdx;
-        state.playRangeEndIdx = maxIdx;
-        updateRangePlayBarUI();
-        renderScoreStaff();
-        startScorePlayback(state.scoreNotes.slice(minIdx, maxIdx + 1), null, minIdx, false);
-      }
-
-      function playFromSelectedNote() {
-        const idx = state.selectedNoteIdx;
-        if (idx < 0 || idx >= state.scoreNotes.length) return;
-        startScorePlayback(state.scoreNotes.slice(idx), null, idx, true);
-      }
-
-      function playSelectedRange() {
-        if (
-          state.playRangeStartIdx < 0 ||
-          state.playRangeEndIdx < state.playRangeStartIdx ||
-          state.playRangeStartIdx >= state.scoreNotes.length
-        ) {
-          return;
-        }
-        const s = state.playRangeStartIdx;
-        const e = Math.min(state.playRangeEndIdx, state.scoreNotes.length - 1);
-        startScorePlayback(state.scoreNotes.slice(s, e + 1), null, s, false);
-      }
-
-      function stepSelectedNote(stepDelta) {
-        mutateSelectedNote((noteObj) => {
-          const pos = midiToStaffPosition(noteObj.midi);
-          noteObj.midi = staffStepToDiatonicMidi(pos.staffStep + stepDelta);
-        }, true);
-      }
-
-      function toggleSelectedNoteSharp() {
-        mutateSelectedNote((noteObj) => {
-          const currentMidi = noteObj.midi;
-          const pos = midiToStaffPosition(currentMidi);
-          const keySig = getCurrentKeySignature();
-          if (keySig.type === 'flat') {
-            noteObj.midi = pos.isFlat
-              ? Math.min(88, currentMidi + 1)
-              : Math.max(48, currentMidi - 1);
-          } else {
-            noteObj.midi = pos.isSharp
-              ? Math.max(48, currentMidi - 1)
-              : Math.min(88, currentMidi + 1);
-          }
-        }, true);
-      }
-
-      function insertNoteAfterSelected() {
         if (state.isPlayingScore) stopScorePlayback();
-        const idx = state.selectedNoteIdx;
-        const baseMidi = (idx >= 0 && idx < state.scoreNotes.length)
-          ? state.scoreNotes[idx].midi
-          : 60;
-        const insertPos = idx >= 0 ? idx + 1 : state.scoreNotes.length;
-        state.scoreNotes.splice(insertPos, 0, createNoteEvent({ midi: baseMidi, beats: 1 }));
-        state.selectedNoteIdx = insertPos;
+        const target = state.scoreNotes[idx];
+
+        if (target.triplet) {
+          const gid = target.tripletGroupId;
+          if (gid) {
+            const groupIndices = [];
+            state.scoreNotes.forEach((n, i) => {
+              if (n.tripletGroupId === gid) groupIndices.push(i);
+            });
+            groupIndices.forEach((i) => {
+              state.scoreNotes[i].triplet = false;
+              state.scoreNotes[i].tripletGroupId = null;
+              state.scoreNotes[i].beats = computeEffectiveNoteBeats(state.scoreNotes[i]);
+            });
+            if (groupIndices.length === 3 &&
+              state.scoreNotes[groupIndices[1]].midi === target.midi &&
+              state.scoreNotes[groupIndices[2]].midi === target.midi &&
+              !state.scoreNotes[groupIndices[1]].isRest &&
+              !state.scoreNotes[groupIndices[2]].isRest) {
+              state.scoreNotes.splice(groupIndices[1], 2);
+              state.selectedNoteIdx = groupIndices[0];
+            }
+          } else {
+            target.triplet = false;
+            target.beats = computeEffectiveNoteBeats(target);
+          }
+        } else {
+          let base = getNoteBaseBeats(target);
+          if (base >= 4) base = 1;
+          const gid = `trp_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`;
+
+          const next1 = state.scoreNotes[idx + 1];
+          const next2 = state.scoreNotes[idx + 2];
+          const canGroupExisting = next1 && next2 &&
+            !next1.triplet && !next2.triplet &&
+            Math.abs(getNoteBaseBeats(next1) - base) < 0.01 &&
+            Math.abs(getNoteBaseBeats(next2) - base) < 0.01;
+
+          if (canGroupExisting) {
+            [target, next1, next2].forEach((n) => {
+              n.baseBeats = base;
+              n.dotted = false;
+              n.triplet = true;
+              n.tripletGroupId = gid;
+              n.beats = computeEffectiveNoteBeats(n);
+            });
+          } else {
+            target.baseBeats = base;
+            target.dotted = false;
+            target.triplet = true;
+            target.tripletGroupId = gid;
+            target.beats = computeEffectiveNoteBeats(target);
+
+            const clone1 = createNoteEvent({ midi: target.midi, baseBeats: base, triplet: true, tripletGroupId: gid }, 't1_');
+            const clone2 = createNoteEvent({ midi: target.midi, baseBeats: base, triplet: true, tripletGroupId: gid }, 't2_');
+            state.scoreNotes.splice(idx + 1, 0, clone1, clone2);
+          }
+        }
+
         triggerHaptic(12);
-        playReferenceTone(midiToFreq(baseMidi), 0.45);
         renderScoreStaff();
       }
 
@@ -3108,6 +3202,7 @@
           });
 
           const { beamGroups, beamGroupBySlice } = computeAutoBeamGroups(layout.slices, renderedCoords, ts, lineSpacing, stepToY);
+          const { brackets: tripletBrackets, downBracketBottomBySlice } = computeTripletTrioBrackets(layout.slices, renderedCoords, beamGroupBySlice, lineSpacing, stepToY);
 
           sysSlices.forEach(({ sl, sIdx, pos, noteX, noteY, sliceHighlightW }) => {
             const isSelected = interactive && sl.noteIdx === state.selectedNoteIdx;
@@ -3188,6 +3283,7 @@
             }
 
             const bGroup = beamGroupBySlice.get(sIdx);
+            const hasBracket = tripletBrackets.some((b) => noteX >= b.x1 - 4 && noteX <= b.x2 + 4 && Math.abs(b.midY - noteY) < 65);
             if (bGroup) {
               const stemX = noteX + bGroup.stemOffsetX;
               const beamY = bGroup.y1 + bGroup.slope * (stemX - bGroup.x1);
@@ -3195,12 +3291,12 @@
               parts.push(`<line class="note-stem-line" x1="${stemX}" y1="${noteY + dir * 1.5}" x2="${stemX}" y2="${beamY}" stroke="#0f172a" stroke-width="1.65" stroke-linecap="round" />`);
             } else if (glyph.stem) {
               parts.push(buildSingleNoteStemAndFlagsMarkup(noteX, noteY, pos.staffStep, lineSpacing, glyph.flags));
-              if (glyph.triplet) {
+              if (glyph.triplet && !hasBracket) {
                 const stemUp = pos.staffStep < ENGRAVING_SPEC.stemFlipStep;
                 const numY = stemUp ? (noteY - lineSpacing * 2.8 - 4) : (noteY + lineSpacing * 2.8 + 11);
                 parts.push(`<text x="${noteX}" y="${numY}" text-anchor="middle" font-family="Georgia, serif" font-size="9.5" font-weight="800" font-style="italic" fill="#0f172a">3</text>`);
               }
-            } else if (glyph.triplet) {
+            } else if (glyph.triplet && !hasBracket) {
               parts.push(`<text x="${noteX}" y="${noteY - 8}" text-anchor="middle" font-family="Georgia, serif" font-size="9.5" font-weight="800" font-style="italic" fill="#0f172a">3</text>`);
             }
 
@@ -3219,13 +3315,27 @@
               const lblText = state.subLabelMode === 'solfege'
                 ? STEP_NAMES_SOLFEGE[stepInOct]
                 : STEP_NAMES_LETTER[stepInOct];
-              const textY = Math.max(bottomLineY + 17, noteY + 19);
+              let minSafeLabelY = Math.max(bottomLineY + 17, noteY + 19);
+              if (bGroup && !bGroup.stemUp) {
+                const stemX = noteX + bGroup.stemOffsetX;
+                const localBeamY = bGroup.y1 + bGroup.slope * (stemX - bGroup.x1);
+                minSafeLabelY = Math.max(minSafeLabelY, localBeamY + (bGroup.isTripletGroup ? 23 : 14));
+              }
+              if (downBracketBottomBySlice.has(sIdx)) {
+                minSafeLabelY = Math.max(minSafeLabelY, downBracketBottomBySlice.get(sIdx) + 10);
+              }
               const fillCol = isPlaying ? '#047857' : (isSelected ? '#c2410c' : '#1e293b');
-              parts.push(`<text x="${noteX}" y="${textY}" text-anchor="middle" font-family="Inter, sans-serif" font-size="9.5" font-weight="800" fill="${fillCol}" stroke="#ffffff" stroke-width="3.5" stroke-linejoin="round" paint-order="stroke">${lblText}</text>`);
+              parts.push(`<text x="${noteX}" y="${minSafeLabelY}" text-anchor="middle" font-family="Inter, sans-serif" font-size="9.5" font-weight="800" fill="${fillCol}" stroke="#ffffff" stroke-width="3.5" stroke-linejoin="round" paint-order="stroke">${lblText}</text>`);
             }
 
             parts.push(`<rect x="${noteX - 10}" y="${noteY - 16}" width="20" height="32" fill="transparent" />`);
             parts.push(`</g>`);
+          });
+
+          tripletBrackets.forEach((brk) => {
+            const numY = brk.stemUp ? (brk.midY + 3) : (brk.midY + 3.5);
+            parts.push(`<path d="M ${brk.x1} ${brk.y1 + brk.hookDir * brk.hookLen} L ${brk.x1} ${brk.y1} L ${brk.leftBreakX} ${brk.leftBreakY} M ${brk.rightBreakX} ${brk.rightBreakY} L ${brk.x2} ${brk.y2} L ${brk.x2} ${brk.y2 + brk.hookDir * brk.hookLen}" fill="none" stroke="#0f172a" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" />`);
+            parts.push(`<text x="${brk.midX}" y="${numY}" text-anchor="middle" font-family="Georgia, serif" font-size="10.5" font-weight="900" font-style="italic" fill="#0f172a">${3}</text>`);
           });
 
           beamGroups.forEach((grp) => {
@@ -3239,7 +3349,7 @@
             const secOffset = -dir * 5.6;
             const isSixteenthIdx = (idx) => {
               const sl = layout.slices[idx];
-              return sl && ((sl.isTriplet && sl.ticks <= 2) || (!sl.isTriplet && sl.ticks <= 3));
+              return sl && ((sl.isTriplet && sl.ticks <= 4) || (!sl.isTriplet && sl.ticks <= 6));
             };
 
             for (let k = 0; k < grp.members.length; k++) {
